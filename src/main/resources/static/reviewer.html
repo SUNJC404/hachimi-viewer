@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>B站审核模拟器 (Spring Boot版)</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { width: 90%; max-width: 500px; text-align: center; }
+        .view { display: none; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 25px; }
+        #cover-link { display: block; text-decoration: none; margin-bottom: 20px; }
+        #cover-image { width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; cursor: pointer; background-color: #eee; }
+        #video-title { font-size: 24px; font-weight: bold; margin: 0 0 10px 0; }
+        #author-info { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 15px; margin-bottom: 15px; color: #555; }
+        #author-avatar { width: 32px; height: 32px; border-radius: 50%; vertical-align: middle; margin-right: 5px;}
+        #video-stats span { font-size: 14px; }
+        #status-container { font-size: 20px; margin-bottom: 25px; }
+        .status-true { color: #28a745; font-weight: bold; }
+        .status-false { color: #dc3545; font-weight: bold; }
+        button { border: none; cursor: pointer; border-radius: 8px; font-size: 16px; padding: 12px 0; color: white; transition: background-color 0.2s; }
+        button:disabled { background-color: #ccc !important; cursor: not-allowed; }
+        .button-group { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .button-group button { width: 45%; }
+        #yes-btn { background-color: #28a745; }
+        #no-btn { background-color: #dc3545; }
+        .nav-buttons { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 20px; }
+        .nav-buttons button { width: auto; padding: 8px 16px; font-size: 14px; background-color: #007bff; }
+        #loading-view h2, #finished-view h2 { font-size: 24px; color: #666; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="loading-view" class="view"><h2>正在从数据库加载审核队列...</h2></div>
+    <div id="reviewer-view" class="view">
+        <a id="cover-link" href="#" target="_blank" rel="noopener noreferrer"><img id="cover-image" alt="视频封面" referrerpolicy="no-referrer"></a>
+        <h2 id="video-title">视频标题</h2>
+
+        <div id="author-info">
+                <span id="author-details">
+                    <img id="author-avatar" alt="作者头像" referrerpolicy="no-referrer">
+                    <span id="author-name">作者</span>
+                </span>
+            <span id="video-stats">
+                    <span id="video-views"></span>
+                </span>
+        </div>
+
+        <div id="status-container">Hachimi: <span id="hachimi-status"></span></div>
+        <div class="button-group">
+            <button id="yes-btn">是 (Yes)</button>
+            <button id="no-btn">否 (No)</button>
+        </div>
+        <div class="nav-buttons">
+            <button id="prev-video-btn">&lt; 上一条</button>
+            <span id="progress-text"></span>
+            <button id="next-video-btn">下一条 &gt;</button>
+        </div>
+    </div>
+    <div id="finished-view" class="view"><h2>本轮审核已完成！感谢你为健康网络环境做出的贡献！</h2></div>
+</div>
+
+<script>
+    // --- Variable declarations are the same ---
+    const loadingView = document.getElementById('loading-view');
+    const reviewerView = document.getElementById('reviewer-view');
+    const finishedView = document.getElementById('finished-view');
+    const yesBtn = document.getElementById('yes-btn');
+    const noBtn = document.getElementById('no-btn');
+    const coverLink = document.getElementById('cover-link');
+    const coverImage = document.getElementById('cover-image');
+    const videoTitle = document.getElementById('video-title');
+    const hachimiStatus = document.getElementById('hachimi-status');
+    const authorAvatar = document.getElementById('author-avatar');
+    const authorName = document.getElementById('author-name');
+    const prevVideoBtn = document.getElementById('prev-video-btn');
+    const nextVideoBtn = document.getElementById('next-video-btn');
+    const progressText = document.getElementById('progress-text');
+    const videoViews = document.getElementById('video-views');
+
+    let reviewQueue = [];
+    let currentIndex = 0;
+
+    // --- Other functions are the same ---
+    window.onload = () => { fetchReviewQueue(); };
+
+    async function displayVideo(index) {
+        if (index >= reviewQueue.length) {
+            showView('finished');
+            return;
+        }
+        const video = reviewQueue[index];
+
+        // --- UPDATED LOGIC FOR FASTER IMAGE LOADING ---
+
+        // 1. For the video cover, request a 500px wide version.
+        const compressedCoverUrl = `${video.coverUrl}@500w_282h_1c_100q.jpg`;
+        coverImage.src = `https://images.weserv.nl/?url=${encodeURIComponent(compressedCoverUrl)}`;
+
+        // 2. For the author avatar, request a 100x100px version (good for retina displays).
+        const compressedAvatarUrl = `${video.owner.face}@100w_100h_1c_100q.jpg`;
+        authorAvatar.src = `https://images.weserv.nl/?url=${encodeURIComponent(compressedAvatarUrl)}`;
+
+        // --- The rest of the function is the same ---
+        coverLink.href = `https://www.bilibili.com/video/${video.bvid}`;
+        videoTitle.textContent = video.title;
+        hachimiStatus.textContent = video.isHachimi ? 'T' : 'F';
+        hachimiStatus.className = video.isHachimi ? 'status-true' : 'status-false';
+        videoViews.textContent = `播放: ${video.views.toLocaleString()}`;
+        if (video.owner) {
+            authorName.textContent = video.owner.name;
+        }
+        updateNavState();
+    }
+
+    // --- THE REST OF THE SCRIPT IS UNCHANGED ---
+
+    async function fetchReviewQueue() {
+        showView('loading');
+        try {
+            const response = await fetch('/api/review-queue');
+            if (!response.ok) {
+                throw new Error(`服务器错误 (${response.status})`);
+            }
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+            reviewQueue = data;
+            if (reviewQueue.length === 0) {
+                showView('finished');
+                finishedView.innerHTML = `<h2>数据库中没有待审核的视频了。</h2>`;
+                return;
+            }
+            showView('reviewer');
+            displayVideo(currentIndex);
+        } catch (error) {
+            loadingView.innerHTML = `<h2>加载失败: ${error.message}</h2>`;
+        }
+    }
+    async function submitReview(isHachimi) {
+        yesBtn.disabled = true;
+        noBtn.disabled = true;
+        const video = reviewQueue[currentIndex];
+        try {
+            const response = await fetch(`/api/videos/${video.bvid}/status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isHachimi: isHachimi })
+            });
+            if (!response.ok) {
+                throw new Error('保存状态失败');
+            }
+            video.isHachimi = isHachimi;
+            moveToNextVideo();
+        } catch (err) {
+            alert(`保存失败: ${err.message}`);
+            yesBtn.disabled = false;
+            noBtn.disabled = false;
+        }
+    }
+    function updateNavState() {
+        prevVideoBtn.disabled = currentIndex <= 0;
+        nextVideoBtn.disabled = currentIndex >= reviewQueue.length - 1;
+        progressText.textContent = `进度: ${currentIndex + 1} / ${reviewQueue.length}`;
+        yesBtn.disabled = false;
+        noBtn.disabled = false;
+    }
+    function showView(viewName) {
+        loadingView.style.display = 'none';
+        reviewerView.style.display = 'none';
+        finishedView.style.display = 'none';
+        document.getElementById(`${viewName}-view`).style.display = 'block';
+    }
+    function moveToPrevVideo() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            displayVideo(currentIndex);
+        }
+    }
+    function moveToNextVideo() {
+        if (currentIndex < reviewQueue.length - 1) {
+            currentIndex++;
+            displayVideo(currentIndex);
+        } else {
+            showView('finished');
+        }
+    }
+    yesBtn.addEventListener('click', () => submitReview(true));
+    noBtn.addEventListener('click', () => submitReview(false));
+    prevVideoBtn.addEventListener('click', moveToPrevVideo);
+    nextVideoBtn.addEventListener('click', moveToNextVideo);
+</script>
+</body>
+</html>
