@@ -44,4 +44,19 @@ public class Video {
 
     @Column(name = "category_id")
     private Integer categoryId;
+
+    @Column(name = "review_status")
+    private String reviewStatus; // 例如: "IN_PROGRESS", "COMPLETED"
+
+    @Column(name = "reviewer_id")
+    private String reviewerId;
+
+    @Column(name = "lease_expires_at")
+    private LocalDateTime leaseExpiresAt;
+
+    @Column(name = "original_song")
+    private String originalSong;
+
+    @Column(name = "original_artist")
+    private String originalArtist;
 }

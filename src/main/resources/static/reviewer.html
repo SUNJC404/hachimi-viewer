@@ -83,7 +83,7 @@
 </div>
 
 <script>
-    // --- 获取新增的元素 ---
+    // --- 获取所有DOM元素 ---
     const videoDescription = document.getElementById('video-description');
     const categoryTag = document.getElementById('category-tag');
     const loadingView = document.getElementById('loading-view');
@@ -102,61 +102,96 @@
     const progressText = document.getElementById('progress-text');
     const videoViews = document.getElementById('video-views');
 
+    // --- 全局状态变量 ---
     let reviewQueue = [];
     let currentIndex = 0;
 
-    // --- 新增：分区ID与名称/颜色的映射 ---
+    // =======================================================================
+    // 【关键修正】
+    // 确保这两个变量在这里，即脚本的顶层作用域中声明。
+    let reviewerId = null;
+    let heartbeatInterval = null;
+    // =======================================================================
+
+    // --- 分区ID与名称/颜色的映射 ---
     const categoryMap = {
-        // 鬼畜 (Kichiku) - Red
-        22: { name: '鬼畜调教', group: 'kichiku' },
-        26: { name: '音MAD', group: 'kichiku' },
-        126: { name: '人力VOCALOID', group: 'kichiku' },
-        127: { name: '教程演示', group: 'kichiku' },
-        216: { name: '鬼畜剧场', group: 'kichiku' },
-
-        // 音乐 (Music) - Blue
-        28: { name: '原创音乐', group: 'music' },
-        30: { name: 'VOCALOID·UTAU', group: 'music' },
-        31: { name: '翻唱', group: 'music' },
-        59: { name: '演奏', group: 'music' },
-        130: { name: '音乐综合', group: 'music' },
-        193: { name: 'MV', group: 'music' },
-        194: { name: '电音', group: 'music' },
-        244: { name: '音乐教学', group: 'music' },
-
-        // 动画 (Animation) - Purple
-        24: { name: 'MAD·AMV', group: 'animation' },
-        25: { name: 'MMD·3D', group: 'animation' },
-        27: { name: '综合', group: 'animation' },
-        47: { name: '短片·手书', group: 'animation' },
-        86: { name: '特摄', group: 'animation' },
-        257: { name: '配音', group: 'animation' },
-
-        // 游戏 (Game) - Orange
-        17: { name: '单机游戏', group: 'game' },
-        65: { name: '网络游戏', group: 'game' },
-        121: { name: 'GMV', group: 'game' },
-        136: { name: '音游', group: 'game' },
-        173: { name: '桌游棋牌', group: 'game' },
-        265: { name: '赛事', group: 'game' },
-
-        // 番剧 (Anime) - Teal
-        152: { name: '官方延伸', group: 'anime' },
-
-        // 知识 (Knowledge) - Brown
-        208: { name: '校园学习', group: 'knowledge' },
-
-        // 生活 (Life) - Pink
-        138: { name: '搞笑', group: 'life' },
-
-        // 影视 (Film & TV) - Slate
-        183: { name: '影视剪辑', group: 'film' },
-
-        // 虚拟UP主 (VUP) - Light Blue
-        262: { name: '虚拟UP主', group: 'vup' }
+        // ... (您的 categoryMap 内容保持不变) ...
+        22: { name: '鬼畜调教', group: 'kichiku' }, 26: { name: '音MAD', group: 'kichiku' }, 126: { name: '人力VOCALOID', group: 'kichiku' }, 127: { name: '教程演示', group: 'kichiku' }, 216: { name: '鬼畜剧场', group: 'kichiku' }, 28: { name: '原创音乐', group: 'music' }, 30: { name: 'VOCALOID·UTAU', group: 'music' }, 31: { name: '翻唱', group: 'music' }, 59: { name: '演奏', group: 'music' }, 130: { name: '音乐综合', group: 'music' }, 193: { name: 'MV', group: 'music' }, 194: { name: '电音', group: 'music' }, 244: { name: '音乐教学', group: 'music' }, 24: { name: 'MAD·AMV', group: 'animation' }, 25: { name: 'MMD·3D', group: 'animation' }, 27: { name: '综合', group: 'animation' }, 47: { name: '短片·手书', group: 'animation' }, 86: { name: '特摄', group: 'animation' }, 257: { name: '配音', group: 'animation' }, 17: { name: '单机游戏', group: 'game' }, 65: { name: '网络游戏', group: 'game' }, 121: { name: 'GMV', group: 'game' }, 136: { name: '音游', group: 'game' }, 173: { name: '桌游棋牌', group: 'game' }, 265: { name: '赛事', group: 'game' }, 152: { name: '官方延伸', group: 'anime' }, 208: { name: '校园学习', group: 'knowledge' }, 138: { name: '搞笑', group: 'life' }, 183: { name: '影视剪辑', group: 'film' }, 262: { name: '虚拟UP主', group: 'vup' }
     };
 
+    // --- 页面加载和卸载事件 ---
     window.onload = () => { fetchReviewQueue(); };
+    window.onbeforeunload = () => {
+        stopHeartbeat(); // 离开页面时确保停止心跳
+    };
+
+    // --- 心跳函数 ---
+    function startHeartbeat() {
+        stopHeartbeat(); // 先停止任何可能存在的旧心跳计时器
+        // 每3分钟发送一次心跳，租约是5分钟，这样可以确保在到期前续约
+        heartbeatInterval = setInterval(() => {
+            if (reviewerId) {
+                console.log("Sending heartbeat to extend lease...");
+                fetch('/api/review-queue/heartbeat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reviewerId: reviewerId })
+                }).catch(err => console.error("Heartbeat failed:", err));
+            }
+        }, 3 * 60 * 1000);
+    }
+
+    function stopHeartbeat() {
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+            console.log("Heartbeat stopped.");
+        }
+    }
+
+    // --- 视图切换 ---
+    function showView(viewName) {
+        loadingView.style.display = 'none';
+        reviewerView.style.display = 'none';
+        finishedView.style.display = 'none';
+        document.getElementById(`${viewName}-view`).style.display = 'block';
+
+        // 当审核完成或队列加载完毕时，停止心跳
+        if (viewName === 'finished') {
+            stopHeartbeat();
+        }
+    }
+
+    // --- 核心业务逻辑 ---
+    async function fetchReviewQueue() {
+        showView('loading');
+        try {
+            const response = await fetch('/api/review-queue');
+            if (!response.ok) { throw new Error(`服务器错误 (${response.status})`); }
+            const data = await response.json();
+            if (data.error) { throw new Error(data.error); }
+
+            reviewQueue = data.videos;
+            reviewerId = data.reviewerId;
+
+            if (!reviewQueue || reviewQueue.length === 0) {
+                finishedView.innerHTML = `<h2>数据库中没有待审核的视频了，或者稍后再试。</h2>`;
+                showView('finished');
+                return;
+            }
+
+            // 成功获取到任务，开始心跳
+            startHeartbeat();
+
+            currentIndex = 0;
+            displayVideo(currentIndex);
+            showView('reviewer');
+
+        } catch (error) {
+            loadingView.innerHTML = `<h2>加载失败: ${error.message}</h2>`;
+            stopHeartbeat(); // 如果加载失败，也要确保心跳是停止的
+        }
+    }
 
     async function displayVideo(index) {
         if (index >= reviewQueue.length) {
@@ -165,26 +200,19 @@
         }
         const video = reviewQueue[index];
 
-        // 图像加载
         const compressedCoverUrl = `${video.coverUrl}@500w_282h_1c_100q.jpg`;
         coverImage.src = `https://images.weserv.nl/?url=${encodeURIComponent(compressedCoverUrl)}`;
-        const compressedAvatarUrl = `${video.owner.face}@100w_100h_1c_100q.jpg`;
-        authorAvatar.src = `https://images.weserv.nl/?url=${encodeURIComponent(compressedAvatarUrl)}`;
+        const compressedAvatarUrl = video.owner && video.owner.face ? `${video.owner.face}@100w_100h_1c_100q.jpg` : '';
+        authorAvatar.src = compressedAvatarUrl ? `https://images.weserv.nl/?url=${encodeURIComponent(compressedAvatarUrl)}` : '';
 
-        // 基本信息
         coverLink.href = `https://www.bilibili.com/video/${video.bvid}`;
         videoTitle.textContent = video.title;
         hachimiStatus.textContent = video.hachimi ? 'T' : 'F';
         hachimiStatus.className = video.hachimi ? 'status-true' : 'status-false';
         videoViews.textContent = `播放: ${video.views.toLocaleString()}`;
-        if (video.owner) {
-            authorName.textContent = video.owner.name;
-        }
-
-        // 1. 设置简介
+        authorName.textContent = video.owner ? video.owner.name : '未知作者';
         videoDescription.textContent = video.description || '暂无简介';
 
-        // 2. 设置分区标签
         const categoryInfo = categoryMap[video.categoryId];
         if (categoryInfo) {
             categoryTag.textContent = categoryInfo.name;
@@ -197,25 +225,6 @@
         updateNavState();
     }
 
-    async function fetchReviewQueue() {
-        showView('loading');
-        try {
-            const response = await fetch('/api/review-queue');
-            if (!response.ok) { throw new Error(`服务器错误 (${response.status})`); }
-            const data = await response.json();
-            if (data.error) { throw new Error(data.error); }
-            reviewQueue = data;
-            if (reviewQueue.length === 0) {
-                showView('finished');
-                finishedView.innerHTML = `<h2>数据库中没有待审核的视频了。</h2>`;
-                return;
-            }
-            showView('reviewer');
-            displayVideo(currentIndex);
-        } catch (error) {
-            loadingView.innerHTML = `<h2>加载失败: ${error.message}</h2>`;
-        }
-    }
     async function submitReview(isHachimi) {
         yesBtn.disabled = true; noBtn.disabled = true;
         const video = reviewQueue[currentIndex];
@@ -233,21 +242,19 @@
             yesBtn.disabled = false; noBtn.disabled = false;
         }
     }
+
+    // --- 导航 ---
     function updateNavState() {
         prevVideoBtn.disabled = currentIndex <= 0;
         nextVideoBtn.disabled = currentIndex >= reviewQueue.length - 1;
         progressText.textContent = `进度: ${currentIndex + 1} / ${reviewQueue.length}`;
         yesBtn.disabled = false; noBtn.disabled = false;
     }
-    function showView(viewName) {
-        loadingView.style.display = 'none';
-        reviewerView.style.display = 'none';
-        finishedView.style.display = 'none';
-        document.getElementById(`${viewName}-view`).style.display = 'block';
-    }
+
     function moveToPrevVideo() {
         if (currentIndex > 0) { currentIndex--; displayVideo(currentIndex); }
     }
+
     function moveToNextVideo() {
         if (currentIndex < reviewQueue.length - 1) {
             currentIndex++;
@@ -256,6 +263,8 @@
             showView('finished');
         }
     }
+
+    // --- 事件监听 ---
     yesBtn.addEventListener('click', () => submitReview(true));
     noBtn.addEventListener('click', () => submitReview(false));
     prevVideoBtn.addEventListener('click', moveToPrevVideo);
