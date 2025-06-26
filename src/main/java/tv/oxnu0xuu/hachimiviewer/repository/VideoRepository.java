@@ -18,10 +18,9 @@ public interface VideoRepository extends JpaRepository<Video, String> {
 
     // --- 修改查询逻辑 ---
     // 查找未审核、且（状态为空 或 租约已过期）的视频
-    @Query("SELECT v FROM Video v WHERE v.isReviewed = false AND (v.reviewStatus IS NULL OR v.leaseExpiresAt < :now) ORDER BY v.pubDate DESC")
-    List<Video> findAvailableForReview(@Param("now") LocalDateTime now);
+    @Query("SELECT v FROM Video v WHERE v.isReviewed = false AND v.reviewStatus IS NULL ORDER BY v.pubDate DESC")
+    List<Video> findAvailableForReview();
 
-    // 根据 reviewerId 查找正在审核的视频
     List<Video> findByReviewerIdAndReviewStatus(String reviewerId, String reviewStatus);
 
     @Modifying
@@ -33,4 +32,6 @@ public interface VideoRepository extends JpaRepository<Video, String> {
     @Transactional
     @Query("UPDATE Video v SET v.reviewStatus = null, v.reviewerId = null, v.leaseExpiresAt = null WHERE v.reviewStatus = 'IN_PROGRESS' AND v.leaseExpiresAt < :now")
     int releaseExpiredLeases(@Param("now") LocalDateTime now);
+
+    List<Video> findByReviewStatus(String status);
 }
