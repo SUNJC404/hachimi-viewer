@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UpdateStatusRequestDto {
-    private boolean isHachimi;
+    private boolean hachimi;
 }

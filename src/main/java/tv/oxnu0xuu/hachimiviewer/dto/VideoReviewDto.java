@@ -12,7 +12,9 @@ public class VideoReviewDto {
     private boolean isHachimi;
     private OwnerDto owner;
     private long views;
-    private String coverUrl; // <-- ADD THIS FIELD
+    private String coverUrl;
+    private String description;
+    private Integer categoryId;
 
     public static VideoReviewDto fromEntity(Video video) {
         VideoReviewDto dto = new VideoReviewDto();
@@ -20,7 +22,9 @@ public class VideoReviewDto {
         dto.setTitle(video.getTitle());
         dto.setHachimi(video.isHachimi());
         dto.setViews(video.getViews());
-        dto.setCoverUrl(video.getCoverUrl()); // <-- ADD THIS LINE
+        dto.setCoverUrl(video.getCoverUrl());
+        dto.setDescription(video.getDescription());
+        dto.setCategoryId(video.getCategoryId());
         if (video.getOwner() != null) {
             dto.setOwner(new OwnerDto(video.getOwner().getName(), video.getOwner().getAvatarUrl()));
         }

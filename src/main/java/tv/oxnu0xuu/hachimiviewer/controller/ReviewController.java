@@ -29,7 +29,7 @@ public class ReviewController {
     /**
      * API endpoint to update the review status of a video.
      * @param bvid The BVID of the video from the URL path.
-     * @param request The request body containing the 'isHachimi' status.
+     * @param request The request body containing the 'bachimi' status.
      * @return A success response.
      */
     @PostMapping("/videos/{bvid}/status")

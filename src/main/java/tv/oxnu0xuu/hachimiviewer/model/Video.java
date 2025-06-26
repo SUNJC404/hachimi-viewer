@@ -26,7 +26,6 @@ public class Video {
 
     private int views;
 
-    // ADD THIS FIELD AND ANNOTATION
     @Column(name = "cover_url")
     private String coverUrl;
 
@@ -42,4 +41,7 @@ public class Video {
 
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
+
+    @Column(name = "category_id")
+    private Integer categoryId;
 }

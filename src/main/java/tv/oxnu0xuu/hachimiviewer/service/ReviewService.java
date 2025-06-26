@@ -3,7 +3,7 @@ package tv.oxnu0xuu.hachimiviewer.service;
 import tv.oxnu0xuu.hachimiviewer.dto.VideoReviewDto;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
 import tv.oxnu0xuu.hachimiviewer.repository.VideoRepository;
-import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +21,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public List<VideoReviewDto> getReviewQueue() {
         // Fetch 50 unreviewed videos from the database
-        List<Video> videos = videoRepository.findTop50ByIsReviewedFalseOrderByPubDateAsc();
+        List<Video> videos = videoRepository.findTop50ByIsReviewedFalseOrderByPubDateDesc();
         // Convert the list of Video entities to a list of DTOs for the frontend
         return videos.stream()
                 .map(VideoReviewDto::fromEntity)
@@ -30,16 +30,10 @@ public class ReviewService {
 
     @Transactional
     public void updateVideoStatus(String bvid, boolean isHachimi) {
-        // Find the video by its BVID, or throw an exception if not found
-        Video video = videoRepository.findById(bvid)
-                .orElseThrow(() -> new EntityNotFoundException("Video not found with BVID: " + bvid));
-
-        // Update the status
-        video.setHachimi(isHachimi);
-        video.setReviewed(true);
-        video.setReviewedAt(LocalDateTime.now());
-
-        // Save the changes back to the database
-        videoRepository.save(video);
+        try {
+            videoRepository.updateHachimiStatus(bvid, isHachimi, LocalDateTime.now());
+        } catch (Exception e) {
+            throw e;
+        }
     }
 }
