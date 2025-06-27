@@ -17,7 +17,6 @@ import tv.oxnu0xuu.hachimiviewer.dto.VideoReviewDto;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
 import tv.oxnu0xuu.hachimiviewer.repository.VideoRepository;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
