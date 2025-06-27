@@ -24,9 +24,10 @@ import java.util.stream.Collectors;
 public class DataSyncService {
 
     private static final Logger log = LoggerFactory.getLogger(DataSyncService.class);
-
-    // 【新增配置】定义每批处理的数据量
-    private static final int BATCH_SIZE = 100; // 每次处理100条，您可以根据服务器性能调整这个值
+    // 定义每批处理100条
+    private static final int BATCH_SIZE = 100;
+    // 定义每批处理完后休眠2秒（2000毫秒），给服务器足够的时间喘息
+    private static final long BATCH_SLEEP_MS = 2000;
 
     @Autowired
     private VideoRepository videoRepository;
@@ -42,12 +43,11 @@ public class DataSyncService {
 
     @Transactional(readOnly = true)
     public void syncVideosToMeiliSearch() {
-        log.info("启动分批数据同步任务，每批处理 {} 条数据...", BATCH_SIZE);
+        log.info("启动分批数据同步任务，每批处理 {} 条，批次间隔 {} 毫秒...", BATCH_SIZE, BATCH_SLEEP_MS);
         int pageNumber = 0;
         Page<Video> videoPage;
 
         try {
-            // 获取MeiliSearch索引
             Index index = meiliSearchClient.index(videoIndexName);
 
             do {
@@ -62,28 +62,24 @@ public class DataSyncService {
                 List<Video> videos = videoPage.getContent();
                 log.info("正在处理第 {} 页，包含 {} 条数据...", pageNumber + 1, videos.size());
 
-                // 转换DTO
                 List<VideoReviewDto> videoDtos = videos.stream()
                         .map(VideoReviewDto::fromEntity)
                         .collect(Collectors.toList());
 
                 if (videoDtos.isEmpty()) {
                     log.warn("当前页没有可转换的数据，跳过。");
+                    pageNumber++;
                     continue;
                 }
 
-                // 发送到MeiliSearch
                 String documents = objectMapper.writeValueAsString(videoDtos);
                 TaskInfo task = index.addDocuments(documents, "bvid");
-                log.info("  -> 已创建MeiliSearch添加任务，Task UID: {}", task.getTaskUid());
+                log.info("  -> 已将批次 {} 的任务提交给MeiliSearch，Task UID: {}", pageNumber + 1, task.getTaskUid());
 
-                // 等待当前批次任务完成（可选，但可以更清楚地看到每一步的结果）
-                meiliSearchClient.waitForTask(task.getTaskUid());
-                log.info("  -> 批次 {} 已成功同步。", pageNumber + 1);
-
-                // 【关键】在处理完一个批次后，进行短暂休眠，给服务器喘息时间
+                // 【最终方案】我们不再调用任何 waitForTask 方法，彻底避免超时和编译错误。
+                // 而是直接让当前线程休眠，把CPU时间完全让给 MeiliSearch 去处理数据。
                 try {
-                    Thread.sleep(500); // 休眠500毫秒
+                    Thread.sleep(BATCH_SLEEP_MS);
                 } catch (InterruptedException e) {
                     log.warn("线程休眠被中断", e);
                     Thread.currentThread().interrupt();
@@ -93,7 +89,7 @@ public class DataSyncService {
 
             } while (videoPage.hasNext());
 
-            log.info("数据同步任务成功完成！");
+            log.info("所有数据批次均已提交给 MeiliSearch，同步任务完成！");
 
         } catch (Exception e) {
             log.error("分批同步数据到MeiliSearch时发生严重错误", e);

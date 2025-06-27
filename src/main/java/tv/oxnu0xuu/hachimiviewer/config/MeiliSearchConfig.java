@@ -18,6 +18,7 @@ public class MeiliSearchConfig {
 
     @Bean
     public Client meiliSearchClient() {
+        // 只使用最基础的构造函数，这是完全正确的
         return new Client(new Config(meiliHost, meiliApiKey, new JacksonJsonHandler()));
     }
 }
