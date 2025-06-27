@@ -1,0 +1,42 @@
+services:
+  # MeiliSearch 服务保持不变
+  meilisearch:
+    image: getmeili/meilisearch
+    container_name: meilisearch-engine
+    environment:
+      - MEILI_MASTER_KEY=Meili4752
+      - MEILI_ENV=development
+    ports:
+      - "7700:7700"
+    volumes:
+      - meili_data:/data.ms
+    networks:
+      - hachimi-net
+
+  # 修改后端服务的 build 部分
+  backend:
+    container_name: hachimi-viewer-app
+    # 【关键修改】
+    # 指定构建上下文为当前目录，并明确使用 Dockerfile.local 文件
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    ports:
+      - "8080:8080"
+    environment:
+      - spring.datasource.url=jdbc:mysql://mysql_video_db:3306/video_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      - meili.host=http://meilisearch:7700
+    depends_on:
+      - meilisearch
+    networks:
+      - hachimi-net
+
+# 网络和数据卷的定义保持不变
+networks:
+  hachimi-net:
+    name: mysql_server_default  # 替换为您的MySQL网络名
+    external: true
+
+volumes:
+  meili_data:
+
