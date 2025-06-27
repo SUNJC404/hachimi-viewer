@@ -20,12 +20,14 @@ services:
     # 指定构建上下文为当前目录，并明确使用 Dockerfile.local 文件
     build:
       context: .
-      dockerfile: Dockerfile.local
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
       - spring.datasource.url=jdbc:mysql://mysql_video_db:3306/video_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
       - meili.host=http://meilisearch:7700
+      - meili.apiKey=Meili4752
+      - meili.index.videos=videos
     depends_on:
       - meilisearch
     networks:

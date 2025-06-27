@@ -8,12 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tv.oxnu0xuu.hachimiviewer.dto.VideoReviewDto;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
 import tv.oxnu0xuu.hachimiviewer.repository.VideoRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +25,9 @@ import java.util.stream.Collectors;
 public class DataSyncService {
 
     private static final Logger log = LoggerFactory.getLogger(DataSyncService.class);
+
+    // 【新增配置】定义每批处理的数据量
+    private static final int BATCH_SIZE = 100; // 每次处理100条，您可以根据服务器性能调整这个值
 
     @Autowired
     private VideoRepository videoRepository;
@@ -34,45 +41,63 @@ public class DataSyncService {
     @Value("${meili.index.videos}")
     private String videoIndexName;
 
-    /**
-     * 将MySQL中的所有视频数据同步到MeiliSearch
-     */
-    @Transactional(readOnly = true) // 【关键修正1】添加事务注解，保证在整个方法执行期间Session开启
+    @Transactional(readOnly = true)
     public void syncVideosToMeiliSearch() {
+        log.info("启动分批数据同步任务，每批处理 {} 条数据...", BATCH_SIZE);
+        int pageNumber = 0;
+        Page<Video> videoPage;
+
         try {
-            log.info("开始将视频数据从MySQL同步到MeiliSearch...");
-
-            // 【关键修正2】调用新创建的、可以一次性加载作者信息的方法
-            List<Video> videos = videoRepository.findAllWithOwners();
-
-            if (videos.isEmpty()) {
-                log.warn("数据库中没有找到任何视频数据，同步任务结束。");
-                return;
-            }
-            log.info("从数据库中查询到 {} 条视频数据。", videos.size());
-
-            // 将实体转换为用于索引的DTO
-            List<VideoReviewDto> videoDtos = videos.stream()
-                    .map(VideoReviewDto::fromEntity)
-                    .collect(Collectors.toList());
-
             // 获取MeiliSearch索引
             Index index = meiliSearchClient.index(videoIndexName);
 
-            // 将DTO列表转换为JSON字符串
-            String documents = objectMapper.writeValueAsString(videoDtos);
+            do {
+                Pageable pageable = PageRequest.of(pageNumber, BATCH_SIZE);
+                videoPage = videoRepository.findAllWithOwners(pageable);
 
-            // 将文档添加到索引，并设置主键
-            log.info("正在将文档批量添加到MeiliSearch索引 '{}'...", videoIndexName);
-            TaskInfo task = index.addDocuments(documents, "bvid");
+                if (!videoPage.hasContent()) {
+                    log.info("所有数据页均已处理完毕。");
+                    break;
+                }
 
-            log.info("已创建MeiliSearch任务，Task UID: {}", task.getTaskUid());
-            meiliSearchClient.waitForTask(task.getTaskUid());
+                List<Video> videos = videoPage.getContent();
+                log.info("正在处理第 {} 页，包含 {} 条数据...", pageNumber + 1, videos.size());
 
-            log.info("数据同步成功！");
+                // 转换DTO
+                List<VideoReviewDto> videoDtos = videos.stream()
+                        .map(VideoReviewDto::fromEntity)
+                        .collect(Collectors.toList());
+
+                if (videoDtos.isEmpty()) {
+                    log.warn("当前页没有可转换的数据，跳过。");
+                    continue;
+                }
+
+                // 发送到MeiliSearch
+                String documents = objectMapper.writeValueAsString(videoDtos);
+                TaskInfo task = index.addDocuments(documents, "bvid");
+                log.info("  -> 已创建MeiliSearch添加任务，Task UID: {}", task.getTaskUid());
+
+                // 等待当前批次任务完成（可选，但可以更清楚地看到每一步的结果）
+                meiliSearchClient.waitForTask(task.getTaskUid());
+                log.info("  -> 批次 {} 已成功同步。", pageNumber + 1);
+
+                // 【关键】在处理完一个批次后，进行短暂休眠，给服务器喘息时间
+                try {
+                    Thread.sleep(500); // 休眠500毫秒
+                } catch (InterruptedException e) {
+                    log.warn("线程休眠被中断", e);
+                    Thread.currentThread().interrupt();
+                }
+
+                pageNumber++;
+
+            } while (videoPage.hasNext());
+
+            log.info("数据同步任务成功完成！");
 
         } catch (Exception e) {
-            log.error("同步数据到MeiliSearch时发生严重错误", e);
+            log.error("分批同步数据到MeiliSearch时发生严重错误", e);
         }
     }
 }

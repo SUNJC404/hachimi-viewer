@@ -1,5 +1,7 @@
+// src/main/java/tv/oxnu0xuu/hachimiviewer/repository/VideoRepository.java
 package tv.oxnu0xuu.hachimiviewer.repository;
 
+import org.springframework.data.domain.Page; // 导入 Page
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
@@ -15,8 +17,10 @@ import java.util.List;
 @Repository
 public interface VideoRepository extends JpaRepository<Video, String> {
 
-    @Query("SELECT v FROM Video v JOIN FETCH v.owner")
-    List<Video> findAllWithOwners();
+    // 支持分页
+    @Query(value = "SELECT v FROM Video v JOIN FETCH v.owner",
+            countQuery = "SELECT count(v) FROM Video v") // 添加 countQuery 以正确计算总页数
+    Page<Video> findAllWithOwners(Pageable pageable);
 
     @Query("SELECT v FROM Video v WHERE v.isReviewed = false AND v.reviewStatus IS NULL ORDER BY v.pubDate DESC")
     List<Video> findAvailableForReview();
@@ -35,11 +39,9 @@ public interface VideoRepository extends JpaRepository<Video, String> {
 
     List<Video> findByReviewStatus(String status);
 
-    // 获取最新发现
     @Query("SELECT v FROM Video v WHERE v.isHachimi = true ORDER BY v.pubDate DESC")
     List<Video> findHachimiVideosOrderByPubDateDesc(Pageable pageable);
 
-    // 获取随机推荐
     @Query(value = "SELECT * FROM videos WHERE is_hachimi = true ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<Video> findRandomHachimiVideos(@Param("limit") int limit);
 }
