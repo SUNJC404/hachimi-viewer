@@ -12,12 +12,14 @@ services:
       - meili_data:/data.ms
     networks:
       - hachimi-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
-  # 修改后端服务的 build 部分
   backend:
     container_name: hachimi-viewer-app
-    # 【关键修改】
-    # 指定构建上下文为当前目录，并明确使用 Dockerfile.local 文件
     build:
       context: .
       dockerfile: Dockerfile
@@ -28,17 +30,25 @@ services:
       - meili.host=http://meilisearch:7700
       - meili.apiKey=Meili4752
       - meili.index.videos=videos
+      # JVM 资源限制
+      - JAVA_OPTS=-Xms256m -Xmx512m
     depends_on:
       - meilisearch
     networks:
       - hachimi-net
+      - mysql-external-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 768M
 
 # 网络和数据卷的定义保持不变
 networks:
   hachimi-net:
-    name: mysql_server_default  # 替换为您的MySQL网络名
+  mysql-external-net:
     external: true
-
+    name: mysql_server_default
 volumes:
   meili_data:
 
