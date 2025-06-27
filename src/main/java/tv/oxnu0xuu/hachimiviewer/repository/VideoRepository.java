@@ -1,6 +1,6 @@
 package tv.oxnu0xuu.hachimiviewer.repository;
 
-import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import jakarta.persistence.LockModeType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,4 +33,12 @@ public interface VideoRepository extends JpaRepository<Video, String> {
     int releaseExpiredLeases(@Param("now") LocalDateTime now);
 
     List<Video> findByReviewStatus(String status);
+
+    // 获取最新发现
+    @Query("SELECT v FROM Video v WHERE v.isHachimi = true ORDER BY v.pubDate DESC")
+    List<Video> findHachimiVideosOrderByPubDateDesc(Pageable pageable);
+
+    // 获取随机推荐
+    @Query(value = "SELECT * FROM videos WHERE is_hachimi = true ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    List<Video> findRandomHachimiVideos(@Param("limit") int limit);
 }

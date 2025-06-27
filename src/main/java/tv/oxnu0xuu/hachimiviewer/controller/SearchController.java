@@ -2,7 +2,8 @@ package tv.oxnu0xuu.hachimiviewer.controller;
 
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Index;
-import com.meilisearch.sdk.model.SearchResult;
+import com.meilisearch.sdk.SearchRequest;
+// com.meilisearch.sdk.model.SearchResult 暂时不再需要导入
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +33,14 @@ public class SearchController {
             return ResponseEntity.badRequest().body("{\"error\": \"Search query 'q' cannot be empty.\"}");
         }
         try {
-            logger.info("Performing search for query: '{}'", query);
-            SearchResult results = videosIndex.search(query);
+            logger.info("Performing search for query: '{}' with filter 'is_hachimi = true'", query);
+
+            // 使用 SearchRequest 来构建带过滤条件的搜索
+            SearchRequest searchRequest = new SearchRequest(query);
+            searchRequest.setFilter(new String[]{"is_hachimi = true"});
+
+            Object results = videosIndex.search(searchRequest);
+
             return ResponseEntity.ok(results);
         } catch (Exception e) {
             logger.error("Error during Meilisearch search", e);
