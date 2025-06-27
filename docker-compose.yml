@@ -27,8 +27,8 @@ services:
       - "8080:8080"
     environment:
       - spring.datasource.url=jdbc:mysql://mysql_video_db:3306/video_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-      - meili.host=http://meilisearch:7700
-      - meili.apiKey=Meili4752
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_API_KEY=Meili4752
       - meili.index.videos=videos
       # JVM 资源限制
       - JAVA_OPTS=-Xms256m -Xmx512m
