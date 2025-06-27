@@ -2,270 +2,385 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>B站审核模拟器 (哈气版)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hachimi Viewer</title>
   <style>
-    body { font-family: sans-serif; background: #f0f2f5; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px 0; }
-    .container { width: 90%; max-width: 500px; text-align: center; }
-    .view { display: none; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 25px; }
-    #cover-link { display: block; text-decoration: none; margin-bottom: 20px; }
-    #cover-image { width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; cursor: pointer; background-color: #eee; }
-    #video-title { font-size: 24px; font-weight: bold; margin: 0 0 10px 0; }
-
-    .meta-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px 15px;
-      margin-bottom: 15px;
-      color: #555;
+    :root {
+      --primary-color: #007bff;
+      --background-color: #f0f2f5;
+      --card-background-color: #ffffff;
+      --text-color: #333;
+      --text-secondary-color: #666;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
-    .author-box {
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+    }
+    .search-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    #search-input {
+      width: 50%;
+      max-width: 600px;
+      padding: 12px 18px;
+      font-size: 16px;
+      border-radius: var(--border-radius) 0 0 var(--border-radius);
+      border: 1px solid #ccc;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #search-input:focus {
+      border-color: var(--primary-color);
+    }
+    #search-button {
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+      border: none;
+      background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #search-button:hover {
+      background-color: #0056b3;
+    }
+    .videos-section {
+      /* 增加模块间距 */
+      margin-bottom: 60px;
+    }
+    .section-header {
       display: flex;
       align-items: center;
       gap: 15px;
+      border-bottom: 2px solid #e9ecef;
+      padding-bottom: 10px;
+      margin-bottom: 25px;
     }
-
-    #author-avatar { width: 32px; height: 32px; border-radius: 50%; vertical-align: middle; margin-right: 5px;}
-    #video-stats span, #category-tag { font-size: 13px; }
-    #category-tag { padding: 3px 8px; border-radius: 4px; color: white; font-weight: bold; }
-    .tag-kichiku { background-color: #f56c6c; }
-    .tag-music { background-color: #409eff; }
-    .tag-animation { background-color: #a972e8; }
-    .tag-game { background-color: #e6a23c; }
-    .tag-anime { background-color: #00a2ae; }
-    .tag-knowledge { background-color: #b07957; }
-    .tag-life { background-color: #f78bba; }
-    .tag-film { background-color: #546e7a; }
-    .tag-vup { background-color: #79bbff; }
-    .tag-unknown { background-color: #909399; }
-
-    #description-box { margin-bottom: 20px; text-align: left; }
-    #description-box summary { cursor: pointer; font-weight: bold; margin-bottom: 5px;}
-    #description-box p { font-size: 14px; color: #666; line-height: 1.6; max-height: 150px; overflow-y: auto; background: #fafafa; padding: 10px; border-radius: 6px; margin: 0; white-space: pre-wrap; }
-
-    #status-container { font-size: 20px; margin-bottom: 25px; }
-    .status-true { color: #28a745; font-weight: bold; }
-    .status-false { color: #dc3545; font-weight: bold; }
-    button { border: none; cursor: pointer; border-radius: 8px; font-size: 16px; padding: 12px 0; color: white; transition: background-color 0.2s; }
-    button:disabled { background-color: #ccc !important; cursor: not-allowed; }
-    .button-group { display: flex; justify-content: space-around; margin-bottom: 20px; }
-    .button-group button { width: 45%; }
-    #yes-btn { background-color: #28a745; }
-    #no-btn { background-color: #dc3545; }
-    .nav-buttons { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 20px; }
-    .nav-buttons button { width: auto; padding: 8px 16px; font-size: 14px; background-color: #007bff; }
-    #loading-view h2, #finished-view h2 { font-size: 24px; color: #666; }
+    .section-header h2 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+    .refresh-button {
+      background: none;
+      border: 1px solid #ccc;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s, border-color 0.2s;
+    }
+    .refresh-button:hover {
+      transform: rotate(180deg);
+      border-color: var(--primary-color);
+    }
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 25px;
+    }
+    .video-card {
+      background: var(--card-background-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
+    }
+    .video-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    .video-card.hidden {
+      /* 用于隐藏多余的卡片 */
+      display: none;
+    }
+    .video-card a {
+      text-decoration: none;
+      color: inherit;
+    }
+    .video-thumbnail-container {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    }
+    .video-thumbnail {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background-color: #eee;
+    }
+    .video-card-content {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .video-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 10px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-height: 2.4em; /* Reserve space for 2 lines */
+    }
+    .video-card-meta {
+      font-size: 0.8rem;
+      color: var(--text-secondary-color);
+      margin-top: auto; /* Push meta to the bottom */
+    }
+    .video-card-owner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .owner-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .video-stats {
+      display: flex;
+      gap: 15px;
+    }
   </style>
 </head>
 <body>
 <div class="container">
-  <div id="loading-view" class="view"><h2>正在从数据库加载审核队列...</h2></div>
-  <div id="reviewer-view" class="view">
-    <a id="cover-link" href="#" target="_blank" rel="noopener noreferrer"><img id="cover-image" alt="视频封面" referrerpolicy="no-referrer"></a>
-    <h2 id="video-title">视频标题</h2>
-
-    <div class="meta-info">
-            <span id="video-stats">
-                <span id="video-views"></span>
-            </span>
-
-      <div class="author-box">
-                <span id="author-details">
-                    <img id="author-avatar" alt="作者头像" referrerpolicy="no-referrer">
-                    <span id="author-name">作者</span>
-                </span>
-        <span id="category-tag"></span>
-      </div>
-    </div>
-    <details id="description-box">
-      <summary>视频简介</summary>
-      <p id="video-description"></p>
-    </details>
-
-    <div id="status-container">Hachimi: <span id="hachimi-status"></span></div>
-    <div class="button-group">
-      <button id="yes-btn">是 (Yes)</button>
-      <button id="no-btn">否 (No)</button>
-    </div>
-    <div class="nav-buttons">
-      <button id="prev-video-btn">&lt; 上一条</button>
-      <span id="progress-text"></span>
-      <button id="next-video-btn">下一条 &gt;</button>
-    </div>
+  <div class="header">
+    <h1>Hachimi Viewer</h1>
   </div>
-  <div id="finished-view" class="view"><h2>本轮审核已完成！感谢你为小动物保护做出的贡献！</h2></div>
+
+  <div class="search-container">
+    <input type="text" id="search-input" placeholder="搜索哈基米视频...">
+    <button id="search-button">搜索</button>
+  </div>
+
+  <div id="search-results" class="videos-section" style="display: none;">
+    <div class="section-header">
+      <h2>搜索结果</h2>
+    </div>
+    <div id="search-results-grid" class="videos-grid"></div>
+  </div>
+
+  <div class="videos-section">
+    <div class="section-header">
+      <h2>最新发现</h2>
+      <button id="refresh-latest" class="refresh-button" title="刷新最新视频">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+      </button>
+    </div>
+    <div id="latest-videos-grid" class="videos-grid"></div>
+  </div>
+
+  <div class="videos-section">
+    <div class="section-header">
+      <h2>随机推荐</h2>
+      <button id="refresh-random" class="refresh-button" title="刷新随机视频">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+      </button>
+    </div>
+    <div id="random-videos-grid" class="videos-grid"></div>
+  </div>
 </div>
 
 <script>
-  // --- 【JS代码无需任何修改】 ---
-  const videoDescription = document.getElementById('video-description');
-  const categoryTag = document.getElementById('category-tag');
-  const loadingView = document.getElementById('loading-view');
-  const reviewerView = document.getElementById('reviewer-view');
-  const finishedView = document.getElementById('finished-view');
-  const yesBtn = document.getElementById('yes-btn');
-  const noBtn = document.getElementById('no-btn');
-  const coverLink = document.getElementById('cover-link');
-  const coverImage = document.getElementById('cover-image');
-  const videoTitle = document.getElementById('video-title');
-  const hachimiStatus = document.getElementById('hachimi-status');
-  const authorAvatar = document.getElementById('author-avatar');
-  const authorName = document.getElementById('author-name');
-  const prevVideoBtn = document.getElementById('prev-video-btn');
-  const nextVideoBtn = document.getElementById('next-video-btn');
-  const progressText = document.getElementById('progress-text');
-  const videoViews = document.getElementById('video-views');
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchButton = document.getElementById('search-button');
+    const searchInput = document.getElementById('search-input');
+    const refreshLatestBtn = document.getElementById('refresh-latest');
+    const refreshRandomBtn = document.getElementById('refresh-random');
 
-  let reviewQueue = [];
-  let currentIndex = 0;
-  let reviewerId = null;
-  let heartbeatInterval = null;
+    fetchLatestVideos();
+    fetchRandomVideos();
 
-  const categoryMap = {
-    22: { name: '鬼畜调教', group: 'kichiku' }, 26: { name: '音MAD', group: 'kichiku' }, 126: { name: '人力VOCALOID', group: 'kichiku' }, 127: { name: '教程演示', group: 'kichiku' }, 216: { name: '鬼畜剧场', group: 'kichiku' }, 28: { name: '原创音乐', group: 'music' }, 30: { name: 'VOCALOID·UTAU', group: 'music' }, 31: { name: '翻唱', group: 'music' }, 59: { name: '演奏', group: 'music' }, 130: { name: '音乐综合', group: 'music' }, 193: { name: 'MV', group: 'music' }, 194: { name: '电音', group: 'music' }, 244: { name: '音乐教学', group: 'music' }, 24: { name: 'MAD·AMV', group: 'animation' }, 25: { name: 'MMD·3D', group: 'animation' }, 27: { name: '综合', group: 'animation' }, 47: { name: '短片·手书', group: 'animation' }, 86: { name: '特摄', group: 'animation' }, 257: { name: '配音', group: 'animation' }, 17: { name: '单机游戏', group: 'game' }, 65: { name: '网络游戏', group: 'game' }, 121: { name: 'GMV', group: 'game' }, 136: { name: '音游', group: 'game' }, 173: { name: '桌游棋牌', group: 'game' }, 265: { name: '赛事', group: 'game' }, 152: { name: '官方延伸', group: 'anime' }, 208: { name: '校园学习', group: 'knowledge' }, 138: { name: '搞笑', group: 'life' }, 183: { name: '影视剪辑', group: 'film' }, 262: { name: '虚拟UP主', group: 'vup' }
-  };
-
-  window.onload = () => { fetchReviewQueue(); };
-  window.onbeforeunload = () => {
-    stopHeartbeat();
-  };
-
-  function startHeartbeat() {
-    stopHeartbeat();
-    heartbeatInterval = setInterval(() => {
-      if (reviewerId) {
-        console.log("Sending heartbeat to extend lease...");
-        fetch('/api/review-queue/heartbeat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reviewerId: reviewerId })
-        }).catch(err => console.error("Heartbeat failed:", err));
+    searchButton.addEventListener('click', () => {
+      const query = searchInput.value.trim();
+      if (query) {
+        document.getElementById('search-results').style.display = 'block';
+        searchVideos(query);
       }
-    }, 3 * 60 * 1000);
-  }
+    });
 
-  function stopHeartbeat() {
-    if (heartbeatInterval) {
-      clearInterval(heartbeatInterval);
-      heartbeatInterval = null;
-      console.log("Heartbeat stopped.");
-    }
-  }
+    searchInput.addEventListener('keyup', (event) => {
+      if (event.key === 'Enter') {
+        searchButton.click();
+      }
+    });
 
-  function showView(viewName) {
-    loadingView.style.display = 'none';
-    reviewerView.style.display = 'none';
-    finishedView.style.display = 'none';
-    document.getElementById(`${viewName}-view`).style.display = 'block';
+    refreshLatestBtn.addEventListener('click', fetchLatestVideos);
+    refreshRandomBtn.addEventListener('click', fetchRandomVideos);
 
-    if (viewName === 'finished') {
-      stopHeartbeat();
-    }
-  }
+    // --- 【新增】监听窗口大小变化，动态调整布局 ---
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        adjustGridLayout(document.getElementById('latest-videos-grid'));
+        adjustGridLayout(document.getElementById('random-videos-grid'));
+        adjustGridLayout(document.getElementById('search-results-grid'));
+      }, 200); // 防抖处理，避免频繁触发
+    });
+  });
 
-  async function fetchReviewQueue() {
-    showView('loading');
+  async function fetchApi(url, gridElement) {
     try {
-      const response = await fetch('/api/review-queue');
-      if (!response.ok) { throw new Error(`服务器错误 (${response.status})`); }
+      gridElement.innerHTML = '<p>正在加载...</p>';
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-      if (data.error) { throw new Error(data.error); }
-
-      reviewQueue = data.videos;
-      reviewerId = data.reviewerId;
-
-      if (!reviewQueue || reviewQueue.length === 0) {
-        finishedView.innerHTML = `<h2>数据库中没有待审核的视频了，或者稍后再试。</h2>`;
-        showView('finished');
-        return;
-      }
-
-      startHeartbeat();
-
-      currentIndex = 0;
-      displayVideo(currentIndex);
-      showView('reviewer');
-
+      renderVideos(data, gridElement);
     } catch (error) {
-      loadingView.innerHTML = `<h2>加载失败: ${error.message}</h2>`;
-      stopHeartbeat();
+      console.error('Fetch error:', error);
+      gridElement.innerHTML = `<p>加载失败: ${error.message}</p>`;
     }
   }
 
-  async function displayVideo(index) {
-    if (index >= reviewQueue.length) {
-      showView('finished');
+  function fetchLatestVideos() {
+    // 请求10个以适应5列x2行的场景
+    fetchApi('/api/videos/latest?size=10', document.getElementById('latest-videos-grid'));
+  }
+
+  function fetchRandomVideos() {
+    // 请求10个以适应5列x2行的场景
+    fetchApi('/api/videos/random?limit=10', document.getElementById('random-videos-grid'));
+  }
+
+  async function searchVideos(query) {
+    const grid = document.getElementById('search-results-grid');
+    try {
+      grid.innerHTML = '<p>正在搜索...</p>';
+      const response = await fetch(`/api/search/videos?q=${encodeURIComponent(query)}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const results = await response.json();
+      // 搜索结果也应用此布局逻辑
+      renderVideos(results.hits, grid, '搜索结果为空');
+    } catch (error) {
+      console.error('Search error:', error);
+      grid.innerHTML = `<p>搜索失败: ${error.message}</p>`;
+    }
+  }
+
+  function renderVideos(videos, gridElement, emptyMessage = '没有可显示的视频。') {
+    if (!videos || videos.length === 0) {
+      gridElement.innerHTML = `<p>${emptyMessage}</p>`;
       return;
     }
-    const video = reviewQueue[index];
+    gridElement.innerHTML = '';
+    for (const video of videos) {
+      const ownerName = video.owner ? video.owner.name : '未知UP主';
+      const ownerAvatar = video.owner && video.owner.face ? video.owner.face : '';
 
-    const compressedCoverUrl = `${video.coverUrl}@500w_282h_1c_100q.jpg`;
-    coverImage.src = `https://images.weserv.nl/?url=${encodeURIComponent(compressedCoverUrl)}`;
-    const compressedAvatarUrl = video.owner && video.owner.face ? `${video.owner.face}@100w_100h_1c_100q.jpg` : '';
-    authorAvatar.src = compressedAvatarUrl ? `https://images.weserv.nl/?url=${encodeURIComponent(compressedAvatarUrl)}` : '';
+      const compressedCoverUrl = `${video.coverUrl}@400w.jpg`;
+      const proxiedCoverUrl = `https://images.weserv.nl/?url=${encodeURIComponent(compressedCoverUrl)}`;
+      const proxiedAvatarUrl = ownerAvatar ? `https://images.weserv.nl/?url=${encodeURIComponent(ownerAvatar)}&w=56&h=56&fit=cover&output=webp` : '';
 
-    coverLink.href = `https://www.bilibili.com/video/${video.bvid}`;
-    videoTitle.textContent = video.title;
-    hachimiStatus.textContent = video.hachimi ? 'T' : 'F';
-    hachimiStatus.className = video.hachimi ? 'status-true' : 'status-false';
-    videoViews.textContent = `播放: ${video.views.toLocaleString()}`;
-    authorName.textContent = video.owner ? video.owner.name : '未知作者';
-    videoDescription.textContent = video.description || '暂无简介';
+      const videoCard = document.createElement('div');
+      videoCard.className = 'video-card';
+      videoCard.innerHTML = `
+                <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
+                    <div class="video-thumbnail-container">
+                        <img class="video-thumbnail" src="${proxiedCoverUrl}" alt="${video.title}" loading="lazy" referrerpolicy="no-referrer">
+                    </div>
+                </a>
+                <div class="video-card-content">
+                    <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
+                        <h3 class="video-card-title">${video.title}</h3>
+                    </a>
+                    <div class="video-card-meta">
+                        <div class="video-card-owner">
+                            <img class="owner-avatar" src="${proxiedAvatarUrl}" alt="${ownerName}" loading="lazy" referrerpolicy="no-referrer">
+                            <span>${ownerName}</span>
+                        </div>
+                        <div class="video-stats">
+                            <span>▶ ${formatViews(video.views)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+      gridElement.appendChild(videoCard);
+    }
+    // --- 【新增】渲染后立即调整布局 ---
+    adjustGridLayout(gridElement);
+  }
 
-    const categoryInfo = categoryMap[video.categoryId];
-    if (categoryInfo) {
-      categoryTag.textContent = categoryInfo.name;
-      categoryTag.className = `tag-${categoryInfo.group}`;
+  // --- 【新增】核心布局调整函数 ---
+  function adjustGridLayout(gridElement) {
+    if (!gridElement || !gridElement.hasChildNodes()) {
+      return;
+    }
+
+    const cards = Array.from(gridElement.getElementsByClassName('video-card'));
+    if (cards.length === 0) {
+      return;
+    }
+
+    // 计算列数
+    const gridWidth = gridElement.offsetWidth;
+    const cardWidth = cards[0].offsetWidth;
+    const numColumns = Math.round(gridWidth / cardWidth);
+
+    let itemsToShow;
+
+    // 根据列数决定显示数量
+    if (numColumns <= 3) {
+      // 1, 2, 3列时，显示3行
+      itemsToShow = 3 * numColumns;
+    } else if (numColumns === 4) {
+      // 4列时，显示2行
+      itemsToShow = 2 * numColumns; // 8个
     } else {
-      categoryTag.textContent = '未知分区';
-      categoryTag.className = 'tag-unknown';
+      // 5列及以上时，显示2行（最多10个）
+      itemsToShow = 2 * 5; // 10个
     }
 
-    updateNavState();
+    // 遍历所有卡片，根据计算结果显示或隐藏
+    cards.forEach((card, index) => {
+      if (index < itemsToShow) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
   }
 
-  async function submitReview(isHachimi) {
-    yesBtn.disabled = true; noBtn.disabled = true;
-    const video = reviewQueue[currentIndex];
-    try {
-      const response = await fetch(`/api/videos/${video.bvid}/status`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hachimi: isHachimi })
-      });
-      if (!response.ok) { throw new Error('保存状态失败'); }
-      video.hachimi = isHachimi;
-      moveToNextVideo();
-    } catch (err) {
-      alert(`保存失败: ${err.message}`);
-      yesBtn.disabled = false; noBtn.disabled = false;
+  function formatViews(num) {
+    if (num >= 10000) {
+      return (num / 10000).toFixed(1) + '万';
     }
+    return num.toLocaleString();
   }
-
-  function updateNavState() {
-    prevVideoBtn.disabled = currentIndex <= 0;
-    nextVideoBtn.disabled = currentIndex >= reviewQueue.length - 1;
-    progressText.textContent = `进度: ${currentIndex + 1} / ${reviewQueue.length}`;
-    yesBtn.disabled = false; noBtn.disabled = false;
-  }
-
-  function moveToPrevVideo() {
-    if (currentIndex > 0) { currentIndex--; displayVideo(currentIndex); }
-  }
-
-  function moveToNextVideo() {
-    if (currentIndex < reviewQueue.length - 1) {
-      currentIndex++;
-      displayVideo(currentIndex);
-    } else {
-      showView('finished');
-    }
-  }
-
-  yesBtn.addEventListener('click', () => submitReview(true));
-  noBtn.addEventListener('click', () => submitReview(false));
-  prevVideoBtn.addEventListener('click', moveToPrevVideo);
-  nextVideoBtn.addEventListener('click', moveToNextVideo);
 </script>
 </body>
 </html>

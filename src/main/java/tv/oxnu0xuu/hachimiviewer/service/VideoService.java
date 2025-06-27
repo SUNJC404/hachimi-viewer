@@ -17,7 +17,6 @@ public class VideoService {
     @Autowired
     private VideoRepository videoRepository;
 
-    // 4. 添加 @Transactional 并修改返回类型
     @Transactional(readOnly = true)
     public List<VideoReviewDto> getLatestHachimiVideos(int page, int size) {
         List<Video> videos = videoRepository.findHachimiVideosOrderByPubDateDesc(PageRequest.of(page, size));
@@ -27,10 +26,18 @@ public class VideoService {
                 .collect(Collectors.toList());
     }
 
-    // 6. 对另一个方法也进行同样的操作
     @Transactional(readOnly = true)
     public List<VideoReviewDto> getRandomHachimiVideos(int limit) {
         List<Video> videos = videoRepository.findRandomHachimiVideos(limit);
+        return videos.stream()
+                .map(VideoReviewDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    // 搜索功能
+    @Transactional(readOnly = true)
+    public List<VideoReviewDto> searchHachimiVideos(String query, int page, int size) {
+        List<Video> videos = videoRepository.searchHachimiVideos(query, PageRequest.of(page, size));
         return videos.stream()
                 .map(VideoReviewDto::fromEntity)
                 .collect(Collectors.toList());
