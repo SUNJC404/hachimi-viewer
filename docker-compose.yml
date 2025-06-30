@@ -1,0 +1,40 @@
+services:
+  meilisearch:
+    image: getmeili/meilisearch
+    container_name: meilisearch-engine
+    environment:
+      - MEILI_MASTER_KEY=REDACTED
+      - MEILI_ENV=development
+    ports:
+      - "7700:7700"
+    volumes:
+      - meili_data:/data.ms
+    networks:
+      - hachimi-net
+
+  backend:
+    container_name: hachimi-viewer-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      # MODIFIED: Point to the host machine's forwarded port via the SSH tunnel
+      - spring.datasource.url=jdbc:mysql://host.docker.internal:3307/video_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      # MEILI variables remain the same
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_API_KEY=REDACTED
+      - meili.index.videos=videos
+    depends_on:
+      - meilisearch
+    networks:
+      # Only this network is needed. The external network is removed.
+      - hachimi-net
+
+# REMOVED the mysql-external-net definition
+networks:
+  hachimi-net:
+
+volumes:
+  meili_data:
