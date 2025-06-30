@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hachimi Viewer</title>
+  <title>哈基米启动器</title>
   <style>
     :root {
       --primary-color: #007bff;
@@ -153,16 +153,23 @@
       text-overflow: ellipsis;
       min-height: 2.4em; /* Reserve space for 2 lines */
     }
+
+    /* --- CSS 修改部分 START --- */
     .video-card-meta {
       font-size: 0.8rem;
       color: var(--text-secondary-color);
       margin-top: auto; /* Push meta to the bottom */
+
+      /* 新增样式以实现左右布局 */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 8px; /* 增加与标题之间的间距 */
     }
     .video-card-owner {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 8px;
     }
     .owner-avatar {
       width: 28px;
@@ -171,32 +178,33 @@
       object-fit: cover;
     }
     .video-stats {
-      display: flex;
-      gap: 15px;
+      /* display: flex; 不再需要 */
+      /* gap: 15px;   不再需要 */
     }
+
   </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
-    <h1>Hachimi Viewer</h1>
+    <h1>哈基米启动器</h1>
   </div>
 
   <div class="search-container">
-    <input type="text" id="search-input" placeholder="搜索哈基米视频...">
+    <input type="text" id="search-input" placeholder="搜索哈基米...">
     <button id="search-button">搜索</button>
   </div>
 
   <div id="search-results" class="videos-section" style="display: none;">
     <div class="section-header">
-      <h2>搜索结果</h2>
+      <h2>哈气结果</h2>
     </div>
     <div id="search-results-grid" class="videos-grid"></div>
   </div>
 
   <div class="videos-section">
     <div class="section-header">
-      <h2>最新发现</h2>
+      <h2>最新哈气</h2>
       <button id="refresh-latest" class="refresh-button" title="刷新最新视频">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
       </button>
@@ -206,7 +214,7 @@
 
   <div class="videos-section">
     <div class="section-header">
-      <h2>随机推荐</h2>
+      <h2>随机哈气</h2>
       <button id="refresh-random" class="refresh-button" title="刷新随机视频">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
       </button>
@@ -268,12 +276,10 @@
   }
 
   function fetchLatestVideos() {
-    // 请求10个以适应5列x2行的场景
     fetchApi('/api/videos/latest?size=10', document.getElementById('latest-videos-grid'));
   }
 
   function fetchRandomVideos() {
-    // 请求10个以适应5列x2行的场景
     fetchApi('/api/videos/random?limit=10', document.getElementById('random-videos-grid'));
   }
 
@@ -308,6 +314,7 @@
 
       const videoCard = document.createElement('div');
       videoCard.className = 'video-card';
+
       videoCard.innerHTML = `
                 <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
                     <div class="video-thumbnail-container">
@@ -319,23 +326,22 @@
                         <h3 class="video-card-title">${video.title}</h3>
                     </a>
                     <div class="video-card-meta">
+                        <div class="video-stats">
+                            <span>▶ ${formatViews(video.views)}</span>
+                        </div>
                         <div class="video-card-owner">
                             <img class="owner-avatar" src="${proxiedAvatarUrl}" alt="${ownerName}" loading="lazy" referrerpolicy="no-referrer">
                             <span>${ownerName}</span>
                         </div>
-                        <div class="video-stats">
-                            <span>▶ ${formatViews(video.views)}</span>
-                        </div>
                     </div>
                 </div>
             `;
+
       gridElement.appendChild(videoCard);
     }
-    // --- 【新增】渲染后立即调整布局 ---
     adjustGridLayout(gridElement);
   }
 
-  // --- 【新增】核心布局调整函数 ---
   function adjustGridLayout(gridElement) {
     if (!gridElement || !gridElement.hasChildNodes()) {
       return;
