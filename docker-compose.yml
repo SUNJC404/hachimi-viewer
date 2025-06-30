@@ -11,6 +11,7 @@ services:
       - meili_data:/data.ms
     networks:
       - hachimi-net
+    restart: always # 建议添加重启策略
 
   backend:
     container_name: hachimi-viewer-app
@@ -20,19 +21,25 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # MODIFIED: Point to the host machine's forwarded port via the SSH tunnel
-      - spring.datasource.url=jdbc:mysql://host.docker.internal:3307/video_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-      # MEILI variables remain the same
+      # Spring Boot 数据库配置 (通过环境变量传入)
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3307/video_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=viewer
+      - SPRING_DATASOURCE_PASSWORD=REDACTED
+      # MEILI 变量
       - MEILI_HOST=http://meilisearch:7700
       - MEILI_API_KEY=REDACTED
-      - meili.index.videos=videos
+      - MEILI_INDEX_VIDEOS=videos
     depends_on:
       - meilisearch
     networks:
-      # Only this network is needed. The external network is removed.
       - hachimi-net
+    # --- 这是解决问题的关键 ---
+    # 添加 extra_hosts 来定义 host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # --- 关键部分结束 ---
+    restart: always # 建议添加重启策略
 
-# REMOVED the mysql-external-net definition
 networks:
   hachimi-net:
 
