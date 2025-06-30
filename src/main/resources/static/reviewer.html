@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>B站审核模拟器 (哈气版)</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px 0; }
+        .container { width: 90%; max-width: 500px; text-align: center; }
+        .view { display: none; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 25px; }
+        #cover-link { display: block; text-decoration: none; margin-bottom: 20px; }
+        #cover-image { width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; cursor: pointer; background-color: #eee; }
+        #video-title { font-size: 24px; font-weight: bold; margin: 0 0 10px 0; }
+
+        /* 区域和简介的样式 */
+        .meta-info { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 15px; margin-bottom: 15px; color: #555; }
+        #author-avatar { width: 32px; height: 32px; border-radius: 50%; vertical-align: middle; margin-right: 5px;}
+        #video-stats span, #category-tag { font-size: 13px; }
+        #category-tag { padding: 3px 8px; border-radius: 4px; color: white; font-weight: bold; }
+        .tag-kichiku { background-color: #f56c6c; }      /* 鬼畜 - 红色 */
+        .tag-music { background-color: #409eff; }      /* 音乐 - 蓝色 */
+        .tag-animation { background-color: #a972e8; }  /* 动画 - 紫色 */
+        .tag-game { background-color: #e6a23c; }       /* 游戏 - 橙色 */
+        .tag-anime { background-color: #00a2ae; }      /* 番剧 - 青色 */
+        .tag-knowledge { background-color: #b07957; }  /* 知识 - 棕色 */
+        .tag-life { background-color: #f78bba; }       /* 生活 - 粉色 */
+        .tag-film { background-color: #546e7a; }       /* 影视 - 灰蓝色 */
+        .tag-vup { background-color: #79bbff; }        /* 虚拟UP主 - 浅蓝色 */
+        .tag-unknown { background-color: #909399; }    /* 未知 - 灰色 */
+
+        #description-box { margin-bottom: 20px; text-align: left; }
+        #description-box summary { cursor: pointer; font-weight: bold; margin-bottom: 5px;}
+        #description-box p { font-size: 14px; color: #666; line-height: 1.6; max-height: 150px; overflow-y: auto; background: #fafafa; padding: 10px; border-radius: 6px; margin: 0; white-space: pre-wrap; }
+
+        #status-container { font-size: 20px; margin-bottom: 25px; }
+        .status-true { color: #28a745; font-weight: bold; }
+        .status-false { color: #dc3545; font-weight: bold; }
+        button { border: none; cursor: pointer; border-radius: 8px; font-size: 16px; padding: 12px 0; color: white; transition: background-color 0.2s; }
+        button:disabled { background-color: #ccc !important; cursor: not-allowed; }
+        .button-group { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .button-group button { width: 45%; }
+        #yes-btn { background-color: #28a745; }
+        #no-btn { background-color: #dc3545; }
+        .nav-buttons { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 20px; }
+        .nav-buttons button { width: auto; padding: 8px 16px; font-size: 14px; background-color: #007bff; }
+        #loading-view h2, #finished-view h2 { font-size: 24px; color: #666; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="loading-view" class="view"><h2>正在从数据库加载审核队列...</h2></div>
+    <div id="reviewer-view" class="view">
+        <a id="cover-link" href="#" target="_blank" rel="noopener noreferrer"><img id="cover-image" alt="视频封面" referrerpolicy="no-referrer"></a>
+        <h2 id="video-title">视频标题</h2>
+
+        <div class="meta-info">
+            <span id="author-details">
+                <img id="author-avatar" alt="作者头像" referrerpolicy="no-referrer">
+                <span id="author-name">作者</span>
+            </span>
+            <span id="video-stats">
+                <span id="video-views"></span>
+            </span>
+            <span id="category-tag"></span>
+        </div>
+
+        <details id="description-box">
+            <summary>视频简介</summary>
+            <p id="video-description"></p>
+        </details>
+
+        <div id="status-container">Hachimi: <span id="hachimi-status"></span></div>
+        <div class="button-group">
+            <button id="yes-btn">是 (Yes)</button>
+            <button id="no-btn">否 (No)</button>
+        </div>
+        <div class="nav-buttons">
+            <button id="prev-video-btn">&lt; 上一条</button>
+            <span id="progress-text"></span>
+            <button id="next-video-btn">下一条 &gt;</button>
+        </div>
+    </div>
+    <div id="finished-view" class="view"><h2>本轮审核已完成！感谢你为小动物保护做出的贡献！</h2></div>
+</div>
+
+<script>
+    // --- 获取所有DOM元素 ---
+    const videoDescription = document.getElementById('video-description');
+    const categoryTag = document.getElementById('category-tag');
+    const loadingView = document.getElementById('loading-view');
+    const reviewerView = document.getElementById('reviewer-view');
+    const finishedView = document.getElementById('finished-view');
+    const yesBtn = document.getElementById('yes-btn');
+    const noBtn = document.getElementById('no-btn');
+    const coverLink = document.getElementById('cover-link');
+    const coverImage = document.getElementById('cover-image');
+    const videoTitle = document.getElementById('video-title');
+    const hachimiStatus = document.getElementById('hachimi-status');
+    const authorAvatar = document.getElementById('author-avatar');
+    const authorName = document.getElementById('author-name');
+    const prevVideoBtn = document.getElementById('prev-video-btn');
+    const nextVideoBtn = document.getElementById('next-video-btn');
+    const progressText = document.getElementById('progress-text');
+    const videoViews = document.getElementById('video-views');
+
+    // --- 全局状态变量 ---
+    let reviewQueue = [];
+    let currentIndex = 0;
+
+    // =======================================================================
+    // 【关键修正】
+    // 确保这两个变量在这里，即脚本的顶层作用域中声明。
+    let reviewerId = null;
+    let heartbeatInterval = null;
+    // =======================================================================
+
+    // --- 分区ID与名称/颜色的映射 ---
+    const categoryMap = {
+        // ... (您的 categoryMap 内容保持不变) ...
+        22: { name: '鬼畜调教', group: 'kichiku' }, 26: { name: '音MAD', group: 'kichiku' }, 126: { name: '人力VOCALOID', group: 'kichiku' }, 127: { name: '教程演示', group: 'kichiku' }, 216: { name: '鬼畜剧场', group: 'kichiku' }, 28: { name: '原创音乐', group: 'music' }, 30: { name: 'VOCALOID·UTAU', group: 'music' }, 31: { name: '翻唱', group: 'music' }, 59: { name: '演奏', group: 'music' }, 130: { name: '音乐综合', group: 'music' }, 193: { name: 'MV', group: 'music' }, 194: { name: '电音', group: 'music' }, 244: { name: '音乐教学', group: 'music' }, 24: { name: 'MAD·AMV', group: 'animation' }, 25: { name: 'MMD·3D', group: 'animation' }, 27: { name: '综合', group: 'animation' }, 47: { name: '短片·手书', group: 'animation' }, 86: { name: '特摄', group: 'animation' }, 257: { name: '配音', group: 'animation' }, 17: { name: '单机游戏', group: 'game' }, 65: { name: '网络游戏', group: 'game' }, 121: { name: 'GMV', group: 'game' }, 136: { name: '音游', group: 'game' }, 173: { name: '桌游棋牌', group: 'game' }, 265: { name: '赛事', group: 'game' }, 152: { name: '官方延伸', group: 'anime' }, 208: { name: '校园学习', group: 'knowledge' }, 138: { name: '搞笑', group: 'life' }, 183: { name: '影视剪辑', group: 'film' }, 262: { name: '虚拟UP主', group: 'vup' }
+    };
+
+    // --- 页面加载和卸载事件 ---
+    window.onload = () => { fetchReviewQueue(); };
+    window.onbeforeunload = () => {
+        stopHeartbeat(); // 离开页面时确保停止心跳
+    };
+
+    // --- 心跳函数 ---
+    function startHeartbeat() {
+        stopHeartbeat(); // 先停止任何可能存在的旧心跳计时器
+        // 每3分钟发送一次心跳，租约是5分钟，这样可以确保在到期前续约
+        heartbeatInterval = setInterval(() => {
+            if (reviewerId) {
+                console.log("Sending heartbeat to extend lease...");
+                fetch('/api/review-queue/heartbeat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reviewerId: reviewerId })
+                }).catch(err => console.error("Heartbeat failed:", err));
+            }
+        }, 3 * 60 * 1000);
+    }
+
+    function stopHeartbeat() {
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+            console.log("Heartbeat stopped.");
+        }
+    }
+
+    // --- 视图切换 ---
+    function showView(viewName) {
+        loadingView.style.display = 'none';
+        reviewerView.style.display = 'none';
+        finishedView.style.display = 'none';
+        document.getElementById(`${viewName}-view`).style.display = 'block';
+
+        // 当审核完成或队列加载完毕时，停止心跳
+        if (viewName === 'finished') {
+            stopHeartbeat();
+        }
+    }
+
+    // --- 核心业务逻辑 ---
+    async function fetchReviewQueue() {
+        showView('loading');
+        try {
+            const response = await fetch('/api/review-queue');
+            if (!response.ok) { throw new Error(`服务器错误 (${response.status})`); }
+            const data = await response.json();
+            if (data.error) { throw new Error(data.error); }
+
+            reviewQueue = data.videos;
+            reviewerId = data.reviewerId;
+
+            if (!reviewQueue || reviewQueue.length === 0) {
+                finishedView.innerHTML = `<h2>数据库中没有待审核的视频了，或者稍后再试。</h2>`;
+                showView('finished');
+                return;
+            }
+
+            // 成功获取到任务，开始心跳
+            startHeartbeat();
+
+            currentIndex = 0;
+            displayVideo(currentIndex);
+            showView('reviewer');
+
+        } catch (error) {
+            loadingView.innerHTML = `<h2>加载失败: ${error.message}</h2>`;
+            stopHeartbeat(); // 如果加载失败，也要确保心跳是停止的
+        }
+    }
+
+    async function displayVideo(index) {
+        if (index >= reviewQueue.length) {
+            showView('finished');
+            return;
+        }
+        const video = reviewQueue[index];
+
+        const compressedCoverUrl = `${video.coverUrl}@500w_282h_1c.webp`;
+        coverImage.src = `https://images.weserv.nl/?url=${encodeURIComponent(compressedCoverUrl)}&w=500&h=282&fit=cover&output=webp`;
+        const compressedAvatarUrl = video.owner && video.owner.face ? `${video.owner.face}@100w_100h_1c.webp` : '';
+        authorAvatar.src = compressedAvatarUrl ? `https://images.weserv.nl/?url=${encodeURIComponent(compressedAvatarUrl)}&w=100&h=100&fit=cover&output=webp` : '';
+
+        coverLink.href = `https://www.bilibili.com/video/${video.bvid}`;
+        videoTitle.textContent = video.title;
+        hachimiStatus.textContent = video.hachimi ? 'T' : 'F';
+        hachimiStatus.className = video.hachimi ? 'status-true' : 'status-false';
+        videoViews.textContent = `播放: ${video.views.toLocaleString()}`;
+        authorName.textContent = video.owner ? video.owner.name : '未知作者';
+        videoDescription.textContent = video.description || '暂无简介';
+
+        const categoryInfo = categoryMap[video.categoryId];
+        if (categoryInfo) {
+            categoryTag.textContent = categoryInfo.name;
+            categoryTag.className = `tag-${categoryInfo.group}`;
+        } else {
+            categoryTag.textContent = '未知分区';
+            categoryTag.className = 'tag-unknown';
+        }
+
+        updateNavState();
+    }
+
+    async function submitReview(isHachimi) {
+        yesBtn.disabled = true; noBtn.disabled = true;
+        const video = reviewQueue[currentIndex];
+        try {
+            const response = await fetch(`/api/videos/${video.bvid}/status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hachimi: isHachimi })
+            });
+            if (!response.ok) { throw new Error('保存状态失败'); }
+            video.hachimi = isHachimi;
+            moveToNextVideo();
+        } catch (err) {
+            alert(`保存失败: ${err.message}`);
+            yesBtn.disabled = false; noBtn.disabled = false;
+        }
+    }
+
+    // --- 导航 ---
+    function updateNavState() {
+        prevVideoBtn.disabled = currentIndex <= 0;
+        nextVideoBtn.disabled = currentIndex >= reviewQueue.length - 1;
+        progressText.textContent = `进度: ${currentIndex + 1} / ${reviewQueue.length}`;
+        yesBtn.disabled = false; noBtn.disabled = false;
+    }
+
+    function moveToPrevVideo() {
+        if (currentIndex > 0) { currentIndex--; displayVideo(currentIndex); }
+    }
+
+    function moveToNextVideo() {
+        if (currentIndex < reviewQueue.length - 1) {
+            currentIndex++;
+            displayVideo(currentIndex);
+        } else {
+            showView('finished');
+        }
+    }
+
+    // --- 事件监听 ---
+    yesBtn.addEventListener('click', () => submitReview(true));
+    noBtn.addEventListener('click', () => submitReview(false));
+    prevVideoBtn.addEventListener('click', moveToPrevVideo);
+    nextVideoBtn.addEventListener('click', moveToNextVideo);
+</script>
+</body>
+</html>
