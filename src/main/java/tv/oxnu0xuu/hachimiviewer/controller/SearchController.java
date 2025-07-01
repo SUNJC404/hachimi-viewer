@@ -26,7 +26,7 @@ public class SearchController {
         this.videosIndex = client.index(indexName);
     }
 
-    @GetMapping("/videos")
+    @GetMapping("/")
     public ResponseEntity<?> searchVideos(@RequestParam(name = "q") String query) {
         if (query == null || query.isBlank()) {
             return ResponseEntity.badRequest().body("{\"error\": \"Search query 'q' cannot be empty.\"}");
