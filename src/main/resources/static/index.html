@@ -20,6 +20,7 @@
       color: var(--text-color);
       margin: 0;
       padding: 20px;
+      position: relative; /* 为绝对定位的子元素提供参考点 */
     }
     .container {
       max-width: 1400px;
@@ -153,18 +154,14 @@
       text-overflow: ellipsis;
       min-height: 2.4em; /* Reserve space for 2 lines */
     }
-
-    /* --- CSS 修改部分 START --- */
     .video-card-meta {
       font-size: 0.8rem;
       color: var(--text-secondary-color);
-      margin-top: auto; /* Push meta to the bottom */
-
-      /* 新增样式以实现左右布局 */
+      margin-top: auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-top: 8px; /* 增加与标题之间的间距 */
+      padding-top: 8px;
     }
     .video-card-owner {
       display: flex;
@@ -177,14 +174,41 @@
       border-radius: 50%;
       object-fit: cover;
     }
-    .video-stats {
-      /* display: flex; 不再需要 */
-      /* gap: 15px;   不再需要 */
+    .video-stats { }
+
+    /* --- 新增：右上角按钮样式 --- */
+    .top-right-button-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10; /* 确保按钮在最上层 */
+    }
+    .top-right-button-container button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: var(--border-radius);
+      border: none;
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      box-shadow: var(--box-shadow);
+    }
+    .top-right-button-container button:hover {
+      background-color: #218838;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
     }
 
   </style>
 </head>
 <body>
+
+<div class="top-right-button-container">
+  <button onclick="window.location.href='/reviewer.html'">前往审核页面</button>
+</div>
+
+
 <div class="container">
   <div class="header">
     <h1>哈基米启动器</h1>
@@ -224,6 +248,7 @@
 </div>
 
 <script>
+  // ... 您的 JavaScript 逻辑保持不变 ...
   document.addEventListener('DOMContentLoaded', () => {
     const searchButton = document.getElementById('search-button');
     const searchInput = document.getElementById('search-input');
@@ -250,7 +275,6 @@
     refreshLatestBtn.addEventListener('click', fetchLatestVideos);
     refreshRandomBtn.addEventListener('click', fetchRandomVideos);
 
-    // --- 【新增】监听窗口大小变化，动态调整布局 ---
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
@@ -258,7 +282,7 @@
         adjustGridLayout(document.getElementById('latest-videos-grid'));
         adjustGridLayout(document.getElementById('random-videos-grid'));
         adjustGridLayout(document.getElementById('search-results-grid'));
-      }, 200); // 防抖处理，避免频繁触发
+      }, 200);
     });
   });
 
@@ -290,7 +314,6 @@
       const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const results = await response.json();
-      // 搜索结果也应用此布局逻辑
       renderVideos(results.hits, grid, '搜索结果为空');
     } catch (error) {
       console.error('Search error:', error);
@@ -352,26 +375,20 @@
       return;
     }
 
-    // 计算列数
     const gridWidth = gridElement.offsetWidth;
     const cardWidth = cards[0].offsetWidth;
     const numColumns = Math.round(gridWidth / cardWidth);
 
     let itemsToShow;
 
-    // 根据列数决定显示数量
     if (numColumns <= 3) {
-      // 1, 2, 3列时，显示3行
       itemsToShow = 3 * numColumns;
     } else if (numColumns === 4) {
-      // 4列时，显示2行
-      itemsToShow = 2 * numColumns; // 8个
+      itemsToShow = 2 * numColumns;
     } else {
-      // 5列及以上时，显示2行（最多10个）
-      itemsToShow = 2 * 5; // 10个
+      itemsToShow = 2 * 5;
     }
 
-    // 遍历所有卡片，根据计算结果显示或隐藏
     cards.forEach((card, index) => {
       if (index < itemsToShow) {
         card.classList.remove('hidden');
