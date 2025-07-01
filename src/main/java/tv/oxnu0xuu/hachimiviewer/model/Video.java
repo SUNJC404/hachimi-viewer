@@ -59,4 +59,7 @@ public class Video {
 
     @Column(name = "original_artist")
     private String originalArtist;
+
+    @Column(name = "is_available", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
+    private boolean isAvailable;
 }

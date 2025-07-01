@@ -15,9 +15,11 @@ public class VideoReviewDto {
     private String coverUrl;
     private String description;
     private Integer categoryId;
+    private boolean isAvailable;
 
     public static VideoReviewDto fromEntity(Video video) {
         VideoReviewDto dto = new VideoReviewDto();
+        dto.setAvailable(video.isAvailable());
         dto.setBvid(video.getBvid());
         dto.setTitle(video.getTitle());
         dto.setHachimi(video.isHachimi());

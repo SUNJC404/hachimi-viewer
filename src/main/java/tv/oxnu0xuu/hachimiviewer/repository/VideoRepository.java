@@ -44,4 +44,8 @@ public interface VideoRepository extends JpaRepository<Video, String> {
 
     @Query(value = "SELECT * FROM videos WHERE is_hachimi = true ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<Video> findRandomHachimiVideos(@Param("limit") int limit);
+
+    @Query(value = "SELECT v FROM Video v JOIN FETCH v.owner WHERE v.isHachimi = true",
+            countQuery = "SELECT count(v) FROM Video v WHERE v.isHachimi = true")
+    Page<Video> findAllHachimiWithOwners(Pageable pageable);
 }
