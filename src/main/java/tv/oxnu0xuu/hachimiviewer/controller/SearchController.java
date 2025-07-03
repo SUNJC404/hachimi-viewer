@@ -3,7 +3,6 @@ package tv.oxnu0xuu.hachimiviewer.controller;
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.SearchRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,16 +26,21 @@ public class SearchController {
     }
 
     @GetMapping
-    public ResponseEntity<?> searchVideos(@RequestParam(name = "q") String query) {
+    public ResponseEntity<?> searchVideos(
+            @RequestParam(name = "q") String query,
+            // Meilisearch 的分页参数，page 从 1 开始
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int hitsPerPage) {
         if (query == null || query.isBlank()) {
             return ResponseEntity.badRequest().body("{\"error\": \"Search query 'q' cannot be empty.\"}");
         }
         try {
-            logger.info("Performing search for query: '{}' with filter 'is_hachimi = true'", query);
+            logger.info("Performing search for query: '{}', page: {}, hitsPerPage: {}", query, page, hitsPerPage);
 
-            // 使用 SearchRequest 来构建带过滤条件的搜索
             SearchRequest searchRequest = new SearchRequest(query);
             searchRequest.setFilter(new String[]{"is_hachimi = true"});
+            searchRequest.setPage(page);
+            searchRequest.setHitsPerPage(hitsPerPage);
 
             Object results = videosIndex.search(searchRequest);
 
