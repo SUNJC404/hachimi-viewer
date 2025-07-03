@@ -62,4 +62,8 @@ public class Video {
 
     @Column(name = "is_available", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private boolean isAvailable;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 }
