@@ -48,4 +48,7 @@ public interface VideoRepository extends JpaRepository<Video, String> {
     @Query(value = "SELECT v FROM Video v JOIN FETCH v.owner WHERE v.isHachimi = true",
             countQuery = "SELECT count(v) FROM Video v WHERE v.isHachimi = true")
     Page<Video> findAllHachimiWithOwners(Pageable pageable);
+
+    @Query("SELECT v FROM Video v JOIN FETCH v.owner WHERE v.isHachimi = true AND v.updatedAt > :since")
+    List<Video> findHachimiVideosUpdatedSince(@Param("since") LocalDateTime since);
 }

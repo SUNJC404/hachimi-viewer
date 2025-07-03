@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tv.oxnu0xuu.hachimiviewer.dto.VideoReviewDto;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
 import tv.oxnu0xuu.hachimiviewer.repository.VideoRepository;
+import org.springframework.scheduling.annotation.Scheduled;
+import java.time.LocalDateTime;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +52,7 @@ public class DataSyncService {
             Index index = meiliSearchClient.index(videoIndexName);
 
             // --- 步骤 1: 清空所有现有文档 ---
-//            log.info("正在清空 MeiliSearch 索引 '{}' 中的所有旧数据...", videoIndexName);
+//            log.info("正在清空 MeiliSearch 索引 '{}' 中的所有旧data数据...", videoIndexName);
 //            TaskInfo clearTask = index.deleteAllDocuments();
 //            // 建议等待清空任务完成，确保后续添加不会出错
 //            index.waitForTask(clearTask.getTaskUid());
@@ -110,6 +112,44 @@ public class DataSyncService {
 
         } catch (Exception e) {
             log.error("同步数据到 MeiliSearch 时发生严重错误", e);
+        }
+    }
+
+    @Scheduled(cron = "0 * * * * ?")
+    @Transactional(readOnly = true)
+    public void syncRecentUpdatesToMeiliSearch() {
+        // 计算出一分钟前的时间点
+        LocalDateTime oneMinuteAgo = LocalDateTime.now().minusMinutes(1);
+        log.info("【增量同步任务】启动，正在查找自 {} 以后更新的哈基米视频...", oneMinuteAgo);
+
+        // 使用新的查询方法，找出最近更新的视频
+        List<Video> recentlyUpdatedVideos = videoRepository.findHachimiVideosUpdatedSince(oneMinuteAgo);
+
+        if (recentlyUpdatedVideos.isEmpty()) {
+            log.info("【增量同步任务】没有找到最近更新的视频，任务结束。");
+            return;
+        }
+
+        log.info("【增量同步任务】发现 {} 条更新的视频，正在同步到 Meilisearch...", recentlyUpdatedVideos.size());
+
+        try {
+            // 将实体转换为 DTO
+            List<VideoReviewDto> dtosToSync = recentlyUpdatedVideos.stream()
+                    .map(VideoReviewDto::fromEntity)
+                    .collect(Collectors.toList());
+
+            // 序列化为 JSON
+            String documents = objectMapper.writeValueAsString(dtosToSync);
+
+            Index index = meiliSearchClient.index(videoIndexName);
+
+            // 使用 addDocuments 方法。它会智能地新增或替换已有文档（根据主键 bvid）
+            TaskInfo task = index.addDocuments(documents, "bvid");
+
+            log.info("【增量同步任务】成功提交 {} 条更新到 Meilisearch，Task UID: {}", dtosToSync.size(), task.getTaskUid());
+
+        } catch (Exception e) {
+            log.error("【增量同步任务】在同步最近更新时发生严重错误", e);
         }
     }
 }

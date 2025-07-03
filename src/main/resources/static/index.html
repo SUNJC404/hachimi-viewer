@@ -276,7 +276,7 @@
       const results = await response.json();
 
       // 搜索结果不限制数量，全部展示
-      renderVideos(results.hits, grid, false, '搜索结果为空');
+      renderVideos(results, grid, false, '搜索结果为空');
       renderPagination(results);
       document.getElementById('search-results').scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
@@ -287,21 +287,17 @@
 
   function renderPagination(results) {
     const paginationContainer = document.getElementById('search-pagination');
-    if (!results || !results.limit) {
-      paginationContainer.innerHTML = '';
-      return;
-    }
-    const totalPages = Math.ceil(results.estimatedTotalHits / results.limit);
+    const totalPages = results.totalPages;
+    const currentPage = results.page;
 
     if (totalPages <= 1) {
-      paginationContainer.innerHTML = '';
+      paginationContainer.innerHTML = ''; // 如果只有一页或没有，不显示分页
       return;
     }
-
     let paginationHtml = `
-      <button onclick="goToSearchPage(${currentSearchPage - 1})" ${currentSearchPage === 1 ? 'disabled' : ''}>&laquo; 上一页</button>
-      <span>第 ${currentSearchPage} / ${totalPages} 页</span>
-      <button onclick="goToSearchPage(${currentSearchPage + 1})" ${currentSearchPage >= totalPages ? 'disabled' : ''}>下一页 &raquo;</button>
+        <button onclick="goToSearchPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&laquo; 上一页</button>
+        <span>第 ${currentPage} / ${totalPages} 页</span>
+        <button onclick="goToSearchPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>下一页 &raquo;</button>
     `;
 
     paginationContainer.innerHTML = paginationHtml;
@@ -314,7 +310,7 @@
   }
 
   function renderVideos(videos, gridElement, shouldAdjustLayout, emptyMessage = '没有可显示的视频。') {
-    const dataToRender = (videos && videos.hits) ? videos.hits : videos;
+    const dataToRender = videos.hits ? videos.hits : videos;
     if (!dataToRender || dataToRender.length === 0) {
       gridElement.innerHTML = `<p>${emptyMessage}</p>`;
       return;
