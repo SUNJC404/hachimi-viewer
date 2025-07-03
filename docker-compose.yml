@@ -33,12 +33,10 @@ services:
       - meilisearch
     networks:
       - hachimi-net
-    # --- 这是解决问题的关键 ---
     # 添加 extra_hosts 来定义 host.docker.internal
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    # --- 关键部分结束 ---
-    restart: always # 建议添加重启策略
+    restart: always
 
 networks:
   hachimi-net:
