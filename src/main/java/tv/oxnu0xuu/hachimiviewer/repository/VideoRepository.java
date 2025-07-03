@@ -1,7 +1,6 @@
-// src/main/java/tv/oxnu0xuu/hachimiviewer/repository/VideoRepository.java
 package tv.oxnu0xuu.hachimiviewer.repository;
 
-import org.springframework.data.domain.Page; // 导入 Page
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
