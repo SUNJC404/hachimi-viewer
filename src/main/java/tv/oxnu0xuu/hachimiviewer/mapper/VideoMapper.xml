@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tv.oxnu0xuu.hachimiviewer.mapper.VideoMapper">
+
+    <resultMap id="VideoWithOwnerResultMap" type="tv.oxnu0xuu.hachimiviewer.model.Video">
+        <id property="bvid" column="bvid"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="pubDate" column="pub_date"/>
+        <result property="views" column="views"/>
+        <result property="coverUrl" column="cover_url"/>
+        <result property="isHachimi" column="is_hachimi"/>
+        <result property="isReviewed" column="is_reviewed"/>
+        <result property="reviewedAt" column="reviewed_at"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="reviewStatus" column="review_status"/>
+        <result property="reviewerId" column="reviewer_id"/>
+        <result property="leaseExpiresAt" column="lease_expires_at"/>
+        <result property="originalSong" column="original_song"/>
+        <result property="originalArtist" column="original_artist"/>
+        <result property="isAvailable" column="is_available"/>
+        <result property="updatedAt" column="updated_at"/>
+
+        <association property="owner" javaType="tv.oxnu0xuu.hachimiviewer.model.User">
+            <id property="mid" column="owner_mid"/>
+            <result property="name" column="user_name"/>
+            <result property="avatarUrl" column="user_avatar_url"/>
+        </association>
+    </resultMap>
+
+    <select id="findAvailableForReview" resultMap="VideoWithOwnerResultMap">
+        SELECT v.*, u.name as user_name, u.avatar_url as user_avatar_url
+        FROM videos v
+                 LEFT JOIN users u ON v.owner_mid = u.mid
+        WHERE v.is_reviewed = false AND v.review_status IS NULL
+        ORDER BY v.pub_date DESC
+    </select>
+
+    <update id="releaseExpiredLeases">
+        UPDATE videos SET review_status = null, reviewer_id = null, lease_expires_at = null
+        WHERE review_status = 'IN_PROGRESS' AND lease_expires_at &lt; #{now}
+    </update>
+
+    <update id="updateHachimiStatus">
+        UPDATE videos
+        SET
+            is_hachimi = #{isHachimi},
+            is_reviewed = true,
+            reviewed_at = #{reviewedAt},
+            review_status = 'COMPLETED',
+            lease_expires_at = null,
+            updated_at = NOW()  -- 建议在更新时也更新 updated_at 字段
+        WHERE
+            bvid = #{bvid}
+    </update>
+
+    <select id="findHachimiVideosOrderByPubDateDesc" resultMap="VideoWithOwnerResultMap">
+        SELECT v.*, u.name as user_name, u.avatar_url as user_avatar_url
+        FROM videos v
+                 LEFT JOIN users u ON v.owner_mid = u.mid
+        WHERE v.is_hachimi = true ORDER BY v.pub_date DESC
+            LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="findRandomHachimiVideos" resultMap="VideoWithOwnerResultMap">
+        SELECT v.*, u.name as user_name, u.avatar_url as user_avatar_url
+        FROM videos v
+                 LEFT JOIN users u ON v.owner_mid = u.mid
+        WHERE is_hachimi = true ORDER BY RAND()
+            LIMIT #{limit}
+    </select>
+
+    <select id="findAllHachimiWithOwners" resultMap="VideoWithOwnerResultMap">
+        SELECT v.*, u.name as user_name, u.avatar_url as user_avatar_url
+        FROM videos v
+                 LEFT JOIN users u ON v.owner_mid = u.mid
+        WHERE v.is_hachimi = true
+        ORDER BY v.pub_date DESC
+            LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="findHachimiVideosUpdatedSince" resultMap="VideoWithOwnerResultMap">
+        SELECT v.*, u.name as user_name, u.avatar_url as user_avatar_url
+        FROM videos v
+                 LEFT JOIN users u ON v.owner_mid = u.mid
+        WHERE v.is_hachimi = true AND v.updated_at > #{since}
+    </select>
+
+</mapper>

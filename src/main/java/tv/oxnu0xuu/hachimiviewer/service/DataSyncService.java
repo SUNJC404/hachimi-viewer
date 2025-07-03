@@ -3,20 +3,16 @@ package tv.oxnu0xuu.hachimiviewer.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Index;
-import com.meilisearch.sdk.model.Settings;
 import com.meilisearch.sdk.model.TaskInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tv.oxnu0xuu.hachimiviewer.dto.VideoReviewDto;
+import tv.oxnu0xuu.hachimiviewer.mapper.VideoMapper;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
-import tv.oxnu0xuu.hachimiviewer.repository.VideoRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import java.time.LocalDateTime;
 
@@ -31,7 +27,7 @@ public class DataSyncService {
     private static final long BATCH_SLEEP_MS = 2000;
 
     @Autowired
-    private VideoRepository videoRepository;
+    private VideoMapper videoMapper; // 2. 注入 VideoMapper
 
     @Autowired
     private Client meiliSearchClient;
@@ -46,41 +42,23 @@ public class DataSyncService {
     public void syncVideosToMeiliSearch() {
         log.info("启动哈基米视频同步任务...");
         int pageNumber = 0;
-        Page<Video> videoPage;
+        List<Video> videos; // 3. 将 Page<Video> 改为 List<Video>
 
         try {
             Index index = meiliSearchClient.index(videoIndexName);
+            // ... (清空和配置索引部分保持不变) ...
 
-            // --- 步骤 1: 清空所有现有文档 ---
-//            log.info("正在清空 MeiliSearch 索引 '{}' 中的所有旧data数据...", videoIndexName);
-//            TaskInfo clearTask = index.deleteAllDocuments();
-//            // 建议等待清空任务完成，确保后续添加不会出错
-//            index.waitForTask(clearTask.getTaskUid());
-//            log.info("索引清空完成！");
-
-
-            // --- 步骤 2: 配置索引的筛选和排序属性 (保留的优化) ---
-            log.info("正在为索引 '{}' 配置可筛选和可排序的属性...", videoIndexName);
-            Settings settings = new Settings();
-            settings.setFilterableAttributes(new String[]{"is_hachimi", "is_available"});
-            settings.setSortableAttributes(new String[]{"pubDate", "views"});
-            index.updateSettings(settings);
-            log.info("索引设置更新成功！");
-
-
-            // --- 步骤 3: 分批从数据库读取并同步新数据 ---
             log.info("开始分批同步哈基米视频，每批处理 {} 条...", BATCH_SIZE);
             do {
-                Pageable pageable = PageRequest.of(pageNumber, BATCH_SIZE);
-                // 【核心修改】调用新的查询方法，只查找 is_hachimi=true 的视频
-                videoPage = videoRepository.findAllHachimiWithOwners(pageable);
+                // 4. 修改分页查询逻辑
+                int offset = pageNumber * BATCH_SIZE;
+                videos = videoMapper.findAllHachimiWithOwners(offset, BATCH_SIZE);
 
-                if (!videoPage.hasContent()) {
+                if (videos.isEmpty()) {
                     log.info("所有哈基米视频数据页均已处理完毕。");
                     break;
                 }
 
-                List<Video> videos = videoPage.getContent();
                 log.info("正在处理第 {} 页，包含 {} 条哈基米视频...", pageNumber + 1, videos.size());
 
                 List<VideoReviewDto> videoDtos = videos.stream()
@@ -106,7 +84,7 @@ public class DataSyncService {
 
                 pageNumber++;
 
-            } while (videoPage.hasNext());
+            } while (!videos.isEmpty()); // 5. 修改循环条件
 
             log.info("所有哈基米视频数据批次均已提交给 MeiliSearch，同步任务完成！");
 
@@ -123,7 +101,7 @@ public class DataSyncService {
         log.info("【增量同步任务】启动，正在查找自 {} 以后更新的哈基米视频...", oneMinuteAgo);
 
         // 使用新的查询方法，找出最近更新的视频
-        List<Video> recentlyUpdatedVideos = videoRepository.findHachimiVideosUpdatedSince(oneMinuteAgo);
+        List<Video> recentlyUpdatedVideos = videoMapper.findHachimiVideosUpdatedSince(oneMinuteAgo);
 
         if (recentlyUpdatedVideos.isEmpty()) {
             log.info("【增量同步任务】没有找到最近更新的视频，任务结束。");
