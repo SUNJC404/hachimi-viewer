@@ -11,7 +11,6 @@ public class MeiliSearchConfig {
 
     @Bean
     public Client meiliSearchClient() {
-        // 直接从环境变量读取 MeiliSearch 配置
         String meiliHost = System.getenv("MEILI_HOST");
         String meiliApiKey = System.getenv("MEILI_API_KEY");
 
