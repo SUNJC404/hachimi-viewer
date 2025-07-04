@@ -48,4 +48,8 @@ public class Video {
 
     private LocalDateTime updatedAt;
 
+    public User getOwner() {
+        if (owner == null) owner = new User();
+        return owner;
+    }
 }
