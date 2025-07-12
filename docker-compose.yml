@@ -20,6 +20,15 @@ services:
     ports:
       - "8080:8080"
     environment:
+      # 账户配置
+      - REVIEWER_PASSWORD=REDACTED
+      - ADMIN_PASSWORD=
+      - SESSION_TIMEOUT_MINUTES=60
+
+      # 审核配置
+      - REVIEW_BATCH_SIZE=20
+      - REVIEW_LEASE_MINUTES=5
+
       # Spring Boot 数据库配置 (通过环境变量传入)
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3307/video_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=viewer

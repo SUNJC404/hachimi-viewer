@@ -17,17 +17,6 @@ public class DataSourceConfig {
         String username = System.getenv("SPRING_DATASOURCE_USERNAME");
         String password = System.getenv("SPRING_DATASOURCE_PASSWORD");
 
-        // 如果环境变量不存在，可以提供一个默认值，便于本地开发
-        if (url == null || url.isEmpty()) {
-            url = "jdbc:mysql://localhost:3306/video_db";
-        }
-        if (username == null || username.isEmpty()) {
-            username = "root";
-        }
-        if (password == null) { // 密码可能为空
-            password = "password";
-        }
-
         return DataSourceBuilder.create()
                 .url(url)
                 .username(username)

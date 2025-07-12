@@ -1,0 +1,72 @@
+package tv.oxnu0xuu.hachimiviewer.controller;
+
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import tv.oxnu0xuu.hachimiviewer.dto.VideoDetailDto;
+import tv.oxnu0xuu.hachimiviewer.service.AdminService;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/admin")
+public class AdminController {
+
+    @Autowired
+    private AdminService adminService;
+
+    @GetMapping("/videos")
+    public ResponseEntity<?> getVideos(
+            HttpSession session,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean isHachimi) {
+
+        // 检查管理员权限
+        Boolean isAuthenticated = (Boolean) session.getAttribute("isAdminAuthenticated");
+        if (isAuthenticated == null || !isAuthenticated) {
+            return ResponseEntity.status(401).body(Map.of("error", "未授权"));
+        }
+
+        return ResponseEntity.ok(adminService.getVideos(page, size, search, isHachimi));
+    }
+
+    @PutMapping("/videos/{bvid}/hachimi")
+    public ResponseEntity<?> toggleHachimiStatus(
+            HttpSession session,
+            @PathVariable String bvid) {
+
+        // 检查管理员权限
+        Boolean isAuthenticated = (Boolean) session.getAttribute("isAdminAuthenticated");
+        if (isAuthenticated == null || !isAuthenticated) {
+            return ResponseEntity.status(401).body(Map.of("error", "未授权"));
+        }
+
+        try {
+            adminService.toggleHachimiStatus(bvid);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/videos/{bvid}")
+    public ResponseEntity<?> getVideoDetail(
+            HttpSession session,
+            @PathVariable String bvid) {
+
+        // 检查管理员权限
+        Boolean isAuthenticated = (Boolean) session.getAttribute("isAdminAuthenticated");
+        if (isAuthenticated == null || !isAuthenticated) {
+            return ResponseEntity.status(401).body(Map.of("error", "未授权"));
+        }
+
+        VideoDetailDto detail = adminService.getVideoDetail(bvid);
+        if (detail == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "视频不存在"));
+        }
+        return ResponseEntity.ok(detail);
+    }
+}

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tv.oxnu0xuu.hachimiviewer.dto.ReviewQueueResponseDto;
@@ -20,9 +21,15 @@ import java.util.stream.Collectors;
 @Service
 public class ReviewService {
 
-    private static final int BATCH_SIZE = 10;
-    private static final int LEASE_MINUTES = 5;
     private static final Logger log = LoggerFactory.getLogger(ReviewService.class);
+
+    @Autowired
+    @Qualifier("reviewBatchSize")
+    private Integer batchSize;
+
+    @Autowired
+    @Qualifier("reviewLeaseMinutes")
+    private Integer leaseMinutes;
 
     @Autowired
     private VideoMapper videoMapper;
@@ -63,20 +70,19 @@ public class ReviewService {
         log.info("==================== DIAGNOSIS END ==================================");
 
         List<Video> availableVideos = videoMapper.findAvailableForReview();
-        List<Video> videosToReview = availableVideos.stream().limit(BATCH_SIZE).collect(Collectors.toList());
+        List<Video> videosToReview = availableVideos.stream().limit(batchSize).collect(Collectors.toList());
 
         if (videosToReview.isEmpty()) {
             return new ReviewQueueResponseDto(null, Collections.emptyList());
         }
 
         String currentReviewerId = UUID.randomUUID().toString();
-        LocalDateTime leaseExpiresAt = LocalDateTime.now().plusMinutes(LEASE_MINUTES);
+        LocalDateTime leaseExpiresAt = LocalDateTime.now().plusMinutes(leaseMinutes);
 
         for (Video video : videosToReview) {
             video.setReviewStatus("IN_PROGRESS");
             video.setReviewerId(currentReviewerId);
             video.setLeaseExpiresAt(leaseExpiresAt);
-            // 5. 将 saveAll 替换为单条更新
             videoMapper.updateById(video);
         }
 
@@ -97,7 +103,7 @@ public class ReviewService {
                         .eq("reviewer_id", reviewerId)
                         .eq("review_status", "IN_PROGRESS")
         );
-        LocalDateTime newLeaseTime = LocalDateTime.now().plusMinutes(LEASE_MINUTES);
+        LocalDateTime newLeaseTime = LocalDateTime.now().plusMinutes(leaseMinutes);
 
         for (Video video : videos) {
             video.setLeaseExpiresAt(newLeaseTime);

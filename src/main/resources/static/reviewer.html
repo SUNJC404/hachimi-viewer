@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -7,6 +8,45 @@
         body { font-family: sans-serif; background: #f0f2f5; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px 0; }
         .container { width: 90%; max-width: 500px; text-align: center; }
         .view { display: none; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 25px; }
+
+        /* 登录页面样式 */
+        #login-view h2 { font-size: 24px; margin-bottom: 20px; color: #333; }
+        #password-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        #password-input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        #login-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #login-btn:hover { background-color: #0056b3; }
+        #login-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
         #cover-link { display: block; text-decoration: none; margin-bottom: 20px; }
         #cover-image { width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; cursor: pointer; background-color: #eee; }
         #video-title { font-size: 24px; font-weight: bold; margin: 0 0 10px 0; }
@@ -47,6 +87,14 @@
 </head>
 <body>
 <div class="container">
+    <!-- 登录视图 -->
+    <div id="login-view" class="view">
+        <h2>审核系统登录</h2>
+        <input type="password" id="password-input" placeholder="请输入密码" autocomplete="off">
+        <button id="login-btn">登录</button>
+        <div class="error-message" id="error-message">密码错误，请重试</div>
+    </div>
+
     <div id="loading-view" class="view"><h2>正在从数据库加载审核队列...</h2></div>
     <div id="reviewer-view" class="view">
         <a id="cover-link" href="#" target="_blank" rel="noopener noreferrer"><img id="cover-image" alt="视频封面" referrerpolicy="no-referrer"></a>
@@ -84,6 +132,11 @@
 
 <script>
     // --- 获取所有DOM元素 ---
+    const loginView = document.getElementById('login-view');
+    const passwordInput = document.getElementById('password-input');
+    const loginBtn = document.getElementById('login-btn');
+    const errorMessage = document.getElementById('error-message');
+
     const videoDescription = document.getElementById('video-description');
     const categoryTag = document.getElementById('category-tag');
     const loadingView = document.getElementById('loading-view');
@@ -105,25 +158,81 @@
     // --- 全局状态变量 ---
     let reviewQueue = [];
     let currentIndex = 0;
-
-    // =======================================================================
-    // 【关键修正】
-    // 确保这两个变量在这里，即脚本的顶层作用域中声明。
     let reviewerId = null;
     let heartbeatInterval = null;
-    // =======================================================================
 
     // --- 分区ID与名称/颜色的映射 ---
     const categoryMap = {
-        // ... (您的 categoryMap 内容保持不变) ...
         22: { name: '鬼畜调教', group: 'kichiku' }, 26: { name: '音MAD', group: 'kichiku' }, 126: { name: '人力VOCALOID', group: 'kichiku' }, 127: { name: '教程演示', group: 'kichiku' }, 216: { name: '鬼畜剧场', group: 'kichiku' }, 28: { name: '原创音乐', group: 'music' }, 30: { name: 'VOCALOID·UTAU', group: 'music' }, 31: { name: '翻唱', group: 'music' }, 59: { name: '演奏', group: 'music' }, 130: { name: '音乐综合', group: 'music' }, 193: { name: 'MV', group: 'music' }, 194: { name: '电音', group: 'music' }, 244: { name: '音乐教学', group: 'music' }, 24: { name: 'MAD·AMV', group: 'animation' }, 25: { name: 'MMD·3D', group: 'animation' }, 27: { name: '综合', group: 'animation' }, 47: { name: '短片·手书', group: 'animation' }, 86: { name: '特摄', group: 'animation' }, 257: { name: '配音', group: 'animation' }, 17: { name: '单机游戏', group: 'game' }, 65: { name: '网络游戏', group: 'game' }, 121: { name: 'GMV', group: 'game' }, 136: { name: '音游', group: 'game' }, 173: { name: '桌游棋牌', group: 'game' }, 265: { name: '赛事', group: 'game' }, 152: { name: '官方延伸', group: 'anime' }, 208: { name: '校园学习', group: 'knowledge' }, 138: { name: '搞笑', group: 'life' }, 183: { name: '影视剪辑', group: 'film' }, 262: { name: '虚拟UP主', group: 'vup' }
     };
 
     // --- 页面加载和卸载事件 ---
-    window.onload = () => { fetchReviewQueue(); };
+    window.onload = async () => {
+        // 首先检查是否已经登录
+        const authCheck = await checkAuthentication();
+        if (authCheck) {
+            fetchReviewQueue();
+        } else {
+            showView('login');
+        }
+    };
+
     window.onbeforeunload = () => {
         stopHeartbeat(); // 离开页面时确保停止心跳
     };
+
+    // --- 认证相关函数 ---
+    async function checkAuthentication() {
+        try {
+            const response = await fetch('/api/auth/reviewer/check');
+            const data = await response.json();
+            return data.authenticated;
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            return false;
+        }
+    }
+
+    async function login() {
+        const password = passwordInput.value;
+        if (!password) {
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        loginBtn.disabled = true;
+        errorMessage.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/auth/reviewer/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                fetchReviewQueue();
+            } else {
+                errorMessage.style.display = 'block';
+                loginBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Login failed:', error);
+            errorMessage.textContent = '登录失败，请重试';
+            errorMessage.style.display = 'block';
+            loginBtn.disabled = false;
+        }
+    }
+
+    // --- 登录事件监听 ---
+    loginBtn.addEventListener('click', login);
+    passwordInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            login();
+        }
+    });
 
     // --- 心跳函数 ---
     function startHeartbeat() {
@@ -151,6 +260,7 @@
 
     // --- 视图切换 ---
     function showView(viewName) {
+        loginView.style.display = 'none';
         loadingView.style.display = 'none';
         reviewerView.style.display = 'none';
         finishedView.style.display = 'none';
@@ -207,8 +317,8 @@
 
         coverLink.href = `https://www.bilibili.com/video/${video.bvid}`;
         videoTitle.textContent = video.title;
-        hachimiStatus.textContent = video.hachimi ? 'T' : 'F';
-        hachimiStatus.className = video.hachimi ? 'status-true' : 'status-false';
+        hachimiStatus.textContent = video.is_hachimi ? 'T' : 'F';
+        hachimiStatus.className = video.is_hachimi ? 'status-true' : 'status-false';
         videoViews.textContent = `播放: ${video.views.toLocaleString()}`;
         authorName.textContent = video.owner ? video.owner.name : '未知作者';
         videoDescription.textContent = video.description || '暂无简介';
@@ -235,7 +345,7 @@
                 body: JSON.stringify({ hachimi: isHachimi })
             });
             if (!response.ok) { throw new Error('保存状态失败'); }
-            video.hachimi = isHachimi;
+            video.is_hachimi = isHachimi;
             moveToNextVideo();
         } catch (err) {
             alert(`保存失败: ${err.message}`);
