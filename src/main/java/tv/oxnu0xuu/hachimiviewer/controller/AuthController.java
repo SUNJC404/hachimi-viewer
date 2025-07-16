@@ -1,3 +1,4 @@
+
 package tv.oxnu0xuu.hachimiviewer.controller;
 
 import jakarta.servlet.http.HttpSession;
@@ -12,13 +13,16 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    @Qualifier("reviewerPassword")
-    private String reviewerPassword;
+    private final String reviewerPassword;
+    private final String adminPassword;
 
     @Autowired
-    @Qualifier("adminPassword")
-    private String adminPassword;
+    public AuthController(@Qualifier("reviewerPassword") String reviewerPassword,
+                          @Qualifier("adminPassword") String adminPassword) {
+        this.reviewerPassword = reviewerPassword;
+        this.adminPassword = adminPassword;
+        System.out.println("AuthController initialized with admin password: " + (adminPassword != null ? "SET" : "NULL"));
+    }
 
     @PostMapping("/reviewer/login")
     public ResponseEntity<?> reviewerLogin(@RequestBody Map<String, String> payload, HttpSession session) {
@@ -36,11 +40,20 @@ public class AuthController {
     public ResponseEntity<?> adminLogin(@RequestBody Map<String, String> payload, HttpSession session) {
         String password = payload.get("password");
 
+        System.out.println("Admin login attempt - Received password: " + (password != null ? "***" : "NULL"));
+        System.out.println("Admin login attempt - Expected password: " + (adminPassword != null ? "***" : "NULL"));
+
+        if (password == null || password.trim().isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("success", false, "message", "密码不能为空"));
+        }
+
         if (adminPassword.equals(password)) {
             session.setAttribute("isAdminAuthenticated", true);
+            System.out.println("Admin login successful");
             return ResponseEntity.ok(Map.of("success", true));
         }
 
+        System.out.println("Admin login failed - password mismatch");
         return ResponseEntity.status(401).body(Map.of("success", false, "message", "密码错误"));
     }
 
@@ -61,4 +74,5 @@ public class AuthController {
         session.invalidate();
         return ResponseEntity.ok(Map.of("success", true));
     }
+
 }

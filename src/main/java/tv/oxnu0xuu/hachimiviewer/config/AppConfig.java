@@ -30,6 +30,7 @@ public class AppConfig {
         if (password == null || password.isEmpty()) {
             password = "admin2024"; // 默认密码
         }
+        System.out.println("Admin password configured: " + (password.isEmpty() ? "EMPTY" : "SET (length=" + password.length() + ")"));
         return password;
     }
 

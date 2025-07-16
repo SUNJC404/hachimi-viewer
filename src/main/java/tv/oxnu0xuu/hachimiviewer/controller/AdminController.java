@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tv.oxnu0xuu.hachimiviewer.dto.VideoDetailDto;
 import tv.oxnu0xuu.hachimiviewer.service.AdminService;
+import tv.oxnu0xuu.hachimiviewer.service.StatisticsService;
 
 import java.util.Map;
 
@@ -15,6 +16,9 @@ public class AdminController {
 
     @Autowired
     private AdminService adminService;
+
+    @Autowired
+    private StatisticsService statisticsService;
 
     @GetMapping("/videos")
     public ResponseEntity<?> getVideos(
@@ -68,5 +72,16 @@ public class AdminController {
             return ResponseEntity.status(404).body(Map.of("error", "视频不存在"));
         }
         return ResponseEntity.ok(detail);
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<?> getDashboardStatistics(HttpSession session) {
+        // 检查管理员权限
+        Boolean isAuthenticated = (Boolean) session.getAttribute("isAdminAuthenticated");
+        if (isAuthenticated == null || !isAuthenticated) {
+            return ResponseEntity.status(401).body(Map.of("error", "未授权"));
+        }
+
+        return ResponseEntity.ok(statisticsService.getDashboardStatistics());
     }
 }

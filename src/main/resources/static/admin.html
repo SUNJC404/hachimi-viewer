@@ -145,6 +145,61 @@
             transform: translateY(-1px);
         }
 
+        /* 统计卡片样式 */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .stat-card-icon.primary { background: #e6f7ff; color: #1890ff; }
+        .stat-card-icon.success { background: #f6ffed; color: #52c41a; }
+        .stat-card-icon.warning { background: #fffbe6; color: #faad14; }
+        .stat-card-icon.info { background: #f0f5ff; color: #2f54eb; }
+
+        .stat-card-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .stat-card-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .stat-card-extra {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
         /* 表格容器 */
         .table-container {
             background: var(--card-bg);
@@ -530,6 +585,30 @@
 
     <!-- 主内容 -->
     <div class="container">
+        <!-- 统计卡片 -->
+        <div class="stats-container" id="stats-container">
+            <div class="stat-card">
+                <div class="stat-card-icon primary">📹</div>
+                <div class="stat-card-title">哈基米视频总数</div>
+                <div class="stat-card-value" id="stat-total-hachimi">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon success">👤</div>
+                <div class="stat-card-title">作者总数</div>
+                <div class="stat-card-value" id="stat-total-authors">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon warning">✅</div>
+                <div class="stat-card-title">今日审核数</div>
+                <div class="stat-card-value" id="stat-today-reviewed">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon info">🎉</div>
+                <div class="stat-card-title">今日哈基米</div>
+                <div class="stat-card-value" id="stat-today-hachimi">-</div>
+            </div>
+        </div>
+
         <!-- 搜索栏 -->
         <div class="search-bar">
             <input type="text" id="search-input" class="search-input" placeholder="搜索 BV号、标题或简介...">
@@ -580,3 +659,392 @@
         </div>
         <div class="modal-body" id="modal-body"></div>
     </div>
+</div>
+
+<script>
+    // 全局变量
+    let currentPage = 0;
+    let totalPages = 0;
+    let currentSearch = '';
+    let currentFilter = '';
+
+    // 页面初始化
+    document.addEventListener('DOMContentLoaded', async () => {
+        // 检查是否已登录
+        const isAuthenticated = await checkAuth();
+        if (isAuthenticated) {
+            showAdminPage();
+            loadVideos();
+        } else {
+            showLoginPage();
+        }
+    });
+
+    // 检查认证状态
+    async function checkAuth() {
+        try {
+            const response = await fetch('/api/auth/admin/check');
+            const data = await response.json();
+            return data.authenticated;
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            return false;
+        }
+    }
+
+    // 显示登录页面
+    function showLoginPage() {
+        document.getElementById('login-page').style.display = 'flex';
+        document.getElementById('admin-page').style.display = 'none';
+    }
+
+    // 显示管理页面
+    function showAdminPage() {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('admin-page').style.display = 'block';
+        loadStatistics(); // 加载统计数据
+    }
+
+    // 加载统计数据
+    async function loadStatistics() {
+        try {
+            const response = await fetch('/api/admin/statistics');
+            if (!response.ok) {
+                throw new Error('Failed to load statistics');
+            }
+
+            const stats = await response.json();
+
+            // 更新统计卡片
+            document.getElementById('stat-total-hachimi').textContent = formatNumber(stats.totalHachimiVideos || 0);
+            document.getElementById('stat-total-authors').textContent = formatNumber(stats.totalAuthors || 0);
+            document.getElementById('stat-today-reviewed').textContent = formatNumber(stats.todayReviewedVideos || 0);
+            document.getElementById('stat-today-hachimi').textContent = formatNumber(stats.todayHachimiVideos || 0);
+
+        } catch (error) {
+            console.error('Load statistics failed:', error);
+            // 出错时显示 0
+            document.getElementById('stat-total-hachimi').textContent = '0';
+            document.getElementById('stat-total-authors').textContent = '0';
+            document.getElementById('stat-today-reviewed').textContent = '0';
+            document.getElementById('stat-today-hachimi').textContent = '0';
+        }
+    }
+
+    // 登录功能
+    document.getElementById('login-btn').addEventListener('click', login);
+    document.getElementById('password-input').addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') login();
+    });
+
+    async function login() {
+        const password = document.getElementById('password-input').value;
+        const loginBtn = document.getElementById('login-btn');
+        const errorMsg = document.getElementById('error-message');
+
+        console.log('Login attempt with password:', password ? '***' : 'empty');
+
+        if (!password) {
+            showError('请输入密码');
+            return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = '登录中...';
+
+        try {
+            const response = await fetch('/api/auth/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+
+            console.log('Login response status:', response.status);
+            const data = await response.json();
+            console.log('Login response data:', data);
+
+            if (data.success) {
+                console.log('Login successful, loading admin page');
+                showAdminPage();
+                loadVideos(); // 默认加载最新数据
+            } else {
+                showError(data.message || '密码错误');
+            }
+        } catch (error) {
+            console.error('Login failed:', error);
+            showError('登录失败，请重试');
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.textContent = '登录';
+        }
+    }
+
+    function showError(message) {
+        const errorMsg = document.getElementById('error-message');
+        errorMsg.textContent = message;
+        errorMsg.style.display = 'block';
+        setTimeout(() => {
+            errorMsg.style.display = 'none';
+        }, 3000);
+    }
+
+    // 退出登录
+    async function logout() {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            showLoginPage();
+            document.getElementById('password-input').value = '';
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+    }
+
+    // 加载视频列表
+    async function loadVideos(page = 0) {
+        const tbody = document.getElementById('video-tbody');
+        tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="loading">
+                        <div class="spinner"></div>
+                        <div>加载中...</div>
+                    </td>
+                </tr>
+            `;
+
+        try {
+            let url = `/api/admin/videos?page=${page}&size=20`;
+            if (currentSearch) {
+                url += `&search=${encodeURIComponent(currentSearch)}`;
+            }
+            if (currentFilter) {
+                url += `&isHachimi=${currentFilter}`;
+            }
+
+            const response = await fetch(url);
+            if (!response.ok) {
+                if (response.status === 401) {
+                    showLoginPage();
+                    return;
+                }
+                throw new Error('加载失败');
+            }
+
+            const data = await response.json();
+            currentPage = data.currentPage;
+            totalPages = data.totalPages;
+
+            renderVideos(data.content);
+            renderPagination();
+        } catch (error) {
+            console.error('Load videos failed:', error);
+            tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--danger-color);">
+                            加载失败，请重试
+                        </td>
+                    </tr>
+                `;
+        }
+    }
+
+    // 渲染视频列表
+    function renderVideos(videos) {
+        const tbody = document.getElementById('video-tbody');
+
+        if (!videos || videos.length === 0) {
+            tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-secondary);">
+                            暂无数据
+                        </td>
+                    </tr>
+                `;
+            return;
+        }
+
+        tbody.innerHTML = videos.map(video => `
+                <tr>
+                    <td>
+                        <a href="https://www.bilibili.com/video/${video.bvid}"
+                           target="_blank"
+                           class="bvid-link">${video.bvid}</a>
+                    </td>
+                    <td class="title-cell" title="${escapeHtml(video.title)}">
+                        ${escapeHtml(video.title)}
+                    </td>
+                    <td>${escapeHtml(video.ownerName || '未知')}</td>
+                    <td>
+                        <span class="description-preview"
+                              onclick="showDescription('${escapeHtml(video.title)}', '${escapeHtml(video.description || '暂无简介')}')">
+                            ${video.description ? video.description.substring(0, 20) + '...' : '暂无'}
+                        </span>
+                    </td>
+                    <td class="pub-date">${formatDate(video.pubDate)}</td>
+                    <td>
+                        <span class="views-badge" onclick="showStats('${video.bvid}')">
+                            播放: ${formatNumber(video.views)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="hachimi-toggle ${video.is_hachimi ? 'yes' : 'no'}"
+                              onclick="toggleHachimi('${video.bvid}', ${video.is_hachimi})">
+                            ${video.is_hachimi ? '是' : '否'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    // 渲染分页
+    function renderPagination() {
+        const pagination = document.getElementById('pagination');
+
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+
+        pagination.innerHTML = `
+                <button onclick="loadVideos(0)" ${currentPage === 0 ? 'disabled' : ''}>首页</button>
+                <button onclick="loadVideos(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}>上一页</button>
+                <span class="page-info">第 ${currentPage + 1} / ${totalPages} 页</span>
+                <button onclick="loadVideos(${currentPage + 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>下一页</button>
+                <button onclick="loadVideos(${totalPages - 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>末页</button>
+            `;
+    }
+
+    // 搜索功能
+    function searchVideos() {
+        currentSearch = document.getElementById('search-input').value.trim();
+        currentFilter = document.getElementById('filter-select').value;
+        loadVideos(0);
+    }
+
+    // 切换哈基米状态
+    async function toggleHachimi(bvid, currentStatus) {
+        if (!confirm(`确定要将此视频的哈基米状态从 "${currentStatus ? '是' : '否'}" 改为 "${!currentStatus ? '是' : '否'}" 吗？`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/admin/videos/${bvid}/hachimi`, {
+                method: 'PUT'
+            });
+
+            if (!response.ok) {
+                throw new Error('操作失败');
+            }
+
+            // 重新加载当前页
+            loadVideos(currentPage);
+        } catch (error) {
+            console.error('Toggle hachimi failed:', error);
+            alert('操作失败，请重试');
+        }
+    }
+
+    // 显示简介
+    function showDescription(title, description) {
+        document.getElementById('modal-title').textContent = '视频简介';
+        document.getElementById('modal-body').innerHTML = `
+                <h4>${escapeHtml(title)}</h4>
+                <p style="white-space: pre-wrap;">${escapeHtml(description)}</p>
+            `;
+        document.getElementById('modal').style.display = 'block';
+    }
+
+    // 显示视频统计数据
+    async function showStats(bvid) {
+        try {
+            const response = await fetch(`/api/admin/videos/${bvid}`);
+            if (!response.ok) throw new Error('加载失败');
+
+            const video = await response.json();
+
+            document.getElementById('modal-title').textContent = '视频数据详情';
+            document.getElementById('modal-body').innerHTML = `
+                    <h4>${escapeHtml(video.title)}</h4>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">播放量</div>
+                            <div class="stat-value">${formatNumber(video.views)}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">弹幕</div>
+                            <div class="stat-value">${formatNumber(video.danmaku)}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">评论</div>
+                            <div class="stat-value">${formatNumber(video.replies)}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">收藏</div>
+                            <div class="stat-value">${formatNumber(video.favorites)}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">硬币</div>
+                            <div class="stat-value">${formatNumber(video.coins)}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">分享</div>
+                            <div class="stat-value">${formatNumber(video.shares)}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">点赞</div>
+                            <div class="stat-value">${formatNumber(video.likes)}</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 20px; color: var(--text-secondary);">
+                        审核时间: ${video.reviewedAt ? formatDate(video.reviewedAt) : '未审核'}<br>
+                        更新时间: ${video.updatedAt ? formatDate(video.updatedAt) : '-'}
+                    </p>
+                `;
+            document.getElementById('modal').style.display = 'block';
+        } catch (error) {
+            console.error('Show stats failed:', error);
+            alert('加载数据失败');
+        }
+    }
+
+    // 关闭模态框
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    // 点击模态框外部关闭
+    window.onclick = function(event) {
+        const modal = document.getElementById('modal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+
+    // 工具函数
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function formatNumber(num) {
+        if (num >= 10000) {
+            return (num / 10000).toFixed(1) + '万';
+        }
+        return num.toLocaleString();
+    }
+</script>
+</body>
+</html>

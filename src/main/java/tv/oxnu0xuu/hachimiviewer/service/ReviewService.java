@@ -115,6 +115,7 @@ public class ReviewService {
     public void updateVideoStatus(String bvid, boolean isHachimi) {
         try {
             videoMapper.updateHachimiStatus(bvid, isHachimi, LocalDateTime.now());
+            log.info("Updated video {} hachimi status to: {}", bvid, isHachimi);
         } catch (Exception e) {
             log.error("Failed to update video status for bvid: {}", bvid, e);
             throw e;
