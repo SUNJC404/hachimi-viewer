@@ -3,6 +3,7 @@ package tv.oxnu0xuu.hachimiviewer.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.*;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
+import tv.oxnu0xuu.hachimiviewer.dto.OwnerDto; // Import OwnerDto
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -103,4 +104,15 @@ public interface VideoMapper extends BaseMapper<Video> {
     @Select("SELECT " + VIDEO_WITH_OWNER_COLUMNS + " " + VIDEO_OWNER_JOIN + " WHERE v.is_hachimi = true AND v.updated_at > #{since}")
     @ResultMap("videoWithOwnerResultMap")
     List<Video> findHachimiVideosUpdatedSince(@Param("since") LocalDateTime since);
+
+    /**
+     * 查找所有哈基米视频的唯一作者，包含其B站主页链接所需的mid和name。
+     *
+     * @return 唯一作者列表
+     */
+    @Select("SELECT DISTINCT v.owner_mid AS mid, u.name AS name, u.avatar_url AS face " +
+            "FROM videos v " +
+            "JOIN users u ON v.owner_mid = u.mid " +
+            "WHERE v.is_hachimi = true AND v.owner_mid IS NOT NULL")
+    List<OwnerDto> findDistinctHachimiAuthors();
 }

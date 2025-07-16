@@ -110,7 +110,6 @@
     .owner-avatar {
       width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
     }
-    /* --- 新增：分页容器样式 --- */
     .pagination-container {
       display: flex;
       justify-content: center;
@@ -128,7 +127,7 @@
     }
     .pagination-container button:hover {
       background-color: #f0f0f0;
-      border-color: var(--primary-color);
+      border-color: #909399;
     }
     .pagination-container button:disabled {
       cursor: not-allowed;
@@ -137,6 +136,23 @@
     .pagination-container span {
       font-size: 1rem;
       color: var(--text-secondary-color);
+    }
+    .footer-links {
+      text-align: center;
+      margin-top: 50px; /* Adjust spacing from content */
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+      color: var(--text-secondary-color);
+      font-size: 0.9rem;
+    }
+    .footer-links a {
+      color: #909399;
+      text-decoration: none;
+      margin: 0 10px;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover {
+      color: #909399;
     }
   </style>
 </head>
@@ -183,7 +199,14 @@
     </div>
     <div id="random-videos-grid" class="videos-grid"></div>
   </div>
+
+  <div class="footer-links">
+    <a href="/reviewer.html">审核页面</a>
+    <a href="/admin.html">管理员页面</a>
+    <a href="https://space.bilibili.com/20002123" target="_blank">@鼻血黄豆</a>
+  </div>
 </div>
+
 
 <script>
   // --- 全局状态变量 ---

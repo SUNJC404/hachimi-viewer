@@ -15,6 +15,9 @@ import tv.oxnu0xuu.hachimiviewer.mapper.VideoMapper;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
 
 import jakarta.annotation.PostConstruct;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter; // <-- Add this import
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +27,9 @@ import java.util.stream.Collectors;
 public class AdminSearchService {
 
     private static final Logger log = LoggerFactory.getLogger(AdminSearchService.class);
+
+    // Define the DateTimeFormatter to match your expected string format
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // <-- Add this line
 
     @Autowired
     private Client meiliSearchClient;
@@ -45,11 +51,9 @@ public class AdminSearchService {
             adminVideosIndex = meiliSearchClient.index(videoIndexName);
 
             Settings settings = new Settings();
-            // Change ownerName to owner.name for searchable attributes
             settings.setSearchableAttributes(new String[]{"bvid", "title", "description", "owner.name"});
             settings.setFilterableAttributes(new String[]{"is_hachimi", "is_available", "pubDate"});
             settings.setSortableAttributes(new String[]{"pubDate", "views", "updatedAt"});
-            // Change ownerName and ownerMid to owner.name and owner.mid for displayed attributes
             settings.setDisplayedAttributes(new String[]{
                     "bvid", "title", "description", "owner.name", "owner.mid",
                     "pubDate", "views", "danmaku", "replies", "favorites",
@@ -93,29 +97,119 @@ public class AdminSearchService {
                         dto.setTitle((String) hit.get("title"));
                         dto.setDescription((String) hit.get("description"));
 
-                        // Correctly retrieve ownerName and ownerMid from the nested 'owner' object
                         Map<String, Object> ownerMap = (Map<String, Object>) hit.get("owner");
                         if (ownerMap != null) {
                             dto.setOwnerName((String) ownerMap.get("name"));
-                            dto.setOwnerMid(ownerMap.get("mid") != null ? ((Number) ownerMap.get("mid")).longValue() : null);
+
+                            Object ownerMidObj = ownerMap.get("mid");
+                            if (ownerMidObj instanceof Number) {
+                                dto.setOwnerMid(((Number) ownerMidObj).longValue());
+                            } else if (ownerMidObj != null) {
+                                log.warn("Unexpected type for owner.mid for bvid {}: Expected Number, got {}", hit.get("bvid"), ownerMidObj.getClass().getName());
+                            }
                         }
 
-                        dto.setViews(((Number) hit.get("views")).longValue());
-                        dto.setDanmaku(hit.get("danmaku") != null ? ((Number) hit.get("danmaku")).longValue() : 0);
-                        dto.setReplies(hit.get("replies") != null ? ((Number) hit.get("replies")).longValue() : 0);
-                        dto.setFavorites(hit.get("favorites") != null ? ((Number) hit.get("favorites")).longValue() : 0);
-                        dto.setCoins(hit.get("coins") != null ? ((Number) hit.get("coins")).longValue() : 0);
-                        dto.setShares(hit.get("shares") != null ? ((Number) hit.get("shares")).longValue() : 0);
-                        dto.setLikes(hit.get("likes") != null ? ((Number) hit.get("likes")).longValue() : 0);
+                        // Robust parsing for pubDate
+                        Object pubDateObj = hit.get("pubDate");
+                        if (pubDateObj instanceof String) {
+                            try {
+                                // Use the defined formatter for parsing
+                                dto.setPubDate(LocalDateTime.parse((String) pubDateObj, DATE_TIME_FORMATTER)); // <-- Change here
+                            } catch (DateTimeParseException e) {
+                                log.warn("Failed to parse pubDate string '{}' for bvid {}: {}", pubDateObj, hit.get("bvid"), e.getMessage());
+                                // Leave pubDate as null or set a default
+                            }
+                        } else if (pubDateObj != null) {
+                            log.warn("Unexpected type for pubDate for bvid {}: Expected String, got {}", hit.get("bvid"), pubDateObj.getClass().getName());
+                        }
+
+                        // Robust parsing for numeric fields
+                        Object viewsObj = hit.get("views");
+                        if (viewsObj instanceof Number) {
+                            dto.setViews(((Number) viewsObj).longValue());
+                        } else {
+                            dto.setViews(0);
+                            if (viewsObj != null) log.warn("Unexpected type for views for bvid {}: Expected Number, got {}", hit.get("bvid"), viewsObj.getClass().getName());
+                        }
+
+                        Object danmakuObj = hit.get("danmaku");
+                        if (danmakuObj instanceof Number) {
+                            dto.setDanmaku(((Number) danmakuObj).longValue());
+                        } else {
+                            dto.setDanmaku(0);
+                            if (danmakuObj != null) log.warn("Unexpected type for danmaku for bvid {}: Expected Number, got {}", hit.get("bvid"), danmakuObj.getClass().getName());
+                        }
+
+                        Object repliesObj = hit.get("replies");
+                        if (repliesObj instanceof Number) {
+                            dto.setReplies(((Number) repliesObj).longValue());
+                        } else {
+                            dto.setReplies(0);
+                            if (repliesObj != null) log.warn("Unexpected type for replies for bvid {}: Expected Number, got {}", hit.get("bvid"), repliesObj.getClass().getName());
+                        }
+
+                        Object favoritesObj = hit.get("favorites");
+                        if (favoritesObj instanceof Number) {
+                            dto.setFavorites(((Number) favoritesObj).longValue());
+                        } else {
+                            dto.setFavorites(0);
+                            if (favoritesObj != null) log.warn("Unexpected type for favorites for bvid {}: Expected Number, got {}", hit.get("bvid"), favoritesObj.getClass().getName());
+                        }
+
+                        Object coinsObj = hit.get("coins");
+                        if (coinsObj instanceof Number) {
+                            dto.setCoins(((Number) coinsObj).longValue());
+                        } else {
+                            dto.setCoins(0);
+                            if (coinsObj != null) log.warn("Unexpected type for coins for bvid {}: Expected Number, got {}", hit.get("bvid"), coinsObj.getClass().getName());
+                        }
+
+                        Object sharesObj = hit.get("shares");
+                        if (sharesObj instanceof Number) {
+                            dto.setShares(((Number) sharesObj).longValue());
+                        } else {
+                            dto.setShares(0);
+                            if (sharesObj != null) log.warn("Unexpected type for shares for bvid {}: Expected Number, got {}", hit.get("bvid"), sharesObj.getClass().getName());
+                        }
+
+                        Object likesObj = hit.get("likes");
+                        if (likesObj instanceof Number) {
+                            dto.setLikes(((Number) likesObj).longValue());
+                        } else {
+                            dto.setLikes(0);
+                            if (likesObj != null) log.warn("Unexpected type for likes for bvid {}: Expected Number, got {}", hit.get("bvid"), likesObj.getClass().getName());
+                        }
+
                         dto.setHachimi((Boolean) hit.get("is_hachimi"));
                         dto.setAvailable(hit.get("is_available") != null ? (Boolean) hit.get("is_available") : true);
                         dto.setCoverUrl((String) hit.get("coverUrl"));
-                        dto.setCategoryId(hit.get("categoryId") != null ? ((Number) hit.get("categoryId")).intValue() : null);
 
-                        String pubDateStr = (String) hit.get("pubDate");
-                        if (pubDateStr != null) {
-                            dto.setPubDate(java.time.LocalDateTime.parse(pubDateStr));
+                        Object categoryIdObj = hit.get("categoryId");
+                        if (categoryIdObj instanceof Number) {
+                            dto.setCategoryId(((Number) categoryIdObj).intValue());
+                        } else {
+                            dto.setCategoryId(null);
+                            if (categoryIdObj != null) log.warn("Unexpected type for categoryId for bvid {}: Expected Number, got {}", hit.get("bvid"), categoryIdObj.getClass().getName());
                         }
+
+                        String reviewedAtStr = (String) hit.get("reviewedAt");
+                        if (reviewedAtStr != null) {
+                            try {
+                                dto.setReviewedAt(LocalDateTime.parse(reviewedAtStr, DATE_TIME_FORMATTER)); // <-- Change here as well if using same format
+                            } catch (DateTimeParseException e) {
+                                log.warn("Failed to parse reviewedAt string '{}' for bvid {}: {}", reviewedAtStr, hit.get("bvid"), e.getMessage());
+                            }
+                        }
+
+                        String updatedAtStr = (String) hit.get("updatedAt");
+                        if (updatedAtStr != null) {
+                            try {
+                                dto.setUpdatedAt(LocalDateTime.parse(updatedAtStr, DATE_TIME_FORMATTER)); // <-- Change here as well if using same format
+                            } catch (DateTimeParseException e) {
+                                log.warn("Failed to parse updatedAt string '{}' for bvid {}: {}", updatedAtStr, hit.get("bvid"), e.getMessage());
+                            }
+                        }
+
 
                         return dto;
                     })
@@ -130,7 +224,7 @@ public class AdminSearchService {
 
             return response;
         } catch (Exception e) {
-            log.error("Search failed", e);
+            log.error("Search failed in AdminSearchService", e);
             Map<String, Object> response = new HashMap<>();
             response.put("content", List.of());
             response.put("totalElements", 0);

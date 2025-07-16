@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 public class DataSyncService {
 
     private static final Logger log = LoggerFactory.getLogger(DataSyncService.class);
-    private static final int BATCH_SIZE = 100;
-    private static final long BATCH_SLEEP_MS = 2000;
+    private static final int BATCH_SIZE = 500;
+    private static final long BATCH_SLEEP_MS = 1000;
 
     @Autowired
     private VideoMapper videoMapper; // 2. 注入 VideoMapper
