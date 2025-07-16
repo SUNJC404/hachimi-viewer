@@ -1,9 +1,12 @@
 package tv.oxnu0xuu.hachimiviewer.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty; // 导入注解
+import com.fasterxml.jackson.annotation.JsonFormat; // Add this import
+import com.fasterxml.jackson.annotation.JsonProperty;
 import tv.oxnu0xuu.hachimiviewer.model.Video;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime; // Add this import
 
 @Getter
 @Setter
@@ -11,7 +14,6 @@ public class VideoReviewDto {
     private String bvid;
     private String title;
 
-    // --- 修改点 1: 添加 @JsonProperty 注解 ---
     @JsonProperty("is_hachimi")
     private boolean isHachimi;
 
@@ -21,9 +23,12 @@ public class VideoReviewDto {
     private String description;
     private Integer categoryId;
 
-    // --- 修改点 2: 为 isAvailable 也添加注解，保持一致性 ---
     @JsonProperty("is_available")
     private boolean isAvailable;
+
+    // Add pubDate field with JSON format annotation for consistency with VideoDetailDto
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime pubDate;
 
     public static VideoReviewDto fromEntity(Video video) {
         VideoReviewDto dto = new VideoReviewDto();
@@ -35,9 +40,11 @@ public class VideoReviewDto {
         dto.setCoverUrl(video.getCoverUrl());
         dto.setDescription(video.getDescription());
         dto.setCategoryId(video.getCategoryId());
+        // Populate the new pubDate field from the Video entity
+        dto.setPubDate(video.getPubDate());
         if (video.getOwner() != null) {
-            // 注意这里保持 'face' 字段以兼容前端
-            dto.setOwner(new OwnerDto(video.getOwner().getName(), video.getOwner().getAvatarUrl()));
+            // Ensure owner's mid is also passed, as per previous fixes
+            dto.setOwner(new OwnerDto(video.getOwner().getName(), video.getOwner().getAvatarUrl(), video.getOwner().getMid()));
         }
         return dto;
     }

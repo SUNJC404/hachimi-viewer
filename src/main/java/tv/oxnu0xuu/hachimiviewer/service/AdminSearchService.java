@@ -42,16 +42,16 @@ public class AdminSearchService {
     @PostConstruct
     public void init() {
         try {
-            // 使用同一个索引，但配置不同的搜索参数
             adminVideosIndex = meiliSearchClient.index(videoIndexName);
 
-            // 确保索引配置正确
             Settings settings = new Settings();
-            settings.setSearchableAttributes(new String[]{"bvid", "title", "description", "ownerName"});
+            // Change ownerName to owner.name for searchable attributes
+            settings.setSearchableAttributes(new String[]{"bvid", "title", "description", "owner.name"});
             settings.setFilterableAttributes(new String[]{"is_hachimi", "is_available", "pubDate"});
             settings.setSortableAttributes(new String[]{"pubDate", "views", "updatedAt"});
+            // Change ownerName and ownerMid to owner.name and owner.mid for displayed attributes
             settings.setDisplayedAttributes(new String[]{
-                    "bvid", "title", "description", "ownerName", "ownerMid",
+                    "bvid", "title", "description", "owner.name", "owner.mid",
                     "pubDate", "views", "danmaku", "replies", "favorites",
                     "coins", "shares", "likes", "is_hachimi", "is_available",
                     "coverUrl", "categoryId", "reviewedAt", "updatedAt"
@@ -68,7 +68,6 @@ public class AdminSearchService {
         try {
             SearchRequest searchRequest = new SearchRequest(query != null ? query : "");
 
-            // 构建过滤条件
             StringBuilder filter = new StringBuilder();
             if (isHachimi != null) {
                 filter.append("is_hachimi = ").append(isHachimi);
@@ -78,29 +77,29 @@ public class AdminSearchService {
                 searchRequest.setFilter(new String[]{filter.toString()});
             }
 
-            // 设置分页
-            searchRequest.setPage(page + 1); // Meilisearch 页码从1开始
+            searchRequest.setPage(page + 1);
             searchRequest.setHitsPerPage(size);
-
-            // 按发布时间倒序
             searchRequest.setSort(new String[]{"pubDate:desc"});
 
-            // 执行搜索
             Object searchResult = adminVideosIndex.search(searchRequest);
 
-            // 解析结果
             Map<String, Object> resultMap = objectMapper.convertValue(searchResult, Map.class);
             List<Map<String, Object>> hits = (List<Map<String, Object>>) resultMap.get("hits");
 
-            // 转换为 DTO
             List<VideoDetailDto> videos = hits.stream()
                     .map(hit -> {
                         VideoDetailDto dto = new VideoDetailDto();
                         dto.setBvid((String) hit.get("bvid"));
                         dto.setTitle((String) hit.get("title"));
                         dto.setDescription((String) hit.get("description"));
-                        dto.setOwnerName((String) hit.get("ownerName"));
-                        dto.setOwnerMid(hit.get("ownerMid") != null ? ((Number) hit.get("ownerMid")).longValue() : null);
+
+                        // Correctly retrieve ownerName and ownerMid from the nested 'owner' object
+                        Map<String, Object> ownerMap = (Map<String, Object>) hit.get("owner");
+                        if (ownerMap != null) {
+                            dto.setOwnerName((String) ownerMap.get("name"));
+                            dto.setOwnerMid(ownerMap.get("mid") != null ? ((Number) ownerMap.get("mid")).longValue() : null);
+                        }
+
                         dto.setViews(((Number) hit.get("views")).longValue());
                         dto.setDanmaku(hit.get("danmaku") != null ? ((Number) hit.get("danmaku")).longValue() : 0);
                         dto.setReplies(hit.get("replies") != null ? ((Number) hit.get("replies")).longValue() : 0);
@@ -113,7 +112,6 @@ public class AdminSearchService {
                         dto.setCoverUrl((String) hit.get("coverUrl"));
                         dto.setCategoryId(hit.get("categoryId") != null ? ((Number) hit.get("categoryId")).intValue() : null);
 
-                        // 处理日期
                         String pubDateStr = (String) hit.get("pubDate");
                         if (pubDateStr != null) {
                             dto.setPubDate(java.time.LocalDateTime.parse(pubDateStr));
@@ -123,7 +121,6 @@ public class AdminSearchService {
                     })
                     .collect(Collectors.toList());
 
-            // 构建响应
             Map<String, Object> response = new HashMap<>();
             response.put("content", videos);
             response.put("totalElements", resultMap.get("totalHits"));
@@ -134,7 +131,6 @@ public class AdminSearchService {
             return response;
         } catch (Exception e) {
             log.error("Search failed", e);
-            // 失败时返回空结果
             Map<String, Object> response = new HashMap<>();
             response.put("content", List.of());
             response.put("totalElements", 0);

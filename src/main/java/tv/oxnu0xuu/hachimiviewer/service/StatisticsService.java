@@ -30,7 +30,7 @@ public class StatisticsService {
         );
         stats.put("totalHachimiVideos", totalHachimiVideos);
 
-        // 2. 全部作者数量（通过 distinct owner_mid 统计）
+        // 2. 全部作者数量（通过 distinct owner_mid 统计） - NOW ONLY FOR HACHIMI VIDEOS
         Long totalAuthors = countDistinctAuthors();
         stats.put("totalAuthors", totalAuthors);
 
@@ -72,12 +72,13 @@ public class StatisticsService {
     /**
      * 统计不同的作者数量
      * 由于 MyBatis-Plus 的 selectCount 不支持 DISTINCT，我们需要自定义查询
+     * This method is modified to count distinct authors ONLY for videos where is_hachimi is true.
      */
     private Long countDistinctAuthors() {
-        // 使用自定义 SQL 查询
         QueryWrapper<Video> wrapper = new QueryWrapper<>();
         wrapper.select("COUNT(DISTINCT owner_mid) as count")
-                .isNotNull("owner_mid");
+                .isNotNull("owner_mid")
+                .eq("is_hachimi", true); // Add this condition to filter for hachimi videos
 
         Map<String, Object> result = videoMapper.selectMaps(wrapper).get(0);
         return ((Number) result.get("count")).longValue();

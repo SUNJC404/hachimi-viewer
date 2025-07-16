@@ -11,4 +11,5 @@ import lombok.Setter;
 public class OwnerDto {
     private String name;
     private String face; // The frontend expects 'face', our DB has 'avatarUrl'
+    private Long mid;
 }
