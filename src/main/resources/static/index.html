@@ -6,13 +6,17 @@
   <title>哈基米启动器</title>
   <style>
     :root {
-      --primary-color: #007bff;
-      --background-color: #f0f2f5;
+      --primary-color: #00a1d6;
+      --secondary-color: #fb7299;
+      --background-color: #f4f5f7;
       --card-background-color: #ffffff;
-      --text-color: #333;
-      --text-secondary-color: #666;
-      --border-radius: 8px;
-      --box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --text-color: #18191c;
+      --text-secondary-color: #61666d;
+      --border-color: #e3e5e7;
+      --border-radius: 12px;
+      --box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      --hover-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -71,71 +75,167 @@
     .refresh-button:hover { transform: rotate(180deg); border-color: var(--primary-color); }
     .videos-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 25px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      padding: 0 4px;
+    }
+    
+    @media (max-width: 768px) {
+      .videos-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+    
+    @media (min-width: 1200px) {
+      .videos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+    }
+    
+    @media (min-width: 1600px) {
+      .videos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      }
     }
     .video-card {
-      background: var(--card-background-color); border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow); overflow: hidden; display: flex;
+      background: var(--card-background-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      display: flex;
       flex-direction: column;
-      transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
+      transition: var(--transition);
+      border: 1px solid transparent;
     }
     .video-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+      box-shadow: var(--hover-shadow);
+      border-color: var(--border-color);
     }
-    .video-card.hidden { display: none; }
     .video-card a { text-decoration: none; color: inherit; }
     .video-thumbnail-container {
       position: relative; width: 100%; padding-top: 56.25%;
+      overflow: hidden;
     }
     .video-thumbnail {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      object-fit: cover; background-color: #eee;
+      object-fit: cover; background-color: #f1f2f3;
+      transition: transform 0.3s ease;
+    }
+    .video-card:hover .video-thumbnail {
+      transform: scale(1.05);
+    }
+    .video-duration {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
     }
     .video-card-content {
-      padding: 15px; display: flex; flex-direction: column; flex-grow: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
     }
     .video-card-title {
-      font-size: 1rem; font-weight: 600; margin: 0 0 10px 0;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      overflow: hidden; text-overflow: ellipsis; min-height: 2.4em;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.4;
+      margin: 0 0 12px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color: var(--text-color);
+      transition: color 0.2s ease;
+    }
+    .video-card:hover .video-card-title {
+      color: var(--primary-color);
     }
     .video-card-meta {
-      font-size: 0.8rem; color: var(--text-secondary-color); margin-top: auto;
-      display: flex; align-items: center; justify-content: space-between;
-      padding-top: 8px;
+      font-size: 13px;
+      color: var(--text-secondary-color);
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
     }
-    .video-card-owner { display: flex; align-items: center; gap: 8px; }
+    .video-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .views { font-weight: 500; }
+    .date { opacity: 0.8; }
+    .video-card-owner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
     .owner-avatar {
-      width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .owner-name {
+      font-size: 13px;
+      color: var(--text-secondary-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .loading-spinner, .empty-message, .error-message {
+      text-align: center;
+      color: var(--text-secondary-color);
+      padding: 40px 20px;
+      font-size: 16px;
     }
     .pagination-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 15px;
-      margin-top: 30px;
+      gap: 16px;
+      margin-top: 40px;
+      flex-wrap: wrap;
     }
     .pagination-container button {
-      padding: 8px 16px;
-      border: 1px solid #ccc;
-      background-color: #fff;
+      padding: 10px 20px;
+      border: 1px solid var(--border-color);
+      background-color: var(--card-background-color);
       border-radius: var(--border-radius);
       cursor: pointer;
-      transition: background-color 0.2s, border-color 0.2s;
+      transition: var(--transition);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-color);
     }
-    .pagination-container button:hover {
-      background-color: #f0f0f0;
-      border-color: #909399;
+    .pagination-container button:hover:not(:disabled) {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+      transform: translateY(-1px);
     }
     .pagination-container button:disabled {
       cursor: not-allowed;
       opacity: 0.5;
+      background-color: #f5f5f5;
     }
     .pagination-container span {
-      font-size: 1rem;
+      font-size: 14px;
       color: var(--text-secondary-color);
+      font-weight: 500;
     }
     .footer-links {
       text-align: center;
@@ -211,10 +311,19 @@
 <script>
   // --- 全局状态变量 ---
   let latestVideosPage = 0;
-  const LATEST_VIDEOS_SIZE = 10;
   let currentSearchQuery = '';
   let currentSearchPage = 1;
   const SEARCH_HITS_PER_PAGE = 20;
+  
+  // 响应式布局配置
+  const responsiveConfig = {
+    mobile: { maxWidth: 768, columns: 1, itemsPerPage: 6 },
+    tablet: { maxWidth: 1200, columns: 3, itemsPerPage: 12 },
+    desktop: { maxWidth: 1600, columns: 4, itemsPerPage: 16 },
+    large: { maxWidth: Infinity, columns: 5, itemsPerPage: 20 }
+  };
+  
+  let currentLayout = 'desktop';
 
   document.addEventListener('DOMContentLoaded', () => {
     const searchButton = document.getElementById('search-button');
@@ -222,6 +331,10 @@
     const refreshLatestBtn = document.getElementById('refresh-latest');
     const refreshRandomBtn = document.getElementById('refresh-random');
 
+    // 初始化响应式布局
+    updateResponsiveLayout();
+    window.addEventListener('resize', debounce(updateResponsiveLayout, 250));
+    
     fetchLatestVideos();
     fetchRandomVideos();
 
@@ -245,39 +358,74 @@
     refreshRandomBtn.addEventListener('click', fetchRandomVideos);
   });
 
+  // --- 响应式布局工具函数 ---
+  
+  function getCurrentLayout() {
+    const width = window.innerWidth;
+    for (const [key, config] of Object.entries(responsiveConfig)) {
+      if (width <= config.maxWidth) return key;
+    }
+    return 'desktop';
+  }
+  
+  function getItemsPerPage() {
+    return responsiveConfig[currentLayout].itemsPerPage;
+  }
+  
+  function updateResponsiveLayout() {
+    const newLayout = getCurrentLayout();
+    if (newLayout !== currentLayout) {
+      currentLayout = newLayout;
+      // 重新获取数据以适应新的布局
+      fetchLatestVideos();
+    }
+  }
+  
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
   // --- API 调用与渲染 ---
 
-  async function fetchApi(url, gridElement, shouldAdjustLayout = true, successCallback = null) {
+  async function fetchApi(url, gridElement, successCallback = null) {
     try {
-      gridElement.innerHTML = '<p>正在加载...</p>';
+      gridElement.innerHTML = '<div class="loading-spinner">加载中...</div>';
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-      renderVideos(data, gridElement, shouldAdjustLayout);
+      renderVideos(data, gridElement);
       if (successCallback) successCallback(data);
     } catch (error) {
       console.error('Fetch error:', error);
-      gridElement.innerHTML = `<p>加载失败: ${error.message}</p>`;
+      gridElement.innerHTML = `<p class="error-message">加载失败: ${error.message}</p>`;
     }
   }
 
   function fetchLatestVideos() {
+    const itemsPerPage = getItemsPerPage();
     fetchApi(
-            `/api/videos/latest?page=${latestVideosPage}&size=${LATEST_VIDEOS_SIZE}`,
-            document.getElementById('latest-videos-grid'),
-            true, // 应用布局限制
-            (data) => {
-              // 如果返回的数据为空，说明已经到最后一页了，重置页码并重新加载第一页
-              if (!data || data.length === 0) {
-                latestVideosPage = 0;
-                fetchLatestVideos();
-              }
-            }
+      `/api/videos/latest?page=${latestVideosPage}&size=${itemsPerPage}`,
+      document.getElementById('latest-videos-grid'),
+      (data) => {
+        if (!data || data.length === 0) {
+          latestVideosPage = 0;
+          fetchLatestVideos();
+        }
+      }
     );
   }
 
   function fetchRandomVideos() {
-    fetchApi(`/api/videos/random?limit=10`, document.getElementById('random-videos-grid'));
+    const itemsPerPage = getItemsPerPage();
+    fetchApi(`/api/videos/random?limit=${itemsPerPage}`, document.getElementById('random-videos-grid'));
   }
 
   function startNewSearch(query) {
@@ -289,8 +437,8 @@
   async function fetchSearchResults() {
     const grid = document.getElementById('search-results-grid');
     const paginationContainer = document.getElementById('search-pagination');
-    grid.innerHTML = '<p>正在搜索...</p>';
-    paginationContainer.innerHTML = ''; // 清空旧分页
+    grid.innerHTML = '<div class="loading-spinner">搜索中...</div>';
+    paginationContainer.innerHTML = '';
 
     try {
       const url = `/api/search?q=${encodeURIComponent(currentSearchQuery)}&page=${currentSearchPage}&hitsPerPage=${SEARCH_HITS_PER_PAGE}`;
@@ -298,13 +446,12 @@
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const results = await response.json();
 
-      // 搜索结果不限制数量，全部展示
       renderVideos(results, grid, false, '搜索结果为空');
       renderPagination(results);
       document.getElementById('search-results').scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
       console.error('Search error:', error);
-      grid.innerHTML = `<p>搜索失败: ${error.message}</p>`;
+      grid.innerHTML = `<p class="error-message">搜索失败: ${error.message}</p>`;
     }
   }
 
@@ -314,9 +461,10 @@
     const currentPage = results.page;
 
     if (totalPages <= 1) {
-      paginationContainer.innerHTML = ''; // 如果只有一页或没有，不显示分页
+      paginationContainer.innerHTML = '';
       return;
     }
+    
     let paginationHtml = `
         <button onclick="goToSearchPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&laquo; 上一页</button>
         <span>第 ${currentPage} / ${totalPages} 页</span>
@@ -332,14 +480,16 @@
     fetchSearchResults();
   }
 
-  function renderVideos(videos, gridElement, shouldAdjustLayout, emptyMessage = '没有可显示的视频。') {
+  function renderVideos(videos, gridElement, emptyMessage = '没有可显示的视频。') {
     const dataToRender = videos.hits ? videos.hits : videos;
     if (!dataToRender || dataToRender.length === 0) {
-      gridElement.innerHTML = `<p>${emptyMessage}</p>`;
+      gridElement.innerHTML = `<p class="empty-message">${emptyMessage}</p>`;
       return;
     }
 
     gridElement.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    
     for (const video of dataToRender) {
       const ownerName = video.owner ? video.owner.name : '未知UP主';
       const ownerAvatar = video.owner && video.owner.face ? video.owner.face : '';
@@ -351,41 +501,52 @@
       videoCard.className = 'video-card';
       videoCard.innerHTML = `
         <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
-            <div class="video-thumbnail-container"><img class="video-thumbnail" src="${proxiedCoverUrl}" alt="${video.title}" loading="lazy" referrerpolicy="no-referrer"></div>
+            <div class="video-thumbnail-container">
+              <img class="video-thumbnail" src="${proxiedCoverUrl}" alt="${video.title}" loading="lazy" referrerpolicy="no-referrer">
+              <div class="video-duration">${formatDuration(video.duration || 0)}</div>
+            </div>
         </a>
         <div class="video-card-content">
             <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
-                <h3 class="video-card-title">${video.title}</h3>
+                <h3 class="video-card-title" title="${video.title}">${video.title}</h3>
             </a>
             <div class="video-card-meta">
-                <div class="video-stats"><span>▶ ${formatViews(video.views)}</span></div>
+                <div class="video-stats">
+                  <span class="views">▶ ${formatViews(video.views)}</span>
+                  <span class="date">${formatDate(video.created || video.createdTime)}</span>
+                </div>
                 <div class="video-card-owner">
                     <img class="owner-avatar" src="${proxiedAvatarUrl}" alt="${ownerName}" loading="lazy" referrerpolicy="no-referrer">
-                    <span>${ownerName}</span>
+                    <span class="owner-name">${ownerName}</span>
                 </div>
             </div>
         </div>
       `;
-      gridElement.appendChild(videoCard);
+      fragment.appendChild(videoCard);
     }
-    // 只有在明确需要时才调整布局（限制显示数量）
-    if (shouldAdjustLayout) {
-      adjustGridLayout(gridElement);
-    }
+    
+    gridElement.appendChild(fragment);
   }
 
-  function adjustGridLayout(gridElement) {
-    if (!gridElement || !gridElement.hasChildNodes()) return;
-    const cards = Array.from(gridElement.getElementsByClassName('video-card'));
-    if (cards.length === 0) return;
-    const gridWidth = gridElement.offsetWidth;
-    const cardWidth = cards[0].offsetWidth;
-    const numColumns = Math.max(1, Math.floor(gridWidth / cardWidth));
-    let itemsToShow = (numColumns <= 3) ? 3 * numColumns : 2 * numColumns;
-    itemsToShow = Math.min(10, itemsToShow); // 最多显示10个
-    cards.forEach((card, index) => {
-      card.classList.toggle('hidden', index >= itemsToShow);
-    });
+  function formatDuration(seconds) {
+    if (!seconds || seconds === 0) return '';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+  
+  function formatDate(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(timestamp * 1000);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return '今天';
+    if (diffDays === 1) return '昨天';
+    if (diffDays < 7) return `${diffDays}天前`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
+    return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
   }
 
   function formatViews(num) {
