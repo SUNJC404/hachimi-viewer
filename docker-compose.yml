@@ -3,7 +3,7 @@ services:
     image: getmeili/meilisearch
     container_name: meilisearch-engine
     environment:
-      - MEILI_MASTER_KEY=REDACTED
+      - MEILI_MASTER_KEY=your_meili_master_key_here
       - MEILI_ENV=development
 #      - MEILI_MAX_TOTAL_HITS=5000
     ports:
@@ -22,8 +22,8 @@ services:
       - "8080:8080"
     environment:
       # 账户配置
-      - REVIEWER_PASSWORD=REDACTED
-      - ADMIN_PASSWORD=REDACTED
+      - REVIEWER_PASSWORD=your_reviewer_password_here
+      - ADMIN_PASSWORD=your_admin_password_here
       - SESSION_TIMEOUT_MINUTES=60
 
       # 审核配置
@@ -32,11 +32,11 @@ services:
 
       # Spring Boot 数据库配置 (通过环境变量传入)
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3307/video_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=viewer
-      - SPRING_DATASOURCE_PASSWORD=REDACTED
+      - SPRING_DATASOURCE_USERNAME=your_db_username_here
+      - SPRING_DATASOURCE_PASSWORD=your_db_password_here
       # MEILI 变量
       - MEILI_HOST=http://meilisearch:7700
-      - MEILI_API_KEY=REDACTED
+      - MEILI_API_KEY=your_meili_api_key_here
       - MEILI_INDEX_VIDEOS=videos
     depends_on:
       - meilisearch
