@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Docker Compose with sensitive data
+docker-compose.yml
+docker-compose.*.yml
