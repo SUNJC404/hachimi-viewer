@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import tv.oxnu0xuu.hachimiviewer.dto.VideoDetailDto;
 import tv.oxnu0xuu.hachimiviewer.service.AdminService;
 import tv.oxnu0xuu.hachimiviewer.service.StatisticsService;
+import tv.oxnu0xuu.hachimiviewer.dto.OwnerDto; // Import OwnerDto
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -83,5 +85,16 @@ public class AdminController {
         }
 
         return ResponseEntity.ok(statisticsService.getDashboardStatistics());
+    }
+
+    // New Endpoint for Hachimi Authors List
+    @GetMapping("/statistics/authors")
+    public ResponseEntity<List<OwnerDto>> getHachimiAuthors(HttpSession session) {
+        // Check admin authentication
+        Boolean isAuthenticated = (Boolean) session.getAttribute("isAdminAuthenticated");
+        if (isAuthenticated == null || !isAuthenticated) {
+            return ResponseEntity.status(401).body(null); // Return 401 with no body for security
+        }
+        return ResponseEntity.ok(statisticsService.getDistinctHachimiAuthorsList());
     }
 }

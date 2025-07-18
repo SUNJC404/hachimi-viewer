@@ -560,7 +560,6 @@
     </style>
 </head>
 <body>
-<!-- 登录页面 -->
 <div id="login-page" class="login-container">
     <div class="login-box">
         <h2>管理员登录</h2>
@@ -570,9 +569,7 @@
     </div>
 </div>
 
-<!-- 管理页面 -->
 <div id="admin-page" style="display: none;">
-    <!-- 头部 -->
     <header class="header">
         <div class="header-content">
             <h1>哈基米视频管理系统</h1>
@@ -583,17 +580,14 @@
         </div>
     </header>
 
-    <!-- 主内容 -->
     <div class="container">
-        <!-- 统计卡片 -->
         <div class="stats-container" id="stats-container">
             <div class="stat-card">
                 <div class="stat-card-icon primary">📹</div>
                 <div class="stat-card-title">哈基米视频总数</div>
                 <div class="stat-card-value" id="stat-total-hachimi">-</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-card-icon success">👤</div>
+            <div class="stat-card" id="stat-card-total-authors"> <div class="stat-card-icon success">👤</div>
                 <div class="stat-card-title">作者总数</div>
                 <div class="stat-card-value" id="stat-total-authors">-</div>
             </div>
@@ -609,7 +603,6 @@
             </div>
         </div>
 
-        <!-- 搜索栏 -->
         <div class="search-bar">
             <input type="text" id="search-input" class="search-input" placeholder="搜索 BV号、标题或简介...">
             <select id="filter-select" class="filter-select">
@@ -620,7 +613,6 @@
             <button class="search-btn" onclick="searchVideos()">搜索</button>
         </div>
 
-        <!-- 表格 -->
         <div class="table-container">
             <table class="table">
                 <thead>
@@ -645,12 +637,10 @@
             </table>
         </div>
 
-        <!-- 分页 -->
         <div class="pagination" id="pagination"></div>
     </div>
 </div>
 
-<!-- 模态框 -->
 <div id="modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -677,6 +667,13 @@
             loadVideos();
         } else {
             showLoginPage();
+        }
+
+        // Add event listener for the "Total Authors" card
+        const statCardTotalAuthors = document.getElementById('stat-card-total-authors');
+        if (statCardTotalAuthors) {
+            statCardTotalAuthors.style.cursor = 'pointer'; // Make it look clickable
+            statCardTotalAuthors.addEventListener('click', showHachimiAuthorsModal);
         }
     });
 
@@ -1005,6 +1002,71 @@
             alert('加载数据失败');
         }
     }
+
+    // New function to show Hachimi Authors in a modal
+    async function showHachimiAuthorsModal() {
+        document.getElementById('modal-title').textContent = '哈基米视频作者列表';
+        document.getElementById('modal-body').innerHTML = `
+            <div class="spinner" style="margin: 20px auto;"></div>
+            <div>加载作者中...</div>
+        `;
+        document.getElementById('modal').style.display = 'block';
+
+        try {
+            const response = await fetch('/api/admin/statistics/authors');
+            if (!response.ok) {
+                if (response.status === 401) {
+                    showLoginPage(); // Redirect to login if unauthorized
+                    return;
+                }
+                throw new Error('Failed to load authors');
+            }
+            const authors = await response.json();
+
+            if (!authors || authors.length === 0) {
+                document.getElementById('modal-body').innerHTML = '<p style="text-align: center;">暂无作者数据。</p>';
+                return;
+            }
+
+            let tableHtml = `
+                <div class="table-container" style="box-shadow: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>头像</th>
+                                <th>作者名称</th>
+                                <th>B站主页</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            authors.forEach(author => {
+                // Construct Bilibili user space URL: https://space.bilibili.com/{mid}
+                const bilibiliSpaceUrl = `https://space.bilibili.com/${author.mid}`;
+                // Use a proxy for Bilibili avatars to avoid CORS/mixed content issues
+                const proxiedAvatarUrl = author.face ? `https://images.weserv.nl/?url=${encodeURIComponent(author.face)}&w=64&h=64&fit=cover&output=webp` : '';
+
+                tableHtml += `
+                    <tr>
+                        <td><img src="${proxiedAvatarUrl}" alt="头像" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"></td>
+                        <td>${escapeHtml(author.name || '未知作者')}</td>
+                        <td><a href="${bilibiliSpaceUrl}" target="_blank" class="bvid-link">进入主页</a></td>
+                    </tr>
+                `;
+            });
+            tableHtml += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('modal-body').innerHTML = tableHtml;
+
+        } catch (error) {
+            console.error('Error fetching authors:', error);
+            document.getElementById('modal-body').innerHTML = '<p style="color: var(--danger-color); text-align: center;">加载作者失败，请重试。</p>';
+        }
+    }
+
 
     // 关闭模态框
     function closeModal() {

@@ -5,6 +5,7 @@ services:
     environment:
       - MEILI_MASTER_KEY=REDACTED
       - MEILI_ENV=development
+#      - MEILI_MAX_TOTAL_HITS=5000
     ports:
       - "7700:7700"
     volumes:
@@ -22,7 +23,7 @@ services:
     environment:
       # 账户配置
       - REVIEWER_PASSWORD=REDACTED
-      - ADMIN_PASSWORD=
+      - ADMIN_PASSWORD=REDACTED
       - SESSION_TIMEOUT_MINUTES=60
 
       # 审核配置
