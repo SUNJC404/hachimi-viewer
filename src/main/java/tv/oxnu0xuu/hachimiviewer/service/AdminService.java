@@ -36,9 +36,9 @@ public class AdminService {
     private String videoIndexName;
 
     @Transactional(readOnly = true)
-    public Map<String, Object> getVideos(int page, int size, String search, Boolean isHachimi) {
+    public Map<String, Object> getVideos(int page, int size, String search, Boolean isHachimi, String sort) {
         // This method fetches data from MeiliSearch
-        return adminSearchService.searchVideos(search, page, size, isHachimi);
+        return adminSearchService.searchVideos(search, page, size, isHachimi, sort);
     }
 
     @Transactional

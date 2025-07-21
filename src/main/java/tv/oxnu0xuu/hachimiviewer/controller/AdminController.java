@@ -28,7 +28,8 @@ public class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Boolean isHachimi) {
+            @RequestParam(required = false) Boolean isHachimi,
+            @RequestParam(defaultValue = "pubDate:desc") String sort) { // 新增
 
         // 检查管理员权限
         Boolean isAuthenticated = (Boolean) session.getAttribute("isAdminAuthenticated");
@@ -36,7 +37,7 @@ public class AdminController {
             return ResponseEntity.status(401).body(Map.of("error", "未授权"));
         }
 
-        return ResponseEntity.ok(adminService.getVideos(page, size, search, isHachimi));
+        return ResponseEntity.ok(adminService.getVideos(page, size, search, isHachimi, sort));
     }
 
     @PutMapping("/videos/{bvid}/hachimi")

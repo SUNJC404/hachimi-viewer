@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>哈基米启动器</title>
     <style>
+        /* CSS 样式部分保持不变 */
         * {
             margin: 0;
             padding: 0;
@@ -256,6 +257,25 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        /* 新增：排序下拉菜单样式 */
+        .sort-options {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sort-options label {
+            font-weight: 500;
+        }
+
+        .sort-options select {
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
         }
 
         .section-header {
@@ -684,6 +704,11 @@
                 padding: 16px;
             }
 
+            .sort-options {
+                width: 100%;
+                justify-content: space-between;
+            }
+
             .footer {
                 margin-top: 80px;
             }
@@ -748,6 +773,13 @@
                 <div class="section-icon">🔍</div>
                 搜索结果
             </h2>
+            <div class="sort-options">
+                <label for="search-sort">排序:</label>
+                <select id="search-sort">
+                    <option value="pubDate:desc">最新发布</option>
+                    <option value="views:desc">最多播放</option>
+                </select>
+            </div>
         </div>
         <div id="search-results-grid" class="videos-grid"></div>
         <div id="search-pagination" class="pagination-container"></div>
@@ -807,6 +839,7 @@
     let latestVideosPage = 0;
     let currentSearchQuery = '';
     let currentSearchPage = 1;
+    let currentSearchSort = 'pubDate:desc'; // 新增：当前搜索排序
     const SEARCH_HITS_PER_PAGE = 20;
 
     // 响应式布局配置
@@ -824,6 +857,7 @@
         const searchInput = document.getElementById('search-input');
         const refreshLatestBtn = document.getElementById('refresh-latest');
         const refreshRandomBtn = document.getElementById('refresh-random');
+        const searchSortSelect = document.getElementById('search-sort'); // 新增
 
         // 初始化响应式布局
         updateResponsiveLayout();
@@ -842,6 +876,14 @@
 
         searchInput.addEventListener('keyup', (event) => {
             if (event.key === 'Enter') searchButton.click();
+        });
+
+        // 新增：监听排序变化
+        searchSortSelect.addEventListener('change', (event) => {
+            currentSearchSort = event.target.value;
+            if (currentSearchQuery) {
+                fetchSearchResults();
+            }
         });
 
         refreshLatestBtn.addEventListener('click', () => {
@@ -932,7 +974,7 @@
         paginationContainer.innerHTML = '';
 
         try {
-            const url = `/api/search?q=${encodeURIComponent(currentSearchQuery)}&page=${currentSearchPage}&hitsPerPage=${SEARCH_HITS_PER_PAGE}`;
+            const url = `/api/search?q=${encodeURIComponent(currentSearchQuery)}&page=${currentSearchPage}&hitsPerPage=${SEARCH_HITS_PER_PAGE}&sort=${currentSearchSort}`;
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const results = await response.json();

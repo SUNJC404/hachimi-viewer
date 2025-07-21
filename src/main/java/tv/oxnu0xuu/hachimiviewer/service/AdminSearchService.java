@@ -55,7 +55,7 @@ public class AdminSearchService {
         }
     }
 
-    public Map<String, Object> searchVideos(String query, int page, int size, Boolean isHachimi) {
+    public Map<String, Object> searchVideos(String query, int page, int size, Boolean isHachimi, String sort) {
         try {
             SearchRequest searchRequest = new SearchRequest(query != null ? query : "");
 
@@ -70,7 +70,7 @@ public class AdminSearchService {
 
             searchRequest.setPage(page + 1);
             searchRequest.setHitsPerPage(size);
-            searchRequest.setSort(new String[]{"pubDate:desc"});
+            searchRequest.setSort(new String[]{sort}); // 使用传入的 sort 参数
 
             Object searchResult = adminVideosIndex.search(searchRequest);
 

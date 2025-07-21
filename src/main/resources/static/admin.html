@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>哈基米视频管理系统</title>
+    <title>管理一个基米？</title>
     <style>
+        /* CSS 样式部分保持不变 */
         :root {
             --primary-color: #1890ff;
             --success-color: #52c41a;
@@ -574,7 +575,7 @@
         <div class="header-content">
             <h1>哈基米视频管理系统</h1>
             <div class="header-actions">
-                <span id="admin-info">管理员</span>
+                <span id="admin-info">电警喵大人</span>
                 <button class="logout-btn" onclick="logout()">退出登录</button>
             </div>
         </div>
@@ -609,6 +610,12 @@
                 <option value="">全部视频</option>
                 <option value="true">哈基米视频</option>
                 <option value="false">非哈基米视频</option>
+            </select>
+            <select id="sort-select" class="filter-select">
+                <option value="pubDate:desc">最新发布</option>
+                <option value="pubDate:asc">最早发布</option>
+                <option value="views:desc">最多播放</option>
+                <option value="views:asc">最少播放</option>
             </select>
             <button class="search-btn" onclick="searchVideos()">搜索</button>
         </div>
@@ -657,6 +664,7 @@
     let totalPages = 0;
     let currentSearch = '';
     let currentFilter = '';
+    let currentSort = 'pubDate:desc'; // 新增
 
     // 页面初始化
     document.addEventListener('DOMContentLoaded', async () => {
@@ -816,6 +824,9 @@
             if (currentFilter) {
                 url += `&isHachimi=${currentFilter}`;
             }
+            if (currentSort) {
+                url += `&sort=${currentSort}`;
+            }
 
             const response = await fetch(url);
             if (!response.ok) {
@@ -914,6 +925,7 @@
     function searchVideos() {
         currentSearch = document.getElementById('search-input').value.trim();
         currentFilter = document.getElementById('filter-select').value;
+        currentSort = document.getElementById('sort-select').value; // 新增
         loadVideos(0);
     }
 

@@ -30,17 +30,19 @@ public class SearchController {
             @RequestParam(name = "q") String query,
             // Meilisearch 的分页参数，page 从 1 开始
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int hitsPerPage) {
+            @RequestParam(defaultValue = "20") int hitsPerPage,
+            @RequestParam(defaultValue = "pubDate:desc") String sort) { // 新增排序参数
         if (query == null || query.isBlank()) {
             return ResponseEntity.badRequest().body("{\"error\": \"Search query 'q' cannot be empty.\"}");
         }
         try {
-            logger.info("Performing search for query: '{}', page: {}, hitsPerPage: {}", query, page, hitsPerPage);
+            logger.info("Performing search for query: '{}', page: {}, hitsPerPage: {}, sort: {}", query, page, hitsPerPage, sort);
 
             SearchRequest searchRequest = new SearchRequest(query);
             searchRequest.setFilter(new String[]{"is_hachimi = true"});
             searchRequest.setPage(page);
             searchRequest.setHitsPerPage(hitsPerPage);
+            searchRequest.setSort(new String[]{sort}); // 设置排序
 
             Object results = videosIndex.search(searchRequest);
 
