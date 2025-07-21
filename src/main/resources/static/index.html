@@ -79,20 +79,20 @@
       gap: 24px;
       padding: 0 4px;
     }
-    
+
     @media (max-width: 768px) {
       .videos-grid {
         grid-template-columns: 1fr;
         gap: 16px;
       }
     }
-    
+
     @media (min-width: 1200px) {
       .videos-grid {
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       }
     }
-    
+
     @media (min-width: 1600px) {
       .videos-grid {
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -258,10 +258,6 @@
 </head>
 <body>
 
-<!--<div class="top-right-button-container">-->
-<!--  <button onclick="window.location.href='/reviewer.html'">审核</button>-->
-<!--</div>-->
-
 <div class="container">
   <div class="header">
     <h1>哈基米启动器</h1>
@@ -314,7 +310,7 @@
   let currentSearchQuery = '';
   let currentSearchPage = 1;
   const SEARCH_HITS_PER_PAGE = 20;
-  
+
   // 响应式布局配置
   const responsiveConfig = {
     mobile: { maxWidth: 768, columns: 1, itemsPerPage: 6 },
@@ -322,7 +318,7 @@
     desktop: { maxWidth: 1600, columns: 4, itemsPerPage: 16 },
     large: { maxWidth: Infinity, columns: 5, itemsPerPage: 20 }
   };
-  
+
   let currentLayout = 'desktop';
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -334,7 +330,7 @@
     // 初始化响应式布局
     updateResponsiveLayout();
     window.addEventListener('resize', debounce(updateResponsiveLayout, 250));
-    
+
     fetchLatestVideos();
     fetchRandomVideos();
 
@@ -359,7 +355,7 @@
   });
 
   // --- 响应式布局工具函数 ---
-  
+
   function getCurrentLayout() {
     const width = window.innerWidth;
     for (const [key, config] of Object.entries(responsiveConfig)) {
@@ -367,11 +363,11 @@
     }
     return 'desktop';
   }
-  
+
   function getItemsPerPage() {
     return responsiveConfig[currentLayout].itemsPerPage;
   }
-  
+
   function updateResponsiveLayout() {
     const newLayout = getCurrentLayout();
     if (newLayout !== currentLayout) {
@@ -380,7 +376,7 @@
       fetchLatestVideos();
     }
   }
-  
+
   function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -412,14 +408,14 @@
   function fetchLatestVideos() {
     const itemsPerPage = getItemsPerPage();
     fetchApi(
-      `/api/videos/latest?page=${latestVideosPage}&size=${itemsPerPage}`,
-      document.getElementById('latest-videos-grid'),
-      (data) => {
-        if (!data || data.length === 0) {
-          latestVideosPage = 0;
-          fetchLatestVideos();
-        }
-      }
+            `/api/videos/latest?page=${latestVideosPage}&size=${itemsPerPage}`,
+            document.getElementById('latest-videos-grid'),
+            (data) => {
+              if (!data || data.length === 0) {
+                latestVideosPage = 0;
+                fetchLatestVideos();
+              }
+            }
     );
   }
 
@@ -464,7 +460,7 @@
       paginationContainer.innerHTML = '';
       return;
     }
-    
+
     let paginationHtml = `
         <button onclick="goToSearchPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&laquo; 上一页</button>
         <span>第 ${currentPage} / ${totalPages} 页</span>
@@ -489,20 +485,21 @@
 
     gridElement.innerHTML = '';
     const fragment = document.createDocumentFragment();
-    
+
     for (const video of dataToRender) {
       const ownerName = video.owner ? video.owner.name : '未知UP主';
       const ownerAvatar = video.owner && video.owner.face ? video.owner.face : '';
-      const compressedCoverUrl = `${video.coverUrl}@400w.jpg`;
-      const proxiedCoverUrl = `https://images.weserv.nl/?url=${encodeURIComponent(compressedCoverUrl)}`;
-      const proxiedAvatarUrl = ownerAvatar ? `https://images.weserv.nl/?url=${encodeURIComponent(ownerAvatar)}&w=56&h=56&fit=cover&output=webp` : '';
+
+      // Use direct Bilibili URLs with specified formatting, removing the weserv proxy
+      const finalCoverUrl = `${video.coverUrl}@672w_378h_1c_!web-home-common-cover.webp`;
+      const finalAvatarUrl = ownerAvatar ? `${ownerAvatar}@128w_128h_1c_1s.webp` : '';
 
       const videoCard = document.createElement('div');
       videoCard.className = 'video-card';
       videoCard.innerHTML = `
         <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
             <div class="video-thumbnail-container">
-              <img class="video-thumbnail" src="${proxiedCoverUrl}" alt="${video.title}" loading="lazy" referrerpolicy="no-referrer">
+              <img class="video-thumbnail" src="${finalCoverUrl}" alt="${video.title}" loading="lazy" referrerpolicy="no-referrer">
               <div class="video-duration">${formatDuration(video.duration || 0)}</div>
             </div>
         </a>
@@ -516,7 +513,7 @@
                   <span class="date">${formatDate(video.created || video.createdTime)}</span>
                 </div>
                 <div class="video-card-owner">
-                    <img class="owner-avatar" src="${proxiedAvatarUrl}" alt="${ownerName}" loading="lazy" referrerpolicy="no-referrer">
+                    <img class="owner-avatar" src="${finalAvatarUrl}" alt="${ownerName}" loading="lazy" referrerpolicy="no-referrer">
                     <span class="owner-name">${ownerName}</span>
                 </div>
             </div>
@@ -524,7 +521,7 @@
       `;
       fragment.appendChild(videoCard);
     }
-    
+
     gridElement.appendChild(fragment);
   }
 
@@ -534,14 +531,14 @@
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
-  
+
   function formatDate(timestamp) {
     if (!timestamp) return '';
     const date = new Date(timestamp * 1000);
     const now = new Date();
     const diffTime = Math.abs(now - date);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return '今天';
     if (diffDays === 1) return '昨天';
     if (diffDays < 7) return `${diffDays}天前`;
