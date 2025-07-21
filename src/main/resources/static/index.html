@@ -1,555 +1,1087 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>哈基米启动器</title>
-  <style>
-    :root {
-      --primary-color: #00a1d6;
-      --secondary-color: #fb7299;
-      --background-color: #f4f5f7;
-      --card-background-color: #ffffff;
-      --text-color: #18191c;
-      --text-secondary-color: #61666d;
-      --border-color: #e3e5e7;
-      --border-radius: 12px;
-      --box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      --hover-shadow: 0 4px 16px rgba(0,0,0,0.15);
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background-color: var(--background-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
-      position: relative;
-    }
-    .top-right-button-container {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 10;
-    }
-    .top-right-button-container button {
-      padding: 10px 20px; font-size: 16px; border-radius: var(--border-radius); border: none;
-      background-color: #28a745; color: white; cursor: pointer;
-      transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
-      box-shadow: var(--box-shadow);
-    }
-    .top-right-button-container button:hover {
-      background-color: #218838;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-      transform: translateY(-2px);
-    }
-    .container { max-width: 1400px; margin: 0 auto; }
-    .header { text-align: center; margin-bottom: 40px; }
-    .header h1 { font-size: 2.5rem; color: var(--primary-color); }
-    .search-container { display: flex; justify-content: center; margin-bottom: 40px; }
-    #search-input {
-      width: 50%; max-width: 600px; padding: 12px 18px; font-size: 16px;
-      border-radius: var(--border-radius) 0 0 var(--border-radius);
-      border: 1px solid #ccc; outline: none; transition: border-color 0.2s;
-    }
-    #search-input:focus { border-color: var(--primary-color); }
-    #search-button {
-      padding: 12px 25px; font-size: 16px;
-      border-radius: 0 var(--border-radius) var(--border-radius) 0; border: none;
-      background-color: var(--primary-color); color: white; cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    #search-button:hover { background-color: #0056b3; }
-    .videos-section { margin-bottom: 60px; }
-    .section-header {
-      display: flex; align-items: center; gap: 15px;
-      border-bottom: 2px solid #e9ecef; padding-bottom: 10px; margin-bottom: 25px;
-    }
-    .section-header h2 { font-size: 1.8rem; margin: 0; }
-    .refresh-button {
-      background: none; border: 1px solid #ccc; border-radius: 50%;
-      width: 32px; height: 32px; cursor: pointer; display: flex;
-      align-items: center; justify-content: center;
-      transition: transform 0.3s, border-color 0.2s;
-    }
-    .refresh-button:hover { transform: rotate(180deg); border-color: var(--primary-color); }
-    .videos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 24px;
-      padding: 0 4px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哈基米启动器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    @media (max-width: 768px) {
-      .videos-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-    }
+        :root {
+            --primary-color: #00a1d6;
+            --primary-dark: #0087c0;
+            --secondary-color: #fb7299;
+            --accent-color: #ff6b6b;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
 
-    @media (min-width: 1200px) {
-      .videos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      }
-    }
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f7fa;
+            --bg-tertiary: #e9ecef;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f8f9fa;
 
-    @media (min-width: 1600px) {
-      .videos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      }
-    }
-    .video-card {
-      background: var(--card-background-color);
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      transition: var(--transition);
-      border: 1px solid transparent;
-    }
-    .video-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--hover-shadow);
-      border-color: var(--border-color);
-    }
-    .video-card a { text-decoration: none; color: inherit; }
-    .video-thumbnail-container {
-      position: relative; width: 100%; padding-top: 56.25%;
-      overflow: hidden;
-    }
-    .video-thumbnail {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      object-fit: cover; background-color: #f1f2f3;
-      transition: transform 0.3s ease;
-    }
-    .video-card:hover .video-thumbnail {
-      transform: scale(1.05);
-    }
-    .video-duration {
-      position: absolute;
-      bottom: 8px;
-      right: 8px;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .video-card-content {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-    }
-    .video-card-title {
-      font-size: 15px;
-      font-weight: 500;
-      line-height: 1.4;
-      margin: 0 0 12px 0;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      color: var(--text-color);
-      transition: color 0.2s ease;
-    }
-    .video-card:hover .video-card-title {
-      color: var(--primary-color);
-    }
-    .video-card-meta {
-      font-size: 13px;
-      color: var(--text-secondary-color);
-      margin-top: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .video-stats {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .views { font-weight: 500; }
-    .date { opacity: 0.8; }
-    .video-card-owner {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-    }
-    .owner-avatar {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-    .owner-name {
-      font-size: 13px;
-      color: var(--text-secondary-color);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .loading-spinner, .empty-message, .error-message {
-      text-align: center;
-      color: var(--text-secondary-color);
-      padding: 40px 20px;
-      font-size: 16px;
-    }
-    .pagination-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 16px;
-      margin-top: 40px;
-      flex-wrap: wrap;
-    }
-    .pagination-container button {
-      padding: 10px 20px;
-      border: 1px solid var(--border-color);
-      background-color: var(--card-background-color);
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-color);
-    }
-    .pagination-container button:hover:not(:disabled) {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      color: white;
-      transform: translateY(-1px);
-    }
-    .pagination-container button:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-      background-color: #f5f5f5;
-    }
-    .pagination-container span {
-      font-size: 14px;
-      color: var(--text-secondary-color);
-      font-weight: 500;
-    }
-    .footer-links {
-      text-align: center;
-      margin-top: 50px; /* Adjust spacing from content */
-      padding-top: 20px;
-      border-top: 1px solid #e9ecef;
-      color: var(--text-secondary-color);
-      font-size: 0.9rem;
-    }
-    .footer-links a {
-      color: #909399;
-      text-decoration: none;
-      margin: 0 10px;
-      transition: color 0.2s;
-    }
-    .footer-links a:hover {
-      color: #909399;
-    }
-  </style>
+            --text-primary: #1a1a1a;
+            --text-secondary: #6c757d;
+            --text-tertiary: #adb5bd;
+
+            --border-color: #e9ecef;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --shadow-xl: 0 12px 48px rgba(0,0,0,0.16);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0a0a0a;
+                --bg-secondary: #1a1a1a;
+                --bg-tertiary: #2a2a2a;
+                --bg-card: #1f1f1f;
+                --bg-card-hover: #2a2a2a;
+
+                --text-primary: #ffffff;
+                --text-secondary: #b0b0b0;
+                --text-tertiary: #808080;
+
+                --border-color: #333333;
+                --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+                --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+                --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+                --shadow-xl: 0 12px 48px rgba(0,0,0,0.5);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background decoration */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 80%, rgba(0, 161, 214, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(251, 114, 153, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(255, 107, 107, 0.03) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-30px, -30px) rotate(120deg); }
+            66% { transform: translate(30px, -30px) rotate(240deg); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 0 40px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .header-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            animation: slideInUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Search Section */
+        .search-wrapper {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            margin-bottom: 60px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out 0.4s both;
+        }
+
+        .search-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            background-size: 200% 100%;
+            animation: gradient 3s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .search-container {
+            display: flex;
+            gap: 12px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #search-input {
+            flex: 1;
+            padding: 16px 24px;
+            font-size: 16px;
+            border: 2px solid transparent;
+            border-radius: var(--radius-lg);
+            background: var(--bg-secondary);
+            transition: var(--transition-fast);
+            outline: none;
+        }
+
+        #search-input:focus {
+            border-color: var(--primary-color);
+            background: var(--bg-primary);
+            box-shadow: 0 0 0 4px rgba(0, 161, 214, 0.1);
+        }
+
+        #search-button {
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #search-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        #search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        #search-button:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Section */
+        .videos-section {
+            margin-bottom: 80px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+            position: relative;
+        }
+
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .section-header h2 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .refresh-button {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .refresh-button:hover {
+            border-color: var(--primary-color);
+            background: var(--bg-card-hover);
+        }
+
+        .refresh-button:hover svg {
+            transform: rotate(180deg);
+        }
+
+        .refresh-button svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.5s ease;
+            color: var(--text-secondary);
+        }
+
+        /* Video Grid */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .videos-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        /* Video Card */
+        .video-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: var(--transition-medium);
+            position: relative;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: transparent;
+        }
+
+        .video-card a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .video-thumbnail-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+        }
+
+        .video-thumbnail {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .video-card:hover .video-thumbnail {
+            transform: scale(1.1);
+        }
+
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.8));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-card:hover .video-overlay {
+            opacity: 1;
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        .video-play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .video-card:hover .video-play-icon {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .video-play-icon::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 16px solid var(--primary-color);
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            margin-left: 4px;
+        }
+
+        .video-card-content {
+            padding: 20px;
+        }
+
+        .video-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: color 0.2s ease;
+        }
+
+        .video-card:hover .video-card-title {
+            color: var(--primary-color);
+        }
+
+        .video-card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .video-stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
+        .video-card-owner {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .owner-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            transition: var(--transition-fast);
+        }
+
+        .video-card:hover .owner-avatar {
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .owner-name {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 150px;
+        }
+
+        /* Loading States */
+        .loading-spinner {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner::before {
+            content: '';
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty & Error States */
+        .empty-message,
+        .error-message {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+
+        .error-message {
+            color: var(--accent-color);
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 48px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-container button {
+            padding: 12px 24px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            color: var(--text-primary);
+        }
+
+        .pagination-container button:hover:not(:disabled) {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .pagination-container button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 120px;
+            padding: 40px 0;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition-fast);
+            position: relative;
+        }
+
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+
+        .footer-copyright {
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 0 30px;
+            }
+
+            .search-wrapper {
+                padding: 24px 16px;
+                margin-bottom: 40px;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            #search-input,
+            #search-button {
+                width: 100%;
+            }
+
+            .section-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .videos-section {
+                margin-bottom: 60px;
+            }
+
+            .video-card-content {
+                padding: 16px;
+            }
+
+            .footer {
+                margin-top: 80px;
+            }
+        }
+
+        /* Animations for cards on scroll */
+        .video-card {
+            opacity: 0;
+            animation: cardFadeIn 0.6s ease-out forwards;
+        }
+
+        .video-card:nth-child(1) { animation-delay: 0.1s; }
+        .video-card:nth-child(2) { animation-delay: 0.2s; }
+        .video-card:nth-child(3) { animation-delay: 0.3s; }
+        .video-card:nth-child(4) { animation-delay: 0.4s; }
+        .video-card:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="header">
-    <h1>哈基米启动器</h1>
-  </div>
+    <header class="header">
+        <h1>哈基米启动器</h1>
+        <p class="header-subtitle">发现最新最酷的哈基米内容 ✨</p>
+    </header>
 
-  <div class="search-container">
-    <input type="text" id="search-input" placeholder="搜索哈基米...">
-    <button id="search-button">搜索</button>
-  </div>
-
-  <div id="search-results" class="videos-section" style="display: none;">
-    <div class="section-header">
-      <h2>哈气结果</h2>
+    <div class="search-wrapper">
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="搜索你感兴趣的哈基米内容...">
+            <button id="search-button">
+                搜索
+            </button>
+        </div>
     </div>
-    <div id="search-results-grid" class="videos-grid"></div>
-    <div id="search-pagination" class="pagination-container"></div>
-  </div>
 
-  <div class="videos-section">
-    <div class="section-header">
-      <h2>最新哈气</h2>
-      <button id="refresh-latest" class="refresh-button" title="换一批">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-      </button>
+    <div id="search-results" class="videos-section" style="display: none;">
+        <div class="section-header">
+            <h2>
+                <div class="section-icon">🔍</div>
+                搜索结果
+            </h2>
+        </div>
+        <div id="search-results-grid" class="videos-grid"></div>
+        <div id="search-pagination" class="pagination-container"></div>
     </div>
-    <div id="latest-videos-grid" class="videos-grid"></div>
-  </div>
 
-  <div class="videos-section">
-    <div class="section-header">
-      <h2>随机哈气</h2>
-      <button id="refresh-random" class="refresh-button" title="刷新随机视频">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-      </button>
+    <div class="videos-section">
+        <div class="section-header">
+            <h2>
+                <div class="section-icon">🔥</div>
+                最新哈气
+            </h2>
+            <button id="refresh-latest" class="refresh-button" title="换一批">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+            </button>
+        </div>
+        <div id="latest-videos-grid" class="videos-grid"></div>
     </div>
-    <div id="random-videos-grid" class="videos-grid"></div>
-  </div>
 
-  <div class="footer-links">
-    <a href="/reviewer.html">审核页面</a>
-    <a href="/admin.html">管理员页面</a>
-    <a href="https://space.bilibili.com/20002123" target="_blank">@鼻血黄豆</a>
-  </div>
+    <div class="videos-section">
+        <div class="section-header">
+            <h2>
+                <div class="section-icon">🎲</div>
+                随机哈气
+            </h2>
+            <button id="refresh-random" class="refresh-button" title="刷新随机视频">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+            </button>
+        </div>
+        <div id="random-videos-grid" class="videos-grid"></div>
+    </div>
 </div>
 
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="/reviewer.html">审核页面</a>
+                <a href="/admin.html">管理员页面</a>
+                <a href="https://space.bilibili.com/20002123" target="_blank" rel="noopener">@鼻血黄豆</a>
+            </div>
+            <div class="footer-copyright">
+                Made with ❤️ by 哈基米团队
+            </div>
+        </div>
+    </div>
+</footer>
 
 <script>
-  // --- 全局状态变量 ---
-  let latestVideosPage = 0;
-  let currentSearchQuery = '';
-  let currentSearchPage = 1;
-  const SEARCH_HITS_PER_PAGE = 20;
+    // --- 全局状态变量 ---
+    let latestVideosPage = 0;
+    let currentSearchQuery = '';
+    let currentSearchPage = 1;
+    const SEARCH_HITS_PER_PAGE = 20;
 
-  // 响应式布局配置
-  const responsiveConfig = {
-    mobile: { maxWidth: 768, columns: 1, itemsPerPage: 6 },
-    tablet: { maxWidth: 1200, columns: 3, itemsPerPage: 12 },
-    desktop: { maxWidth: 1600, columns: 4, itemsPerPage: 16 },
-    large: { maxWidth: Infinity, columns: 5, itemsPerPage: 20 }
-  };
-
-  let currentLayout = 'desktop';
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const searchButton = document.getElementById('search-button');
-    const searchInput = document.getElementById('search-input');
-    const refreshLatestBtn = document.getElementById('refresh-latest');
-    const refreshRandomBtn = document.getElementById('refresh-random');
-
-    // 初始化响应式布局
-    updateResponsiveLayout();
-    window.addEventListener('resize', debounce(updateResponsiveLayout, 250));
-
-    fetchLatestVideos();
-    fetchRandomVideos();
-
-    searchButton.addEventListener('click', () => {
-      const query = searchInput.value.trim();
-      if (query) {
-        document.getElementById('search-results').style.display = 'block';
-        startNewSearch(query);
-      }
-    });
-    searchInput.addEventListener('keyup', (event) => {
-      if (event.key === 'Enter') searchButton.click();
-    });
-
-    // "最新哈气" 的刷新按钮现在是 "换一批"
-    refreshLatestBtn.addEventListener('click', () => {
-      latestVideosPage++;
-      fetchLatestVideos();
-    });
-
-    refreshRandomBtn.addEventListener('click', fetchRandomVideos);
-  });
-
-  // --- 响应式布局工具函数 ---
-
-  function getCurrentLayout() {
-    const width = window.innerWidth;
-    for (const [key, config] of Object.entries(responsiveConfig)) {
-      if (width <= config.maxWidth) return key;
-    }
-    return 'desktop';
-  }
-
-  function getItemsPerPage() {
-    return responsiveConfig[currentLayout].itemsPerPage;
-  }
-
-  function updateResponsiveLayout() {
-    const newLayout = getCurrentLayout();
-    if (newLayout !== currentLayout) {
-      currentLayout = newLayout;
-      // 重新获取数据以适应新的布局
-      fetchLatestVideos();
-    }
-  }
-
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
+    // 响应式布局配置
+    const responsiveConfig = {
+        mobile: { maxWidth: 768, columns: 1, itemsPerPage: 6 },
+        tablet: { maxWidth: 1200, columns: 3, itemsPerPage: 12 },
+        desktop: { maxWidth: 1600, columns: 4, itemsPerPage: 16 },
+        large: { maxWidth: Infinity, columns: 5, itemsPerPage: 20 }
     };
-  }
 
-  // --- API 调用与渲染 ---
+    let currentLayout = 'desktop';
 
-  async function fetchApi(url, gridElement, successCallback = null) {
-    try {
-      gridElement.innerHTML = '<div class="loading-spinner">加载中...</div>';
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
-      renderVideos(data, gridElement);
-      if (successCallback) successCallback(data);
-    } catch (error) {
-      console.error('Fetch error:', error);
-      gridElement.innerHTML = `<p class="error-message">加载失败: ${error.message}</p>`;
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchButton = document.getElementById('search-button');
+        const searchInput = document.getElementById('search-input');
+        const refreshLatestBtn = document.getElementById('refresh-latest');
+        const refreshRandomBtn = document.getElementById('refresh-random');
+
+        // 初始化响应式布局
+        updateResponsiveLayout();
+        window.addEventListener('resize', debounce(updateResponsiveLayout, 250));
+
+        fetchLatestVideos();
+        fetchRandomVideos();
+
+        searchButton.addEventListener('click', () => {
+            const query = searchInput.value.trim();
+            if (query) {
+                document.getElementById('search-results').style.display = 'block';
+                startNewSearch(query);
+            }
+        });
+
+        searchInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') searchButton.click();
+        });
+
+        refreshLatestBtn.addEventListener('click', () => {
+            latestVideosPage++;
+            fetchLatestVideos();
+        });
+
+        refreshRandomBtn.addEventListener('click', fetchRandomVideos);
+    });
+
+    // --- 响应式布局工具函数 ---
+    function getCurrentLayout() {
+        const width = window.innerWidth;
+        for (const [key, config] of Object.entries(responsiveConfig)) {
+            if (width <= config.maxWidth) return key;
+        }
+        return 'desktop';
     }
-  }
 
-  function fetchLatestVideos() {
-    const itemsPerPage = getItemsPerPage();
-    fetchApi(
+    function getItemsPerPage() {
+        return responsiveConfig[currentLayout].itemsPerPage;
+    }
+
+    function updateResponsiveLayout() {
+        const newLayout = getCurrentLayout();
+        if (newLayout !== currentLayout) {
+            currentLayout = newLayout;
+            fetchLatestVideos();
+        }
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // --- API 调用与渲染 ---
+    async function fetchApi(url, gridElement, successCallback = null) {
+        try {
+            gridElement.innerHTML = '<div class="loading-spinner">加载中...</div>';
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            renderVideos(data, gridElement);
+            if (successCallback) successCallback(data);
+        } catch (error) {
+            console.error('Fetch error:', error);
+            gridElement.innerHTML = `<p class="error-message">加载失败: ${error.message}</p>`;
+        }
+    }
+
+    function fetchLatestVideos() {
+        const itemsPerPage = getItemsPerPage();
+        fetchApi(
             `/api/videos/latest?page=${latestVideosPage}&size=${itemsPerPage}`,
             document.getElementById('latest-videos-grid'),
             (data) => {
-              if (!data || data.length === 0) {
-                latestVideosPage = 0;
-                fetchLatestVideos();
-              }
+                if (!data || data.length === 0) {
+                    latestVideosPage = 0;
+                    fetchLatestVideos();
+                }
             }
-    );
-  }
-
-  function fetchRandomVideos() {
-    const itemsPerPage = getItemsPerPage();
-    fetchApi(`/api/videos/random?limit=${itemsPerPage}`, document.getElementById('random-videos-grid'));
-  }
-
-  function startNewSearch(query) {
-    currentSearchQuery = query;
-    currentSearchPage = 1;
-    fetchSearchResults();
-  }
-
-  async function fetchSearchResults() {
-    const grid = document.getElementById('search-results-grid');
-    const paginationContainer = document.getElementById('search-pagination');
-    grid.innerHTML = '<div class="loading-spinner">搜索中...</div>';
-    paginationContainer.innerHTML = '';
-
-    try {
-      const url = `/api/search?q=${encodeURIComponent(currentSearchQuery)}&page=${currentSearchPage}&hitsPerPage=${SEARCH_HITS_PER_PAGE}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const results = await response.json();
-
-      renderVideos(results, grid, false, '搜索结果为空');
-      renderPagination(results);
-      document.getElementById('search-results').scrollIntoView({ behavior: 'smooth' });
-    } catch (error) {
-      console.error('Search error:', error);
-      grid.innerHTML = `<p class="error-message">搜索失败: ${error.message}</p>`;
-    }
-  }
-
-  function renderPagination(results) {
-    const paginationContainer = document.getElementById('search-pagination');
-    const totalPages = results.totalPages;
-    const currentPage = results.page;
-
-    if (totalPages <= 1) {
-      paginationContainer.innerHTML = '';
-      return;
+        );
     }
 
-    let paginationHtml = `
-        <button onclick="goToSearchPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&laquo; 上一页</button>
-        <span>第 ${currentPage} / ${totalPages} 页</span>
-        <button onclick="goToSearchPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>下一页 &raquo;</button>
+    function fetchRandomVideos() {
+        const itemsPerPage = getItemsPerPage();
+        fetchApi(`/api/videos/random?limit=${itemsPerPage}`, document.getElementById('random-videos-grid'));
+    }
+
+    function startNewSearch(query) {
+        currentSearchQuery = query;
+        currentSearchPage = 1;
+        fetchSearchResults();
+    }
+
+    async function fetchSearchResults() {
+        const grid = document.getElementById('search-results-grid');
+        const paginationContainer = document.getElementById('search-pagination');
+        grid.innerHTML = '<div class="loading-spinner">搜索中...</div>';
+        paginationContainer.innerHTML = '';
+
+        try {
+            const url = `/api/search?q=${encodeURIComponent(currentSearchQuery)}&page=${currentSearchPage}&hitsPerPage=${SEARCH_HITS_PER_PAGE}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const results = await response.json();
+
+            renderVideos(results, grid, '搜索结果为空');
+            renderPagination(results);
+            document.getElementById('search-results').scrollIntoView({ behavior: 'smooth' });
+        } catch (error) {
+            console.error('Search error:', error);
+            grid.innerHTML = `<p class="error-message">搜索失败: ${error.message}</p>`;
+        }
+    }
+
+    function renderPagination(results) {
+        const paginationContainer = document.getElementById('search-pagination');
+        const totalPages = results.totalPages;
+        const currentPage = results.page;
+
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let paginationHtml = `
+      <button onclick="goToSearchPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&laquo; 上一页</button>
+      <span class="pagination-info">第 ${currentPage} / ${totalPages} 页</span>
+      <button onclick="goToSearchPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>下一页 &raquo;</button>
     `;
 
-    paginationContainer.innerHTML = paginationHtml;
-  }
-
-  function goToSearchPage(page) {
-    if (page < 1) return;
-    currentSearchPage = page;
-    fetchSearchResults();
-  }
-
-  function renderVideos(videos, gridElement, emptyMessage = '没有可显示的视频。') {
-    const dataToRender = videos.hits ? videos.hits : videos;
-    if (!dataToRender || dataToRender.length === 0) {
-      gridElement.innerHTML = `<p class="empty-message">${emptyMessage}</p>`;
-      return;
+        paginationContainer.innerHTML = paginationHtml;
     }
 
-    gridElement.innerHTML = '';
-    const fragment = document.createDocumentFragment();
+    function goToSearchPage(page) {
+        if (page < 1) return;
+        currentSearchPage = page;
+        fetchSearchResults();
+    }
 
-    for (const video of dataToRender) {
-      const ownerName = video.owner ? video.owner.name : '未知UP主';
-      const ownerAvatar = video.owner && video.owner.face ? video.owner.face : '';
+    function renderVideos(videos, gridElement, emptyMessage = '没有可显示的视频。') {
+        const dataToRender = videos.hits ? videos.hits : videos;
+        if (!dataToRender || dataToRender.length === 0) {
+            gridElement.innerHTML = `<p class="empty-message">${emptyMessage}</p>`;
+            return;
+        }
 
-      // Use direct Bilibili URLs with specified formatting, removing the weserv proxy
-      const finalCoverUrl = `${video.coverUrl}@672w_378h_1c_!web-home-common-cover.webp`;
-      const finalAvatarUrl = ownerAvatar ? `${ownerAvatar}@128w_128h_1c_1s.webp` : '';
+        gridElement.innerHTML = '';
+        const fragment = document.createDocumentFragment();
 
-      const videoCard = document.createElement('div');
-      videoCard.className = 'video-card';
-      videoCard.innerHTML = `
+        for (const video of dataToRender) {
+            const ownerName = video.owner ? video.owner.name : '未知UP主';
+            const ownerAvatar = video.owner && video.owner.face ? video.owner.face : '';
+
+            const finalCoverUrl = `${video.coverUrl}@672w_378h_1c_!web-home-common-cover.webp`;
+            const finalAvatarUrl = ownerAvatar ? `${ownerAvatar}@128w_128h_1c_1s.webp` : '';
+
+            const videoCard = document.createElement('div');
+            videoCard.className = 'video-card';
+            videoCard.innerHTML = `
         <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
-            <div class="video-thumbnail-container">
-              <img class="video-thumbnail" src="${finalCoverUrl}" alt="${video.title}" loading="lazy" referrerpolicy="no-referrer">
-              <div class="video-duration">${formatDuration(video.duration || 0)}</div>
-            </div>
+          <div class="video-thumbnail-container">
+            <img class="video-thumbnail" src="${finalCoverUrl}" alt="${video.title}" loading="lazy" referrerpolicy="no-referrer">
+            <div class="video-overlay"></div>
+            <div class="video-duration">${formatDuration(video.duration || 0)}</div>
+            <div class="video-play-icon"></div>
+          </div>
         </a>
         <div class="video-card-content">
-            <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
-                <h3 class="video-card-title" title="${video.title}">${video.title}</h3>
-            </a>
-            <div class="video-card-meta">
-                <div class="video-stats">
-                  <span class="views">▶ ${formatViews(video.views)}</span>
-                  <span class="date">${formatDate(video.created || video.createdTime)}</span>
-                </div>
-                <div class="video-card-owner">
-                    <img class="owner-avatar" src="${finalAvatarUrl}" alt="${ownerName}" loading="lazy" referrerpolicy="no-referrer">
-                    <span class="owner-name">${ownerName}</span>
-                </div>
+          <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
+            <h3 class="video-card-title" title="${video.title}">${video.title}</h3>
+          </a>
+          <div class="video-card-meta">
+            <div class="video-stats">
+              <div class="stat-item">
+                <span class="views">▶ ${formatViews(video.views)}</span>
+              </div>
+              <div class="stat-item">
+                <span class="date">${formatDate(video.pubDate)}</span>
+              </div>
             </div>
+          </div>
+          <div class="video-card-owner">
+            <img class="owner-avatar" src="${finalAvatarUrl}" alt="${ownerName}" loading="lazy" referrerpolicy="no-referrer">
+            <span class="owner-name">${ownerName}</span>
+          </div>
         </div>
       `;
-      fragment.appendChild(videoCard);
+            fragment.appendChild(videoCard);
+        }
+
+        gridElement.appendChild(fragment);
     }
 
-    gridElement.appendChild(fragment);
-  }
+    function formatDuration(seconds) {
+        if (!seconds || seconds === 0) return '0:00';
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
 
-  function formatDuration(seconds) {
-    if (!seconds || seconds === 0) return '';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  }
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-  function formatDate(timestamp) {
-    if (!timestamp) return '';
-    const date = new Date(timestamp * 1000);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) return '今天';
+        if (diffDays === 1) return '昨天';
+        if (diffDays < 7) return `${diffDays}天前`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
+        if (diffDays < 365) return `${Math.floor(diffDays / 30)}个月前`;
+        return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
 
-    if (diffDays === 0) return '今天';
-    if (diffDays === 1) return '昨天';
-    if (diffDays < 7) return `${diffDays}天前`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
-    return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
-  }
+    function formatViews(num) {
+        if (num >= 10000) return (num / 10000).toFixed(1) + '万';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+        return num.toLocaleString();
+    }
 
-  function formatViews(num) {
-    if (num >= 10000) return (num / 10000).toFixed(1) + '万';
-    return num.toLocaleString();
-  }
+    // 添加平滑滚动效果
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // 添加滚动显示动画
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animationPlayState = 'running';
+            }
+        });
+    }, observerOptions);
+
+    // 监听所有视频卡片
+    document.addEventListener('DOMNodeInserted', (e) => {
+        if (e.target.classList && e.target.classList.contains('video-card')) {
+            observer.observe(e.target);
+        }
+    });
 </script>
 </body>
 </html>
