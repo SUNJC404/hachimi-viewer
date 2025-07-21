@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tv.oxnu0xuu.hachimiviewer.dto.*;
 import tv.oxnu0xuu.hachimiviewer.service.PlaylistService;
+import tv.oxnu0xuu.hachimiviewer.model.Playlist;
+
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -29,7 +31,7 @@ public class PlaylistController {
             HttpServletRequest request) {
         try {
             String creatorIp = getClientIp(request);
-            PlaylistDto playlist = playlistService.createPlaylist(dto, creatorIp);
+            Playlist playlist = playlistService.createPlaylist(dto, creatorIp);
 
             Map<String, Object> response = new HashMap<>();
             response.put("shareCode", playlist.getShareCode());

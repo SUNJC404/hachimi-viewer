@@ -61,7 +61,7 @@ public class PlaylistService {
     /**
      * 通过分享码获取播放列表
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public PlaylistDto getPlaylistByShareCode(String shareCode) {
         Playlist playlist = playlistMapper.selectOne(
                 new QueryWrapper<Playlist>().eq("share_code", shareCode)
