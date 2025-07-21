@@ -77,6 +77,20 @@
       align-items: center;
     }
 
+    .back-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+      transition: opacity 0.3s;
+    }
+
+    .back-link:hover {
+      opacity: 0.8;
+    }
+
     /* Buttons */
     .btn {
       padding: 10px 20px;
@@ -423,6 +437,7 @@
   <div class="header-content">
     <h1>🎵 哈基米播放列表</h1>
     <div class="header-actions">
+      <a href="/" class="back-link">← 返回主页</a>
       <input type="text" id="shareCodeInput" class="form-input" style="width: 150px;" placeholder="输入分享码">
       <button class="btn btn-secondary" onclick="loadPlaylist()">查看播放列表</button>
       <button class="btn btn-primary" onclick="showCreateModal()">+ 创建播放列表</button>
@@ -431,11 +446,9 @@
 </header>
 
 <div class="container">
-  <!-- 主内容区域 -->
   <div id="mainContent"></div>
 </div>
 
-<!-- 创建播放列表模态框 -->
 <div id="createModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -459,7 +472,6 @@
   </div>
 </div>
 
-<!-- 编辑码输入模态框 -->
 <div id="editCodeModal" class="modal">
   <div class="modal-content" style="max-width: 400px;">
     <div class="modal-header">
