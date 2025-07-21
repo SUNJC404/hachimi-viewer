@@ -93,7 +93,7 @@ public class DataSyncService {
         }
     }
 
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 */10 * * * ?")
     @Transactional(readOnly = true)
     public void syncRecentUpdatesToMeiliSearch() {
         // 计算出一分钟前的时间点

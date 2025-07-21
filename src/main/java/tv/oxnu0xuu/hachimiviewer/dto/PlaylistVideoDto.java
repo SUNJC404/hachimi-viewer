@@ -14,7 +14,7 @@ public class PlaylistVideoDto {
     private Integer position;
     private String title;
     private String coverUrl;
-    private Long views;
+    private Integer views;
     private OwnerDto owner;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
