@@ -4,6 +4,7 @@ package tv.oxnu0xuu.hachimiviewer.config;
 import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.model.Settings;
+import com.meilisearch.sdk.model.Pagination;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,11 @@ public class MeiliSearchInitializer {
             Index index = meiliSearchClient.index(videoIndexName);
 
             Settings settings = new Settings();
+
+            // 新增分页设置
+            com.meilisearch.sdk.model.Pagination paginationSettings = new com.meilisearch.sdk.model.Pagination();
+            paginationSettings.setMaxTotalHits(10000);
+            settings.setPagination(paginationSettings);
 
             // 可搜索的属性
             settings.setSearchableAttributes(new String[]{"bvid","owner.name", "title", "description"});
