@@ -26,4 +26,5 @@ public class Playlist {
     private Integer viewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer maxVideos;
 }

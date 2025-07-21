@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class PlaylistService {
 
     private static final Logger log = LoggerFactory.getLogger(PlaylistService.class);
-    private static final int MAX_VIDEOS_PER_PLAYLIST = 20;
+    private static final int MAX_VIDEOS_PER_PLAYLIST = 30;
     private static final String SHARE_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final String EDIT_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final SecureRandom random = new SecureRandom();
@@ -161,13 +161,19 @@ public class PlaylistService {
         }
 
         // 检查播放列表视频数量限制
+        // 1. 获取当前播放列表的专属限制。如果为null或小于等于0，则使用系统默认值。
+        final int limit = (playlist.getMaxVideos() != null && playlist.getMaxVideos() > 0)
+                ? playlist.getMaxVideos()
+                : MAX_VIDEOS_PER_PLAYLIST;
+
+        // 2. 获取当前播放列表的视频总数
         Long videoCount = playlistVideoMapper.selectCount(
-                new QueryWrapper<PlaylistVideo>()
-                        .eq("playlist_id", playlist.getId())
+                new QueryWrapper<PlaylistVideo>().eq("playlist_id", playlist.getId())
         );
 
-        if (videoCount >= MAX_VIDEOS_PER_PLAYLIST) {
-            throw new IllegalArgumentException("播放列表已达到最大视频数量限制");
+        // 3. 使用动态获取的 limit 进行比较
+        if (videoCount >= limit) {
+            throw new IllegalArgumentException("播放列表已达到最大视频数量限制 (" + limit + ")");
         }
 
         // 获取新位置

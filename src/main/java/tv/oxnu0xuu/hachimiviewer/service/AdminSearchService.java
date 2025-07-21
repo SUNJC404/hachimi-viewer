@@ -49,20 +49,7 @@ public class AdminSearchService {
     public void init() {
         try {
             adminVideosIndex = meiliSearchClient.index(videoIndexName);
-
-            Settings settings = new Settings();
-            settings.setSearchableAttributes(new String[]{"bvid", "title", "description", "owner.name"});
-            settings.setFilterableAttributes(new String[]{"is_hachimi", "is_available", "pubDate"});
-            settings.setSortableAttributes(new String[]{"pubDate", "views", "updatedAt"});
-            settings.setDisplayedAttributes(new String[]{
-                    "bvid", "title", "description", "owner.name", "owner.mid",
-                    "pubDate", "views", "danmaku", "replies", "favorites",
-                    "coins", "shares", "likes", "is_hachimi", "is_available",
-                    "coverUrl", "categoryId", "reviewedAt", "updatedAt"
-            });
-
-            adminVideosIndex.updateSettings(settings);
-            log.info("Admin search index configured successfully");
+            log.info("AdminSearchService initialized and connected to index '{}'.", videoIndexName);
         } catch (Exception e) {
             log.error("Failed to initialize admin search index", e);
         }
