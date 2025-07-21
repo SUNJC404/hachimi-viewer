@@ -17,7 +17,6 @@ import java.util.Map; // Import Map
 public interface VideoMapper extends BaseMapper<Video> {
 
     // --- 为了代码清晰和复用，定义 SQL 片段 ---
-    // 【最终修正】: 包含了您指出的 aid, duration, danmaku 等所有在表结构中存在的列
     String VIDEO_WITH_OWNER_COLUMNS =
             "v.bvid, v.aid, v.title, v.description, v.duration, v.pub_date, v.create_date, " +
                     "v.cover_url, v.views, v.danmaku, v.replies, v.favorites, v.coins, v.shares, " +
