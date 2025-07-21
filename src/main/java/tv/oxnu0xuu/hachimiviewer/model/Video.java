@@ -47,6 +47,10 @@ public class Video {
     @TableField(exist = false)
     private User owner;
 
+    private String user_name;
+
+    private String user_avatar_url;
+
     private Long ownerMid;
 
     private boolean isHachimi;

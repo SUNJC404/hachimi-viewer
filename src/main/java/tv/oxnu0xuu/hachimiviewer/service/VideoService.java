@@ -25,7 +25,6 @@ public class VideoService {
                 .collect(Collectors.toList());
     }
 
-    // 6. 对另一个方法也进行同样的操作
     @Transactional(readOnly = true)
     public List<VideoReviewDto> getRandomHachimiVideos(int limit) {
         List<Video> videos = videoMapper.findRandomHachimiVideos(limit);

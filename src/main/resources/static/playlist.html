@@ -745,7 +745,7 @@
                         <div class="search-result-item" onclick="addVideoToPlaylist('${video.bvid}')">
                             <img class="search-result-thumbnail" src="${video.coverUrl}@320w_180h_1c.webp" alt="${video.title}">
                             <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 500; margin-bottom: 4px;">${video.title}</div>
+                                <div style="font-weight: 500; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${video.title}</div>
                                 <div style="font-size: 12px; color: var(--text-secondary);">
                                     UP主: ${video.owner ? video.owner.name : '未知'} · 播放: ${formatViews(video.views)}
                                 </div>
@@ -814,42 +814,47 @@
     videoList.addEventListener('dragstart', (e) => {
       if (e.target.classList.contains('video-item')) {
         draggedElement = e.target;
-        e.target.classList.add('dragging');
+        setTimeout(() => e.target.classList.add('dragging'), 0);
       }
     });
 
     videoList.addEventListener('dragend', (e) => {
-      if (e.target.classList.contains('video-item')) {
-        e.target.classList.remove('dragging');
+      if(draggedElement) {
+        draggedElement.classList.remove('dragging');
+        draggedElement = null;
       }
     });
 
     videoList.addEventListener('dragover', (e) => {
       e.preventDefault();
       const afterElement = getDragAfterElement(videoList, e.clientY);
-      if (afterElement == null) {
-        videoList.appendChild(draggedElement);
-      } else {
-        videoList.insertBefore(draggedElement, afterElement);
+      if (draggedElement) {
+        if (afterElement == null) {
+          videoList.appendChild(draggedElement);
+        } else {
+          videoList.insertBefore(draggedElement, afterElement);
+        }
       }
     });
 
     videoList.addEventListener('drop', async (e) => {
       e.preventDefault();
-      // 获取新的顺序
+      if (!draggedElement) return;
+
       const items = Array.from(videoList.querySelectorAll('.video-item'));
       const draggedId = parseInt(draggedElement.dataset.id);
       const newPosition = items.indexOf(draggedElement) + 1;
 
       try {
         await updateVideoPosition(draggedId, newPosition);
+        // 刷新以确认后台更新
+        loadPlaylistByCode(currentPlaylist.shareCode);
       } catch (error) {
         alert('更新位置失败');
         loadPlaylistByCode(currentPlaylist.shareCode);
       }
     });
 
-    // 为每个视频项添加 draggable 属性
     document.querySelectorAll('.video-item').forEach(item => {
       item.draggable = true;
     });
@@ -861,7 +866,6 @@
     return draggableElements.reduce((closest, child) => {
       const box = child.getBoundingClientRect();
       const offset = y - box.top - box.height / 2;
-
       if (offset < 0 && offset > closest.offset) {
         return { offset: offset, element: child };
       } else {
@@ -892,7 +896,7 @@
     if (num >= 10000) {
       return (num / 10000).toFixed(1) + '万';
     }
-    return num.toLocaleString();
+    return num ? num.toLocaleString() : 0;
   }
 
   function formatDate(dateString) {
@@ -951,9 +955,12 @@
   });
 
   // Enter 键搜索
-  document.getElementById('shareCodeInput').addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') {
+  document.addEventListener('keyup', (e) => {
+    if(e.target.id === 'shareCodeInput' && e.key === 'Enter') {
       loadPlaylist();
+    }
+    if(e.target.id === 'videoSearchInput' && e.key === 'Enter') {
+      searchVideos();
     }
   });
 </script>
