@@ -64,11 +64,11 @@ public class AdminSearchService {
                 filter.append("is_hachimi = ").append(isHachimi);
             }
 
-            if (isReported != null && isReported) {
+            if (isReported != null) {
                 if (filter.length() > 0) {
                     filter.append(" AND ");
                 }
-                filter.append("isReported = true");
+                filter.append("is_reported = ").append(isReported);
             }
 
             if (filter.length() > 0) {
