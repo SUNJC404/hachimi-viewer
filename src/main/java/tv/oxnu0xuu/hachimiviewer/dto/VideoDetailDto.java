@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class VideoDetailDto {
     private String bvid;
     private String title;
+    private Integer duration;
     private String description;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

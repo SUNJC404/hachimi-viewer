@@ -13,6 +13,7 @@ import tv.oxnu0xuu.hachimiviewer.model.Playlist;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -63,6 +64,15 @@ public class PlaylistController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "获取播放列表失败: " + e.getMessage()));
         }
+    }
+
+    /**
+     * 获取随机播放列表
+     */
+    @GetMapping("/random")
+    public ResponseEntity<List<PlaylistDto>> getRandomPlaylists(@RequestParam(defaultValue = "5") int limit) {
+        List<PlaylistDto> playlists = playlistService.getRandomPlaylists(limit);
+        return ResponseEntity.ok(playlists);
     }
 
     /**

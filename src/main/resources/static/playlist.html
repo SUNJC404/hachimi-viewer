@@ -359,6 +359,59 @@
       object-fit: cover;
     }
 
+    /* Random Playlists */
+    #random-playlists-section {
+      margin-bottom: 30px;
+    }
+
+    .playlist-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .playlist-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .playlist-card-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .playlist-card-views {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .playlist-card-videos {
+      display: flex;
+      gap: 10px;
+    }
+
+    .playlist-card-video-cover {
+      width: 120px;
+      height: 68px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+    }
+
+    .playlist-card-more-videos {
+      width: 68px;
+      height: 68px;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     /* Empty state */
     .empty-state {
       text-align: center;
@@ -446,7 +499,12 @@
 </header>
 
 <div class="container">
-  <div id="mainContent"></div>
+  <div id="mainContent">
+    <div id="random-playlists-section">
+      <h2 style="margin-bottom: 20px;">随机播放列表</h2>
+      <div id="random-playlists-container"></div>
+    </div>
+  </div>
 </div>
 
 <div id="createModal" class="modal">
@@ -502,8 +560,64 @@
     if (shareCode) {
       document.getElementById('shareCodeInput').value = shareCode;
       loadPlaylist();
+    } else {
+      loadRandomPlaylists();
     }
   });
+
+  // 加载随机播放列表
+  async function loadRandomPlaylists() {
+    const container = document.getElementById('random-playlists-container');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载中...</div></div>';
+    try {
+      const response = await fetch('/api/playlists/random?limit=5');
+      if (!response.ok) {
+        throw new Error('加载失败');
+      }
+      const playlists = await response.json();
+      displayRandomPlaylists(playlists);
+    } catch (error) {
+      container.innerHTML = `<p class="error-message">${error.message}</p>`;
+    }
+  }
+
+  // 显示随机播放列表
+  function displayRandomPlaylists(playlists) {
+    const container = document.getElementById('random-playlists-container');
+    if (!playlists || playlists.length === 0) {
+      container.innerHTML = '<p class="empty-message">暂无随机播放列表</p>';
+      return;
+    }
+    container.innerHTML = playlists.map(playlist => {
+      const videosHtml = playlist.videos.map(video => `
+              <img class="playlist-card-video-cover" src="https://images.weserv.nl/?url=${encodeURIComponent(video.coverUrl)}&w=240&h=136&fit=cover&output=webp" alt="${video.title}" referrerpolicy="no-referrer">
+          `).join('');
+
+      const moreVideosSvg = playlist.videoCount > 5 ? `
+              <div class="playlist-card-more-videos">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="1"></circle>
+                      <circle cx="19" cy="12" r="1"></circle>
+                      <circle cx="5" cy="12" r="1"></circle>
+                  </svg>
+              </div>
+          ` : '';
+
+      return `
+              <div class="playlist-card" onclick="loadPlaylistByCode('${playlist.shareCode}')" style="cursor: pointer;">
+                  <div class="playlist-card-header">
+                      <div class="playlist-card-title">${playlist.title}</div>
+                      <div class="playlist-card-views">查看次数: ${playlist.viewCount}</div>
+                  </div>
+                  <div class="playlist-card-videos">
+                      ${videosHtml}
+                      ${moreVideosSvg}
+                  </div>
+              </div>
+          `;
+    }).join('');
+  }
+
 
   // 创建播放列表
   async function createPlaylist() {

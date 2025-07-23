@@ -13,6 +13,7 @@ import java.time.LocalDateTime; // Add this import
 public class VideoReviewDto {
     private String bvid;
     private String title;
+    private Integer duration;
 
     @JsonProperty("is_hachimi")
     private boolean isHachimi;

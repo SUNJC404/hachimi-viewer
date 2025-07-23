@@ -17,6 +17,7 @@ import tv.oxnu0xuu.hachimiviewer.model.Video;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -266,6 +267,28 @@ public class PlaylistService {
         // 更新播放列表更新时间
         playlist.setUpdatedAt(LocalDateTime.now());
         playlistMapper.updateById(playlist);
+    }
+
+    /**
+     * 获取随机播放列表
+     */
+    @Transactional(readOnly = true)
+    public List<PlaylistDto> getRandomPlaylists(int limit) {
+        List<Playlist> playlists = playlistMapper.findRandomPlaylists(limit);
+        if (playlists.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return playlists.stream().map(playlist -> {
+            PlaylistDto dto = PlaylistDto.fromEntity(playlist);
+            List<PlaylistVideo> playlistVideos = playlistVideoMapper.findByPlaylistIdWithVideos(playlist.getId());
+            List<PlaylistVideoDto> videoDtos = playlistVideos.stream()
+                    .limit(5)
+                    .map(PlaylistVideoDto::fromEntity)
+                    .collect(Collectors.toList());
+            dto.setVideos(videoDtos);
+            dto.setVideoCount(playlistVideos.size());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     /**

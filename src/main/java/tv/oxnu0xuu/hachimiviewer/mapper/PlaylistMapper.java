@@ -12,4 +12,7 @@ public interface PlaylistMapper extends BaseMapper<Playlist> {
 
     @Update("UPDATE playlists SET view_count = view_count + 1 WHERE share_code = #{shareCode}")
     void incrementViewCount(@Param("shareCode") String shareCode);
+
+    @Select("SELECT * FROM playlists WHERE view_count > 0 ORDER BY RAND() LIMIT #{limit}")
+    List<Playlist> findRandomPlaylists(@Param("limit") int limit);
 }
