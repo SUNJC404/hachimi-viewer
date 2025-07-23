@@ -68,7 +68,7 @@ public class AdminSearchService {
                 if (filter.length() > 0) {
                     filter.append(" AND ");
                 }
-                filter.append("is_reported = ").append(isReported);
+                filter.append("isReported = ").append(isReported);
             }
 
             if (filter.length() > 0) {
@@ -174,9 +174,17 @@ public class AdminSearchService {
                             if (likesObj != null) log.warn("Unexpected type for likes for bvid {}: Expected Number, got {}", hit.get("bvid"), likesObj.getClass().getName());
                         }
 
+
                         dto.setHachimi((Boolean) hit.get("is_hachimi"));
                         dto.setAvailable(hit.get("is_available") != null ? (Boolean) hit.get("is_available") : true);
                         dto.setCoverUrl((String) hit.get("coverUrl"));
+
+                        Object isReportedObj = hit.get("is_reported");
+                        if (isReportedObj instanceof Boolean) {
+                            dto.setReported((Boolean) isReportedObj);
+                        } else {
+                            dto.setReported(false); // 默认值
+                        }
 
                         Object categoryIdObj = hit.get("categoryId");
                         if (categoryIdObj instanceof Number) {

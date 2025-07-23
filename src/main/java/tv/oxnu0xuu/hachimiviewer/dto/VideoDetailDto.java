@@ -33,6 +33,9 @@ public class VideoDetailDto {
     @JsonProperty("is_available")
     private boolean isAvailable;
 
+    @JsonProperty("is_reported")
+    private boolean isReported;
+
     private String ownerName;
     private Long ownerMid;
 

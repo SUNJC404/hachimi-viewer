@@ -39,6 +39,7 @@ public class VideoReviewDto {
         dto.setAvailable(video.isAvailable());
         dto.setBvid(video.getBvid());
         dto.setTitle(video.getTitle());
+        dto.setDuration(video.getDuration());
         dto.setHachimi(video.isHachimi());
         dto.setViews(video.getViews());
         dto.setCoverUrl(video.getCoverUrl());

@@ -56,10 +56,10 @@ public class MeiliSearchInitializer {
             settings.setDisplayedAttributes(new String[]{
                     "bvid", "title", "description",
                     "owner", // <-- 直接返回完整的 owner 对象，包含 name, face, mid
-                    "pubDate", "views", "duration", // duration 在 index.html 中也用到了
+                    "pubDate", "views", "duration",
                     "danmaku", "replies", "favorites",
                     "coins", "shares", "likes",
-                    "is_hachimi", "is_available",
+                    "is_hachimi", "is_available", "is_reported",
                     "coverUrl", "categoryId", "reviewedAt", "updatedAt"
             });
 

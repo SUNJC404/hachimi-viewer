@@ -652,7 +652,7 @@
                     <th>发布时间</th>
                     <th>视频数据</th>
                     <th>哈基米视频</th>
-                    <th>操作</th>
+                    <th>待办</th>
                 </tr>
                 </thead>
                 <tbody id="video-tbody">
@@ -1002,12 +1002,15 @@
     }
 
     // 显示简介
-    function showDescription(title, description) {
+    function showDescription(element) {
+        const title = element.dataset.title;
+        const description = element.dataset.description;
+
         document.getElementById('modal-title').textContent = '视频简介';
         document.getElementById('modal-body').innerHTML = `
-                <h4>${escapeHtml(title)}</h4>
-                <p style="white-space: pre-wrap;">${escapeHtml(description)}</p>
-            `;
+            <h4>${title}</h4>
+            <p style="white-space: pre-wrap;">${description}</p>
+        `;
         document.getElementById('modal').style.display = 'block';
     }
 

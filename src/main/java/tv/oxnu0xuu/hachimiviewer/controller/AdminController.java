@@ -29,7 +29,7 @@ public class AdminController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean isHachimi,
-            @RequestParam(required = false) Boolean isReported, // Add this
+            @RequestParam(required = false) Boolean isReported,
             @RequestParam(defaultValue = "pubDate:desc") String sort) {
 
         // 检查管理员权限
