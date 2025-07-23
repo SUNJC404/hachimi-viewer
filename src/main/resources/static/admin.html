@@ -308,6 +308,26 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .action-btn.resolve {
+            background: #f6ffed;
+            color: var(--success-color);
+            border-color: #b7eb8f;
+        }
+
+        .action-btn.resolve:hover {
+            opacity: 0.8;
+        }
+
         /* 分页 */
         .pagination {
             display: flex;
@@ -610,6 +630,7 @@
                 <option value="">全部视频</option>
                 <option value="true">哈基米视频</option>
                 <option value="false">非哈基米视频</option>
+                <option value="reported">已报告的视频</option>
             </select>
             <select id="sort-select" class="filter-select">
                 <option value="pubDate:desc">最新发布</option>
@@ -631,6 +652,7 @@
                     <th>发布时间</th>
                     <th>视频数据</th>
                     <th>哈基米视频</th>
+                    <th>操作</th>
                 </tr>
                 </thead>
                 <tbody id="video-tbody">
@@ -821,8 +843,10 @@
             if (currentSearch) {
                 url += `&search=${encodeURIComponent(currentSearch)}`;
             }
-            if (currentFilter) {
+            if (currentFilter === 'true' || currentFilter === 'false') {
                 url += `&isHachimi=${currentFilter}`;
+            } else if (currentFilter === 'reported') {
+                url += `&isReported=true`;
             }
             if (currentSort) {
                 url += `&sort=${currentSort}`;
@@ -862,7 +886,7 @@
         if (!videos || videos.length === 0) {
             tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" style="text-align: center; color: var(--text-secondary);">
+                        <td colspan="8" style="text-align: center; color: var(--text-secondary);">
                             暂无数据
                         </td>
                     </tr>
@@ -898,6 +922,9 @@
                               onclick="toggleHachimi('${video.bvid}', ${video.is_hachimi})">
                             ${video.is_hachimi ? '是' : '否'}
                         </span>
+                    </td>
+                    <td>
+                        ${video.is_reported ? `<button class="action-btn resolve" onclick="resolveReport('${video.bvid}')">解决报告</button>` : ''}
                     </td>
                 </tr>
             `).join('');
@@ -948,6 +975,28 @@
             loadVideos(currentPage);
         } catch (error) {
             console.error('Toggle hachimi failed:', error);
+            alert('操作失败，请重试');
+        }
+    }
+
+    async function resolveReport(bvid) {
+        if (!confirm(`确定要将此视频的报告状态标记为已解决吗？`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/admin/videos/${bvid}/resolve-report`, {
+                method: 'PUT'
+            });
+
+            if (!response.ok) {
+                throw new Error('操作失败');
+            }
+
+            // 重新加载当前页
+            loadVideos(currentPage);
+        } catch (error) {
+            console.error('Resolve report failed:', error);
             alert('操作失败，请重试');
         }
     }

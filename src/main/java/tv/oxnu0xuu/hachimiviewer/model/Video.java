@@ -77,6 +77,8 @@ public class Video {
 
     private LocalDateTime updatedAt;
 
+    private boolean isReported;
+
     public User getOwner() {
         if (owner == null) owner = new User();
         return owner;

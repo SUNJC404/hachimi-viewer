@@ -27,6 +27,9 @@ public class VideoReviewDto {
     @JsonProperty("is_available")
     private boolean isAvailable;
 
+    @JsonProperty("is_reported")
+    private boolean isReported;
+
     // Add pubDate field with JSON format annotation for consistency with VideoDetailDto
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime pubDate;
@@ -41,6 +44,7 @@ public class VideoReviewDto {
         dto.setCoverUrl(video.getCoverUrl());
         dto.setDescription(video.getDescription());
         dto.setCategoryId(video.getCategoryId());
+        dto.setReported(video.isReported());
         // Populate the new pubDate field from the Video entity
         dto.setPubDate(video.getPubDate());
         if (video.getOwner() != null) {

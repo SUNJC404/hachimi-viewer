@@ -29,7 +29,8 @@ public class AdminController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean isHachimi,
-            @RequestParam(defaultValue = "pubDate:desc") String sort) { // 新增
+            @RequestParam(required = false) Boolean isReported, // Add this
+            @RequestParam(defaultValue = "pubDate:desc") String sort) {
 
         // 检查管理员权限
         Boolean isAuthenticated = (Boolean) session.getAttribute("isAdminAuthenticated");
@@ -37,7 +38,7 @@ public class AdminController {
             return ResponseEntity.status(401).body(Map.of("error", "未授权"));
         }
 
-        return ResponseEntity.ok(adminService.getVideos(page, size, search, isHachimi, sort));
+        return ResponseEntity.ok(adminService.getVideos(page, size, search, isHachimi, isReported, sort));
     }
 
     @PutMapping("/videos/{bvid}/hachimi")
@@ -53,6 +54,24 @@ public class AdminController {
 
         try {
             adminService.toggleHachimiStatus(bvid);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/videos/{bvid}/resolve-report")
+    public ResponseEntity<?> resolveReport(
+            HttpSession session,
+            @PathVariable String bvid) {
+
+        Boolean isAuthenticated = (Boolean) session.getAttribute("isAdminAuthenticated");
+        if (isAuthenticated == null || !isAuthenticated) {
+            return ResponseEntity.status(401).body(Map.of("error", "未授权"));
+        }
+
+        try {
+            adminService.resolveReport(bvid);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));

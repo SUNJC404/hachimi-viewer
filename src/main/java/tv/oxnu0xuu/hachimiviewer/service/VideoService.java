@@ -1,5 +1,6 @@
 package tv.oxnu0xuu.hachimiviewer.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,5 +32,14 @@ public class VideoService {
         return videos.stream()
                 .map(VideoReviewDto::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void reportVideo(String bvid) {
+        Video video = videoMapper.selectById(bvid);
+        if (video != null) {
+            video.setReported(true);
+            videoMapper.updateById(video);
+        }
     }
 }

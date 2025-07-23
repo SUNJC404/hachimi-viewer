@@ -748,6 +748,148 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
+
+        /* Video Options Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-xl);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-tertiary);
+            font-size: 24px;
+            line-height: 1;
+            padding: 4px;
+            transition: color 0.2s ease;
+        }
+
+        .close-modal-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body p {
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .modal-body p strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .modal-footer {
+            margin-top: 32px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal-button {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            border: none;
+        }
+
+        .report-btn {
+            background-color: var(--warning-color);
+            color: #fff;
+        }
+
+        .report-btn:hover {
+            opacity: 0.85;
+        }
+
+        .cancel-btn {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        .cancel-btn:hover {
+            background-color: var(--border-color);
+        }
+
+        /* More Options Button on Video Card */
+        .video-options-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            z-index: 10;
+            opacity: 0;
+        }
+
+        .video-card:hover .video-options-btn {
+            opacity: 1;
+        }
+
+        .video-options-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .video-options-btn svg {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -834,6 +976,27 @@
     </div>
 </footer>
 
+<!-- Video Options Modal -->
+<div id="video-options-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">视频选项</h3>
+            <button class="close-modal-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p><strong>标题:</strong> <span id="modal-video-title"></span></p>
+            <p><strong>UP主:</strong> <span id="modal-video-owner"></span></p>
+            <p><strong>BVID:</strong> <span id="modal-video-bvid"></span></p>
+            <p style="margin-top: 20px; color: var(--text-tertiary); font-size: 12px;">如果视频内容不当、无法播放或不属于哈基米范畴，请帮助我们改进！</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-button cancel-btn" onclick="closeModal()">取消</button>
+            <button id="report-video-btn" class="modal-button report-btn">报告此视频</button>
+        </div>
+    </div>
+</div>
+
+
 <script>
     // --- 全局状态变量 ---
     let latestVideosPage = 0;
@@ -841,6 +1004,7 @@
     let currentSearchPage = 1;
     let currentSearchSort = 'pubDate:desc'; // 新增：当前搜索排序
     const SEARCH_HITS_PER_PAGE = 20;
+    let activeModalVideo = null; // To store the video data for the currently open modal
 
     // 响应式布局配置
     const responsiveConfig = {
@@ -858,6 +1022,9 @@
         const refreshLatestBtn = document.getElementById('refresh-latest');
         const refreshRandomBtn = document.getElementById('refresh-random');
         const searchSortSelect = document.getElementById('search-sort'); // 新增
+        const modalOverlay = document.getElementById('video-options-modal');
+        const reportVideoBtn = document.getElementById('report-video-btn');
+
 
         // 初始化响应式布局
         updateResponsiveLayout();
@@ -892,7 +1059,65 @@
         });
 
         refreshRandomBtn.addEventListener('click', fetchRandomVideos);
+        
+        // Modal listeners
+        modalOverlay.addEventListener('click', (event) => {
+            if (event.target === modalOverlay) {
+                closeModal();
+            }
+        });
+
+        reportVideoBtn.addEventListener('click', handleReportVideo);
     });
+
+    // --- Modal Functions ---
+    function openModal(video) {
+        activeModalVideo = video;
+        document.getElementById('modal-video-title').textContent = video.title;
+        document.getElementById('modal-video-owner').textContent = video.owner ? video.owner.name : '未知UP主';
+        document.getElementById('modal-video-bvid').textContent = video.bvid;
+        document.getElementById('video-options-modal').classList.add('visible');
+    }
+
+    function closeModal() {
+        document.getElementById('video-options-modal').classList.remove('visible');
+        activeModalVideo = null;
+    }
+
+    async function handleReportVideo() {
+        if (!activeModalVideo) return;
+
+        const bvid = activeModalVideo.bvid;
+        const reportBtn = document.getElementById('report-video-btn');
+        reportBtn.disabled = true;
+        reportBtn.textContent = '处理中...';
+
+        try {
+            const response = await fetch(`/api/videos/${bvid}/report`, {
+                method: 'POST',
+            });
+
+            if (!response.ok) {
+                throw new Error('报告失败，请稍后重试。');
+            }
+            
+            reportBtn.textContent = '感谢反馈！';
+            setTimeout(() => {
+                closeModal();
+                reportBtn.disabled = false;
+                reportBtn.textContent = '报告此视频';
+            }, 1500);
+
+        } catch (error) {
+            console.error('Report error:', error);
+            reportBtn.textContent = error.message;
+             setTimeout(() => {
+                reportBtn.disabled = false;
+                reportBtn.textContent = '报告此视频';
+            }, 2000);
+        }
+    }
+
 
     // --- 响应式布局工具函数 ---
     function getCurrentLayout() {
@@ -1041,6 +1266,9 @@
             <div class="video-play-icon"></div>
           </div>
         </a>
+        <button class="video-options-btn" title="更多选项">
+            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+        </button>
         <div class="video-card-content">
           <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
             <h3 class="video-card-title" title="${video.title}">${video.title}</h3>
@@ -1061,6 +1289,13 @@
           </div>
         </div>
       `;
+            
+            videoCard.querySelector('.video-options-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openModal(video);
+            });
+
             fragment.appendChild(videoCard);
         }
 

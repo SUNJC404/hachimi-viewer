@@ -55,13 +55,20 @@ public class AdminSearchService {
         }
     }
 
-    public Map<String, Object> searchVideos(String query, int page, int size, Boolean isHachimi, String sort) {
+    public Map<String, Object> searchVideos(String query, int page, int size, Boolean isHachimi, Boolean isReported, String sort) {
         try {
             SearchRequest searchRequest = new SearchRequest(query != null ? query : "");
 
             StringBuilder filter = new StringBuilder();
             if (isHachimi != null) {
                 filter.append("is_hachimi = ").append(isHachimi);
+            }
+
+            if (isReported != null && isReported) {
+                if (filter.length() > 0) {
+                    filter.append(" AND ");
+                }
+                filter.append("isReported = true");
             }
 
             if (filter.length() > 0) {

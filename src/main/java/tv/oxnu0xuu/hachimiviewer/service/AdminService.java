@@ -36,9 +36,9 @@ public class AdminService {
     private String videoIndexName;
 
     @Transactional(readOnly = true)
-    public Map<String, Object> getVideos(int page, int size, String search, Boolean isHachimi, String sort) {
+    public Map<String, Object> getVideos(int page, int size, String search, Boolean isHachimi, Boolean isReported, String sort) {
         // This method fetches data from MeiliSearch
-        return adminSearchService.searchVideos(search, page, size, isHachimi, sort);
+        return adminSearchService.searchVideos(search, page, size, isHachimi, isReported, sort);
     }
 
     @Transactional
@@ -58,7 +58,7 @@ public class AdminService {
                 Index index = meiliSearchClient.index(videoIndexName);
                 // Convert the updated Video entity to VideoReviewDto, which is the structure MeiliSearch expects for indexing
                 VideoReviewDto dtoToUpdate = VideoReviewDto.fromEntity(video);
-                String document = objectMapper.writeValueAsString(dtoToUpdate);
+                String document = objectMapper.writeValueAsString(new VideoReviewDto[]{dtoToUpdate});
                 // Use addDocuments; if a document with this bvid (primary key) already exists, it will be updated.
                 index.addDocuments(document, "bvid");
                 System.out.println("MeiliSearch: Video " + bvid + " updated immediately with hachimi status " + newStatus);
@@ -67,6 +67,27 @@ public class AdminService {
                 System.err.println("Error updating MeiliSearch for video " + bvid + ": " + e.getMessage());
             }
             // --- IMMEDIATE MEILISEARCH UPDATE END ---
+        }
+    }
+
+    @Transactional
+    public void resolveReport(String bvid) {
+        Video video = videoMapper.selectById(bvid);
+        if (video != null && video.isReported()) {
+            video.setReported(false);
+            video.setUpdatedAt(LocalDateTime.now());
+            videoMapper.updateById(video);
+
+            // Immediately sync the change to MeiliSearch
+            try {
+                Index index = meiliSearchClient.index(videoIndexName);
+                VideoReviewDto dtoToUpdate = VideoReviewDto.fromEntity(video);
+                String document = objectMapper.writeValueAsString(new VideoReviewDto[]{dtoToUpdate});
+                index.addDocuments(document, "bvid");
+                System.out.println("MeiliSearch: Video " + bvid + " report resolved immediately.");
+            } catch (Exception e) {
+                System.err.println("Error updating MeiliSearch for video " + bvid + " after resolving report: " + e.getMessage());
+            }
         }
     }
 
