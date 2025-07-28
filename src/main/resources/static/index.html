@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>哈基米启动器</title>
+    <title>哈基米FM</title>
     <style>
         /* CSS 样式部分保持不变 */
         * {
@@ -896,23 +896,24 @@
 
 <div class="container">
     <header class="header">
-        <h1>哈基米启动器</h1>
-        <p class="header-subtitle">发现最新最酷的哈基米内容 ✨</p>
+        <link rel="apple-touch-icon" sizes="180x180" th:href="@{/apple-touch-icon.png}">
+        <link rel="icon" type="image/png" sizes="32x32" th:href="@{/favicon-32x32.png}">
+        <link rel="icon" type="image/png" sizes="16x16" th:href="@{/favicon-16x16.png}">
+        <link rel="manifest" th:href="@{/site.webmanifest}">
+        <h1>哈基米FM</h1>
+        <p class="header-subtitle">最新最酷的哈基米内容</p>
     </header>
 
-    <div class="search-wrapper">
-        <div class="search-container">
-            <input type="text" id="search-input" placeholder="搜索一个基米？">
-            <button id="search-button">
-                搜索
-            </button>
-        </div>
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="搜索一个基米？">
+        <button id="search-button">
+            搜索
+        </button>
     </div>
 
     <div id="search-results" class="videos-section" style="display: none;">
         <div class="section-header">
             <h2>
-                <div class="section-icon">🔍</div>
                 搜索结果
             </h2>
             <div class="sort-options">
@@ -930,7 +931,6 @@
     <div class="videos-section">
         <div class="section-header">
             <h2>
-                <div class="section-icon">🔥</div>
                 最新哈气
             </h2>
             <button id="refresh-latest" class="refresh-button" title="换一批">
@@ -946,7 +946,6 @@
     <div class="videos-section">
         <div class="section-header">
             <h2>
-                <div class="section-icon">🎲</div>
                 随机哈气
             </h2>
             <button id="refresh-random" class="refresh-button" title="刷新随机视频">

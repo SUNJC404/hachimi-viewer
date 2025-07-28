@@ -47,7 +47,7 @@ public class MeiliSearchInitializer {
             settings.setSearchableAttributes(new String[]{"bvid","owner.name", "title", "description"});
 
             // 可筛选的属性
-            settings.setFilterableAttributes(new String[]{"is_hachimi", "is_available", "pubDate", "isReported"});
+            settings.setFilterableAttributes(new String[]{"is_hachimi", "is_available", "pubDate", "is_reported"});
 
             // 可排序的属性
             settings.setSortableAttributes(new String[]{"pubDate", "views"});
