@@ -38,13 +38,13 @@ public class MeiliSearchInitializer {
 
             Settings settings = new Settings();
 
-            // 新增分页设置
+            // 分页设置
             com.meilisearch.sdk.model.Pagination paginationSettings = new com.meilisearch.sdk.model.Pagination();
             paginationSettings.setMaxTotalHits(10000);
             settings.setPagination(paginationSettings);
 
             // 可搜索的属性
-            settings.setSearchableAttributes(new String[]{"bvid","owner.name", "title", "description"});
+            settings.setSearchableAttributes(new String[]{"bvid","owner.name", "title", "description", "original_song", "original_artist"});
 
             // 可筛选的属性
             settings.setFilterableAttributes(new String[]{"is_hachimi", "is_available", "pubDate", "is_reported"});
@@ -52,15 +52,16 @@ public class MeiliSearchInitializer {
             // 可排序的属性
             settings.setSortableAttributes(new String[]{"pubDate", "views"});
 
-            // 在搜索结果中返回的属性 (关键修改)
+            // 在搜索结果中返回的属性
             settings.setDisplayedAttributes(new String[]{
                     "bvid", "title", "description",
-                    "owner", // <-- 直接返回完整的 owner 对象，包含 name, face, mid
+                    "owner", // 返回完整的 owner 对象，包含 name, face, mid
                     "pubDate", "views", "duration",
                     "danmaku", "replies", "favorites",
                     "coins", "shares", "likes",
                     "is_hachimi", "is_available", "is_reported",
-                    "coverUrl", "categoryId", "reviewedAt", "updatedAt"
+                    "coverUrl", "categoryId", "reviewedAt", "updatedAt",
+                    "original_song", "original_artist"
             });
 
             // 更新 MeiliSearch 中的配置

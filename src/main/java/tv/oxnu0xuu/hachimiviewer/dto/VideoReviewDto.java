@@ -34,6 +34,12 @@ public class VideoReviewDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime pubDate;
 
+    @JsonProperty("original_song")
+    private String originalSong;
+
+    @JsonProperty("original_artist")
+    private String originalArtist;
+
     public static VideoReviewDto fromEntity(Video video) {
         VideoReviewDto dto = new VideoReviewDto();
         dto.setAvailable(video.isAvailable());
@@ -46,6 +52,9 @@ public class VideoReviewDto {
         dto.setDescription(video.getDescription());
         dto.setCategoryId(video.getCategoryId());
         dto.setReported(video.isReported());
+        dto.setOriginalSong(video.getOriginalSong());
+        dto.setOriginalArtist(video.getOriginalArtist());
+
         // Populate the new pubDate field from the Video entity
         dto.setPubDate(video.getPubDate());
         if (video.getOwner() != null) {
