@@ -237,6 +237,30 @@ public class PlaylistService {
     }
 
     /**
+     * 删除播放列表
+     */
+    @Transactional
+    public void deletePlaylist(String shareCode, String editCode) {
+        Playlist playlist = playlistMapper.selectOne(
+                new QueryWrapper<Playlist>()
+                        .eq("share_code", shareCode)
+                        .eq("edit_code", editCode)
+        );
+
+        if (playlist == null) {
+            throw new IllegalArgumentException("无效的编辑码或播放列表不存在");
+        }
+
+        // 首先删除关联的视频
+        playlistVideoMapper.deleteByPlaylistId(playlist.getId());
+
+        // 然后删除播放列表本身
+        playlistMapper.deleteById(playlist.getId());
+
+        log.info("Playlist with share code {} has been deleted.", shareCode);
+    }
+
+    /**
      * 调整视频在播放列表中的位置
      */
     @Transactional
@@ -270,11 +294,11 @@ public class PlaylistService {
     }
 
     /**
-     * 获取随机播放列表
+     * 获取热门播放列表
      */
     @Transactional(readOnly = true)
-    public List<PlaylistDto> getRandomPlaylists(int limit) {
-        List<Playlist> playlists = playlistMapper.findRandomPlaylists(limit);
+    public List<PlaylistDto> getPopularPlaylists(int limit) {
+        List<Playlist> playlists = playlistMapper.findPopularPlaylists(limit);
         if (playlists.isEmpty()) {
             return Collections.emptyList();
         }
@@ -282,7 +306,6 @@ public class PlaylistService {
             PlaylistDto dto = PlaylistDto.fromEntity(playlist);
             List<PlaylistVideo> playlistVideos = playlistVideoMapper.findByPlaylistIdWithVideos(playlist.getId());
             List<PlaylistVideoDto> videoDtos = playlistVideos.stream()
-                    .limit(5)
                     .map(PlaylistVideoDto::fromEntity)
                     .collect(Collectors.toList());
             dto.setVideos(videoDtos);
@@ -290,6 +313,7 @@ public class PlaylistService {
             return dto;
         }).collect(Collectors.toList());
     }
+
 
     /**
      * 生成唯一的分享码

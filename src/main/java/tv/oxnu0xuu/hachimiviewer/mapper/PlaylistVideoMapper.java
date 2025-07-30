@@ -45,4 +45,7 @@ public interface PlaylistVideoMapper extends BaseMapper<PlaylistVideo> {
 
     @Update("UPDATE playlist_videos SET position = #{newPosition} WHERE id = #{id}")
     void updatePosition(@Param("id") Long id, @Param("newPosition") Integer newPosition);
+
+    @Delete("DELETE FROM playlist_videos WHERE playlist_id = #{playlistId}")
+    void deleteByPlaylistId(@Param("playlistId") Long playlistId);
 }

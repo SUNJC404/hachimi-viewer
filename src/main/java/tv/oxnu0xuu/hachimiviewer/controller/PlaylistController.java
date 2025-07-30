@@ -67,11 +67,11 @@ public class PlaylistController {
     }
 
     /**
-     * 获取随机播放列表
+     * 获取热门播放列表
      */
-    @GetMapping("/random")
-    public ResponseEntity<List<PlaylistDto>> getRandomPlaylists(@RequestParam(defaultValue = "5") int limit) {
-        List<PlaylistDto> playlists = playlistService.getRandomPlaylists(limit);
+    @GetMapping("/popular")
+    public ResponseEntity<List<PlaylistDto>> getPopularPlaylists(@RequestParam(defaultValue = "5") int limit) {
+        List<PlaylistDto> playlists = playlistService.getPopularPlaylists(limit);
         return ResponseEntity.ok(playlists);
     }
 
@@ -149,6 +149,26 @@ public class PlaylistController {
                     .body(Map.of("error", "移除视频失败: " + e.getMessage()));
         }
     }
+
+    /**
+     * 删除播放列表
+     */
+    @DeleteMapping("/{shareCode}")
+    public ResponseEntity<?> deletePlaylist(
+            @PathVariable String shareCode,
+            @RequestParam String editCode) {
+        try {
+            playlistService.deletePlaylist(shareCode, editCode);
+            return ResponseEntity.ok(Map.of("success", true, "message", "播放列表已删除"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "删除播放列表失败: " + e.getMessage()));
+        }
+    }
+
 
     /**
      * 调整视频位置

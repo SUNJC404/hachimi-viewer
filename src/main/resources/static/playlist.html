@@ -120,9 +120,11 @@
       margin-bottom: 20px; padding-bottom: 15px;
       border-bottom: 1px solid var(--border-color);
     }
-    .card-title { font-size: 20px; font-weight: bold; flex-grow: 1; }
+    .card-title { font-size: 20px; font-weight: bold; }
     .card-header-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
     .playlist-details { flex-grow: 1; }
+    .playlist-card-main-info { flex-grow: 1; }
+
 
     /* Edit Mode Specifics */
     .playlist-edit-footer {
@@ -201,9 +203,22 @@
     .share-code-display .copy-btn:hover { color: var(--primary-color); }
     .share-code-display .copy-btn svg { width: 16px; height: 16px; }
     .playlist-card-views { font-size: 14px; color: var(--text-secondary); text-align: right; margin-top: 8px; }
-    .playlist-card-videos { display: flex; flex-wrap: wrap; gap: 10px; }
-    .playlist-card-video-cover { width: 120px; height: 68px; border-radius: var(--radius-sm); object-fit: cover; }
-    .playlist-card-more-videos { width: 68px; height: 68px; border-radius: var(--radius-sm); background-color: var(--bg-secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+    .playlist-card-videos { display: flex; flex-wrap: nowrap; gap: 10px; overflow: hidden; }
+    .playlist-card-video-cover { width: 120px; height: 68px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; }
+    .playlist-card-more-videos {
+      width: 68px; height: 68px; border-radius: var(--radius-sm);
+      background-color: var(--bg-secondary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .playlist-card-description {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     /* Utility Styles */
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
@@ -236,9 +251,9 @@
 
 <div class="container">
   <div id="mainContent">
-    <div id="random-playlists-section">
-      <h2 style="margin-bottom: 20px; font-weight: bold;">发现播放列表</h2>
-      <div id="random-playlists-container"></div>
+    <div id="popular-playlists-section">
+      <h2 style="margin-bottom: 20px; font-weight: bold;">热门播放列表</h2>
+      <div id="popular-playlists-container"></div>
     </div>
   </div>
 </div>
@@ -314,68 +329,73 @@
       document.getElementById('shareCodeInput').value = shareCode;
       loadPlaylist();
     } else {
-      loadRandomPlaylists();
+      loadPopularPlaylists();
     }
   });
 
-  async function loadRandomPlaylists() {
-    const container = document.getElementById('random-playlists-container');
+  async function loadPopularPlaylists() {
+    const container = document.getElementById('popular-playlists-container');
     container.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载中...</div></div>';
     try {
-      const response = await fetch('/api/playlists/random?limit=5');
+      const response = await fetch('/api/playlists/popular?limit=10');
       if (!response.ok) throw new Error('加载失败');
       const playlists = await response.json();
-      displayRandomPlaylists(playlists);
+      displayPopularPlaylists(playlists);
     } catch (error) {
       container.innerHTML = `<div class="card"><p class="empty-state">${error.message}</p></div>`;
     }
   }
 
-  function displayRandomPlaylists(playlists) {
-    const container = document.getElementById('random-playlists-container');
+  function displayPopularPlaylists(playlists) {
+    const container = document.getElementById('popular-playlists-container');
     if (!playlists || playlists.length === 0) {
-      container.innerHTML = '<div class="card"><p class="empty-state">暂无随机播放列表</p></div>';
+      container.innerHTML = '<div class="card"><p class="empty-state">暂无热门播放列表</p></div>';
       return;
     }
 
-    const numVideosToShow = 9;
     const copyIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 
     container.innerHTML = playlists.map(playlist => {
+      const numVideosToShow = 9;
+
       const videosHtml = playlist.videos.slice(0, numVideosToShow).map(video => `
-          <img class="playlist-card-video-cover" src="https://images.weserv.nl/?url=${encodeURIComponent(video.coverUrl)}&w=240&h=136&fit=cover&output=webp" alt="${video.title}" referrerpolicy="no-referrer">
-      `).join('');
+            <img class="playlist-card-video-cover" src="https://images.weserv.nl/?url=${encodeURIComponent(video.coverUrl)}&w=240&h=136&fit=cover&output=webp" alt="${video.title}" referrerpolicy="no-referrer">
+        `).join('');
 
       const moreVideosSvg = playlist.videoCount > numVideosToShow ? `
-          <div class="playlist-card-more-videos">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-tertiary);">
-                  <circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle>
-              </svg>
-          </div>
-      ` : '';
+            <div class="playlist-card-more-videos">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-tertiary);">
+                    <circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle>
+                </svg>
+            </div>
+        ` : '';
 
       return `
-          <div class="playlist-card" onclick="loadPlaylistByCode('${playlist.shareCode}')">
-              <div class="card-header">
-                  <div class="card-title">${playlist.title}</div>
-                  <div class="playlist-card-meta-right">
-                      <div class="share-code-display">
-                          <span>${playlist.shareCode}</span>
-                          <button class="copy-btn" title="复制分享码" onclick="copyShareCodeOnCard(event, '${playlist.shareCode}', this)">
-                              ${copyIconSvg}
-                          </button>
-                      </div>
-                      <div class="playlist-card-views">查看: ${formatViews(playlist.viewCount)}</div>
-                  </div>
-              </div>
-              <div class="playlist-card-videos">
-                  ${videosHtml}
-                  ${moreVideosSvg}
-              </div>
-          </div>
-      `;
+            <div class="playlist-card" onclick="loadPlaylistByCode('${playlist.shareCode}')">
+                <div class="card-header">
+                    <div class="playlist-card-main-info">
+                        <div class="card-title">${playlist.title}</div>
+                        <div class="playlist-card-description">${playlist.description || '暂无简介'}</div>
+                    </div>
+                    <div class="playlist-card-meta-right">
+                        <div class="share-code-display">
+                            <span>${playlist.shareCode}</span>
+                            <button class="copy-btn" title="复制分享码" onclick="copyShareCodeOnCard(event, '${playlist.shareCode}', this)">
+                                ${copyIconSvg}
+                            </button>
+                        </div>
+                        <div class="playlist-card-views">查看: ${formatViews(playlist.viewCount)}</div>
+                    </div>
+                </div>
+                <div class="playlist-card-videos">
+                    ${videosHtml}
+                    ${moreVideosSvg}
+                </div>
+            </div>
+        `;
     }).join('');
   }
+
 
   async function createPlaylist() {
     const title = document.getElementById('playlistTitle').value.trim();
@@ -427,15 +447,15 @@
   function goBackToDiscovery() {
     const mainContent = document.getElementById('mainContent');
     mainContent.innerHTML = `
-      <div id="random-playlists-section">
-        <h2 style="margin-bottom: 20px; font-weight: bold;">发现播放列表</h2>
-        <div id="random-playlists-container"></div>
+      <div id="popular-playlists-section">
+        <h2 style="margin-bottom: 20px; font-weight: bold;">热门播放列表</h2>
+        <div id="popular-playlists-container"></div>
       </div>
     `;
     const url = new URL(window.location);
     url.searchParams.delete('code');
     window.history.pushState({}, '', url);
-    loadRandomPlaylists();
+    loadPopularPlaylists();
   }
 
   async function loadPlaylistByCode(shareCode) {
@@ -696,12 +716,12 @@
       return;
     }
     try {
-      const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}?editCode=${currentEditCode}`, {
+      const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}?editCode=${encodeURIComponent(currentEditCode)}`, {
         method: 'DELETE'
       });
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || '删除失败');
+        const errorData = await response.json().catch(() => ({ error: '删除失败' }));
+        throw new Error(errorData.error);
       }
       alert('播放列表已成功删除。');
       goBackToDiscovery(); // Go back to the main page
