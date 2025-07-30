@@ -63,6 +63,7 @@
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
+            margin: 0;
         }
 
         /* 导航栏样式 */
@@ -222,30 +223,27 @@
             list-style: none;
         }
 
-        .sidebar-menu li {
+        .sidebar-menu li a { /* Style the link directly */
             padding: 12px 20px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, color 0.2s;
             display: flex;
             align-items: center;
             gap: 12px;
             color: var(--text-secondary);
             font-size: 14px;
+            text-decoration: none;
         }
 
-        .sidebar-menu li:hover {
+        .sidebar-menu li a:hover {
             background-color: var(--bg-secondary);
             color: var(--primary-color);
         }
 
-        .sidebar-menu li.active {
+        .sidebar-menu li.active a { /* Target the link inside the active li */
             background-color: rgba(0, 161, 214, 0.1);
             color: var(--primary-color);
             font-weight: 500;
-        }
-
-        .sidebar-menu li i {
-            font-size: 18px;
         }
 
         /* 主内容区 */
@@ -804,12 +802,8 @@
     <!-- 侧边栏 -->
     <aside class="sidebar">
         <ul class="sidebar-menu">
-            <li class="active">
-                <span>首页</span>
-            </li>
-            <li>
-                <span>热门</span>
-            </li>
+            <li class="active"><a href="/index.html"><span>首页</span></a></li>
+            <li><a href="/leaderboard.html"><span>排行榜</span></a></li>
         </ul>
     </aside>
 

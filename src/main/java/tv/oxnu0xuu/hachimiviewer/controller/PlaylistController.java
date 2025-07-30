@@ -215,4 +215,23 @@ public class PlaylistController {
         }
         return ip;
     }
+
+    /**
+     * 获取特定月份的 leaderboard playlist.
+     * @param month 月份格式 "YYYY-MM".
+     */
+    @GetMapping("/leaderboard")
+    public ResponseEntity<?> getLeaderboardPlaylist(@RequestParam String month) {
+        try {
+            PlaylistDto playlist = playlistService.getLeaderboardPlaylist(month);
+            if (playlist == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "该月份的排行榜暂未生成。"));
+            }
+            return ResponseEntity.ok(playlist);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "获取排行榜失败: " + e.getMessage()));
+        }
+    }
 }

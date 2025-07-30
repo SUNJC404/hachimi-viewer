@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>月度排行榜</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #00a1d6; --primary-dark: #0087c0; --secondary-color: #fb7299; --accent-color: #ff6b6b;
+      --success-color: #52c41a; --danger-color: #ff4d4f; --warning-color: #faad14; --bg-primary: #ffffff;
+      --bg-secondary: #f4f4f4; --bg-tertiary: #e7e7e7; --bg-card: #ffffff; --text-primary: #212121;
+      --text-secondary: #505050; --text-tertiary: #999999; --border-color: #e7e7e7; --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1); --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #181818; --bg-secondary: #212121; --bg-tertiary: #2a2a2a; --bg-card: #242424;
+        --text-primary: #e5e5e5; --text-secondary: #a0a0a0; --text-tertiary: #707070; --border-color: #3a3a3a;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    /* Main Layout */
+    .main-container { max-width: 1280px; margin: 0 auto; padding: 16px; display: flex; gap: 16px; }
+    .sidebar { width: 180px; flex-shrink: 0; background-color: var(--bg-primary); border-radius: var(--radius-md); padding: 16px 0; box-shadow: var(--shadow-sm); height: fit-content; position: sticky; top: 80px; }
+    .content { flex: 1; }
+
+    /* Sidebar Menu */
+    .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+    .sidebar-menu li a { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 14px; text-decoration: none; transition: background-color 0.2s, color 0.2s; }
+    .sidebar-menu li a:hover { background-color: var(--bg-secondary); color: var(--primary-color); }
+    .sidebar-menu li.active a { background-color: rgba(0, 161, 214, 0.1); color: var(--primary-color); font-weight: 500; }
+
+    /* Header Styles */
+    .nav-header { background-color: var(--bg-primary); box-shadow: var(--shadow-sm); position: sticky; top: 0!important; z-index: 100; }
+    .nav-container { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 64px; }
+    .logo { display: flex; align-items: center; }
+    .logo-text { font-size: 20px; font-weight: bold; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .nav-menu { display: flex; gap: 24px; }
+    .nav-menu a { color: var(--text-primary); text-decoration: none; font-size: 16px; font-weight: 500; position: relative; transition: color 0.2s; }
+    .nav-menu a:hover { color: var(--primary-color); }
+
+    /* Other page-specific styles */
+    .card { background: var(--bg-card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); padding: 24px; margin-bottom: 20px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+    .card-title { font-size: 24px; font-weight: bold; }
+    .card-description { color: var(--text-secondary); margin-top: 8px; }
+    .month-selector { display: flex; gap: 10px; align-items: center; }
+    .form-select { padding: 8px 12px; border: 1px solid var(--border-color); background-color: var(--bg-secondary); color: var(--text-primary); border-radius: var(--radius-sm); font-size: 14px; }
+    .video-list { display: flex; flex-direction: column; gap: 12px; }
+    .video-item { display: flex; gap: 15px; padding: 12px; background: var(--bg-secondary); border-radius: var(--radius-sm); align-items: center; }
+    .video-rank { font-size: 20px; font-weight: bold; color: var(--text-tertiary); width: 40px; text-align: center; flex-shrink: 0; }
+    .video-rank.top-1 { color: #ffd700; }
+    .video-rank.top-2 { color: #c0c0c0; }
+    .video-rank.top-3 { color: #cd7f32; }
+    .video-thumbnail { width: 120px; height: 68px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; }
+    .video-info { flex: 1; min-width: 0; }
+    .video-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .video-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 15px; align-items: center; }
+    .video-rating { font-size: 14px; font-weight: 500; color: var(--warning-color); display: flex; align-items: center; gap: 4px; }
+    .btn { padding: 8px 16px; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+    .loading { text-align: center; padding: 40px; color: var(--text-tertiary); }
+    .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 12px;
+        flex-direction: column;
+      }
+      .sidebar {
+        display: none;
+      }
+      .nav-container {
+        height: 48px;
+      }
+    }
+
+    /* Modal Styles with Animation */
+    .modal {
+      display: none; /* Initially hidden */
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-content {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 420px;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+    .modal-title { font-size: 18px; font-weight: bold; color: var(--text-primary); }
+    .modal-close { background: none; border: none; font-size: 24px; color: var(--text-tertiary); cursor: pointer; line-height: 1; }
+    .modal-body { margin-bottom: 24px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 12px; }
+
+  </style>
+</head>
+<body>
+<!--<header class="nav-header">-->
+<!--  <div class="nav-container">-->
+<!--    <a href="/" style="text-decoration: none;"><div class="logo-text">哈基米FM</div></a>-->
+<!--    <div class="header-actions">-->
+<!--      <a href="/" class="back-link">首页</a>-->
+<!--      <a href="/playlist.html" class="back-link">播放列表</a>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</header>-->
+<header class="nav-header">
+  <div class="nav-container">
+    <div class="logo">
+      <a href="/" style="text-decoration: none;"><div class="logo-text">哈基米FM</div></a>
+    </div>
+    <nav class="nav-menu">
+      <a href="/index.html">首页</a>
+      <a href="/playlist.html">播放列表</a>
+    </nav>
+  </div>
+</header>
+<div class="main-container">
+  <aside class="sidebar">
+    <ul class="sidebar-menu">
+      <li><a href="/index.html"><span>首页</span></a></li>
+      <li class="active"><a href="/leaderboard.html"><span>排行榜</span></a></li>
+    </ul>
+  </aside>
+  <main class="content">
+    <div id="leaderboardContent">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h1 id="leaderboard-title" class="card-title">月度排行榜</h1>
+            <p id="leaderboard-description" class="card-description">本月最受欢迎的50首哈基米音乐。</p>
+          </div>
+          <div class="month-selector">
+            <label for="month-select">选择月份:</label>
+            <select id="month-select" class="form-select">
+            </select>
+          </div>
+        </div>
+        <div id="leaderboard-list" class="video-list">
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<div id="leaderboard-notice-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">公告</h3>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="text-align: center; font-size: 16px; line-height: 1.5;">仅供娱乐，不要去本家刷哦！排行榜每日中午更新！</p>
+      <p style="text-align: center; color: var(--text-tertiary); font-size: 14px; margin-top: 10px;">
+        月度排名根据综合评分生成。算法来源于 <a href="https://space.bilibili.com/7810173" style="color: lightblue">せきらん雲</a>,感谢！
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" style="width: 100%;">我明白了</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Script remains the same as the previous turn
+  document.addEventListener('DOMContentLoaded', () => {
+    const monthSelect = document.getElementById('month-select');
+    const july2025 = document.createElement('option');
+    july2025.value = '2025-07';
+    july2025.textContent = '2025年 7月';
+    july2025.selected = true;
+    monthSelect.appendChild(july2025);
+    monthSelect.addEventListener('change', () => {
+      loadLeaderboard(monthSelect.value);
+    });
+    loadLeaderboard(monthSelect.value);
+    const noticeModal = document.getElementById('leaderboard-notice-modal');
+    const closeButtons = noticeModal.querySelectorAll('.modal-close, .btn-primary');
+    const closeModal = () => {
+      noticeModal.style.display = 'none';
+    };
+    // Show the modal on page load
+    noticeModal.style.display = 'flex';
+    // Add event listeners to close buttons and overlay
+    closeButtons.forEach(button => button.addEventListener('click', closeModal));
+    noticeModal.addEventListener('click', (event) => {
+      if (event.target === noticeModal) {
+        closeModal();
+      }
+    });
+  });
+  async function loadLeaderboard(month) {
+    const listContainer = document.getElementById('leaderboard-list');
+    const titleEl = document.getElementById('leaderboard-title');
+    const descriptionEl = document.getElementById('leaderboard-description');
+    listContainer.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载排行榜中...</div></div>';
+    titleEl.textContent = '月度排行榜';
+    descriptionEl.textContent = '加载中...';
+    try {
+      const response = await fetch(`/api/playlists/leaderboard?month=${month}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('该月份的排行榜尚未生成，请等待每日中午12点更新。');
+        }
+        throw new Error(`加载失败 (${response.status})`);
+      }
+      const playlist = await response.json();
+      renderLeaderboard(playlist);
+    } catch (error) {
+      listContainer.innerHTML = `<p style="text-align: center; color: var(--danger-color);">${error.message}</p>`;
+    }
+  }
+  function renderLeaderboard(playlist) {
+    const listContainer = document.getElementById('leaderboard-list');
+    const titleEl = document.getElementById('leaderboard-title');
+    const descriptionEl = document.getElementById('leaderboard-description');
+    titleEl.textContent = playlist.title || '月度排行榜';
+    descriptionEl.textContent = playlist.description || '本月最受欢迎的50首哈基米音乐。';
+    if (!playlist.videos || playlist.videos.length === 0) {
+      listContainer.innerHTML = '<p style="text-align: center; color: var(--text-tertiary);">本月还没有数据哦。</p>';
+      return;
+    }
+    const starIcon = `<i class="fas fa-star"></i>`;
+    listContainer.innerHTML = playlist.videos.map(video => {
+      const rankClass = `video-rank ${video.position <= 3 ? 'top-' + video.position : ''}`;
+      return `
+            <div class="video-item" data-bvid="${video.bvid}">
+                <div class="${rankClass}">${video.position}</div>
+                <img class="video-thumbnail" src="https://images.weserv.nl/?url=${encodeURIComponent(video.coverUrl)}&w=480&h=270&fit=cover&output=webp" alt="${video.title}" referrerpolicy="no-referrer">
+                <div class="video-info">
+                    <div class="video-title" title="${video.title}">${video.title}</div>
+                    <div class="video-meta">
+                        <span>UP: ${video.owner ? video.owner.name : '未知'}</span>
+                        <span>▶ ${formatViews(video.views)}</span>
+                        <span>${formatDate(video.pubDate)}</span>
+                    </div>
+                </div>
+                <div class="video-rating">${starIcon} ${video.rating ? video.rating.toFixed(2) : 'N/A'}</div>
+                <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" class="btn btn-secondary">播放</a>
+            </div>`;
+    }).join('');
+  }
+  function formatViews(num) {
+    if (num >= 10000) return (num / 10000).toFixed(1) + '万';
+    return num ? num.toLocaleString() : '0';
+  }
+  function formatDate(dateString) {
+    if (!dateString) return '';
+    try { return new Date(dateString).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }); } catch (e) { return ''; }
+  }
+</script>
+</body>
+</html>

@@ -7,13 +7,8 @@ import tv.oxnu0xuu.hachimiviewer.dto.OwnerDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map; // Import Map
+import java.util.Map;
 
-/**
- * Video 数据访问层
- * 继承 BaseMapper 以获得基础的 CRUD 功能
- * 使用注解方式定义所有自定义 SQL
- */
 public interface VideoMapper extends BaseMapper<Video> {
 
     // --- 为了代码清晰和复用，定义 SQL 片段 ---
@@ -22,25 +17,20 @@ public interface VideoMapper extends BaseMapper<Video> {
                     "v.cover_url, v.views, v.danmaku, v.replies, v.favorites, v.coins, v.shares, " +
                     "v.likes, v.copyright, v.is_hachimi, v.owner_mid, v.category_id, v.is_reviewed, " +
                     "v.reviewed_at, v.lease_expires_at, v.original_song, v.original_artist, " +
-                    "v.review_status, v.reviewer_id, v.updated_at, v.is_available, " +
+                    "v.review_status, v.reviewer_id, v.updated_at, v.is_available, v.rating, " +
                     "u.name as user_name, u.avatar_url as user_avatar_url";
 
     String VIDEO_OWNER_JOIN = "FROM videos v LEFT JOIN users u ON v.owner_mid = u.mid";
 
 
-    /**
-     * 查找可供审核的视频 (is_reviewed = false AND review_status IS NULL)
-     * 这个方法同时【定义】了可复用的 ResultMap，供其他查询使用
-     *
-     * @return 待审核的视频列表，包含作者信息
-     */
     @Select("SELECT " + VIDEO_WITH_OWNER_COLUMNS + " " + VIDEO_OWNER_JOIN + " WHERE v.is_reviewed = false AND v.review_status IS NULL ORDER BY v.pub_date DESC")
     @Results(id = "videoWithOwnerResultMap", value = {
             @Result(property = "bvid", column = "bvid", id = true),
             // 将关联查询出的列，映射到嵌套的 'owner' User 对象上
             @Result(property = "owner.mid", column = "owner_mid"),
             @Result(property = "owner.name", column = "user_name"),
-            @Result(property = "owner.avatarUrl", column = "user_avatar_url")
+            @Result(property = "owner.avatarUrl", column = "user_avatar_url"),
+            @Result(property = "rating", column = "rating")
     })
     List<Video> findAvailableForReview();
 
@@ -75,16 +65,6 @@ public interface VideoMapper extends BaseMapper<Video> {
     List<Video> findHachimiVideosOrderByPubDateDesc(@Param("offset") int offset, @Param("size") int size);
 
     /**
-     * 查询指定数量的随机 Hachimi 视频
-     *
-     * @param limit 数量限制
-     * @return Hachimi 视频列表，包含作者信息
-     */
-    @Select("SELECT " + VIDEO_WITH_OWNER_COLUMNS + " " + VIDEO_OWNER_JOIN + " WHERE is_hachimi = true ORDER BY RAND() LIMIT #{limit}")
-    @ResultMap("videoWithOwnerResultMap")
-    List<Video> findRandomHachimiVideos(@Param("limit") int limit);
-
-    /**
      * 分页查询所有 Hachimi 视频，用于数据同步
      *
      * @param offset 分页偏移量
@@ -116,4 +96,60 @@ public interface VideoMapper extends BaseMapper<Video> {
             "JOIN users u ON v.owner_mid = u.mid " +
             "WHERE v.is_hachimi = true AND v.owner_mid IS NOT NULL")
     List<Map<String, Object>> findDistinctHachimiAuthorsRaw(); // Changed method name and return type
+
+    /**
+     * Finds the top N rated videos published within a specific month.
+     * **Updated to only include videos where is_hachimi is true.**
+     */
+    @Select("SELECT " + VIDEO_WITH_OWNER_COLUMNS + " " + VIDEO_OWNER_JOIN +
+            " WHERE v.pub_date >= #{startDate} AND v.pub_date < #{endDate}" +
+            " AND v.is_hachimi = true " +
+            " AND v.rating IS NOT NULL " +
+            " ORDER BY v.rating DESC, v.views DESC " +
+            " LIMIT #{limit}")
+    @ResultMap("videoWithOwnerResultMap")
+    List<Video> findTopRatedVideosForMonth(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, @Param("limit") int limit);
+
+    /**
+     * This method is inefficient and can cause database errors on large tables.
+     * It is replaced by a more stable implementation in the VideoService.
+     *
+     * @param limit 数量限制
+     * @return Hachimi 视频列表，包含作者信息
+     */
+    @Deprecated
+    @Select("SELECT " + VIDEO_WITH_OWNER_COLUMNS + " " + VIDEO_OWNER_JOIN + " WHERE is_hachimi = true ORDER BY RAND() LIMIT #{limit}")
+    @ResultMap("videoWithOwnerResultMap")
+    List<Video> findRandomHachimiVideos(@Param("limit") int limit);
+
+    /**
+     * Efficiently counts the total number of Hachimi videos.
+     * @return The total count.
+     */
+    @Select("SELECT COUNT(*) FROM videos WHERE is_hachimi = true")
+    Long countHachimiVideos();
+
+    /**
+     * Fetches a slice of Hachimi video BVIDs using LIMIT and OFFSET for efficient pagination.
+     * @param offset The starting offset.
+     * @param limit The number of BVIDs to fetch.
+     * @return A list of BVIDs.
+     */
+    @Select("SELECT bvid FROM videos WHERE is_hachimi = true LIMIT #{offset}, #{limit}")
+    List<String> findHachimiBvidsWithOffset(@Param("offset") long offset, @Param("limit") int limit);
+
+    /**
+     * Fetches full video details for a given list of BVIDs.
+     * @param bvids A list of video BVIDs.
+     * @return A list of videos with their owner information.
+     */
+    @Select("<script>" +
+            "SELECT " + VIDEO_WITH_OWNER_COLUMNS + " " + VIDEO_OWNER_JOIN +
+            " WHERE v.bvid IN " +
+            "<foreach item='bvid' collection='bvids' open='(' separator=',' close=')'>" +
+            "#{bvid}" +
+            "</foreach>" +
+            "</script>")
+    @ResultMap("videoWithOwnerResultMap")
+    List<Video> findVideosWithOwnersByBvids(@Param("bvids") List<String> bvids);
 }

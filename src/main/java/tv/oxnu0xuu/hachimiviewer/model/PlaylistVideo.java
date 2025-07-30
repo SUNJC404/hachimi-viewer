@@ -21,5 +21,5 @@ public class PlaylistVideo {
     private LocalDateTime addedAt;
 
     @TableField(exist = false)
-    private Video video; // 关联的视频信息
+    private Video video;
 }

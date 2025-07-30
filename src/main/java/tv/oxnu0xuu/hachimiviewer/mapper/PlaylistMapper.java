@@ -15,4 +15,7 @@ public interface PlaylistMapper extends BaseMapper<Playlist> {
 
     @Select("SELECT * FROM playlists WHERE view_count > 0 ORDER BY view_count DESC LIMIT #{limit}")
     List<Playlist> findPopularPlaylists(@Param("limit") int limit);
+
+    @Select("SELECT * FROM playlists WHERE share_code LIKE #{shareCodePrefix} ORDER BY created_at DESC LIMIT 1")
+    Playlist findLatestPlaylistByShareCodePrefix(@Param("shareCodePrefix") String shareCodePrefix);
 }

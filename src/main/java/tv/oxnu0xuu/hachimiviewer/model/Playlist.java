@@ -27,4 +27,5 @@ public class Playlist {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer maxVideos;
+    private String playlistType;
 }

@@ -314,6 +314,34 @@ public class PlaylistService {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 提供 leaderboard.
+     * @param month 月份格式 "YYYY-MM".
+     * @return 返回 playlist DTO 或 null.
+     */
+    @Transactional(readOnly = true)
+    public PlaylistDto getLeaderboardPlaylist(String month) {
+        // Search for the latest playlist with a prefix like "leaderboard-2025-07-%"
+        String shareCodePrefix = "leaderboard-" + month + "-%";
+        Playlist playlist = playlistMapper.findLatestPlaylistByShareCodePrefix(shareCodePrefix);
+
+        if (playlist == null) {
+            return null; // No leaderboard has been generated for this month yet.
+        }
+
+        PlaylistDto dto = PlaylistDto.fromEntity(playlist);
+
+        // Get the ranked videos
+        List<PlaylistVideo> playlistVideos = playlistVideoMapper.findByPlaylistIdWithVideos(playlist.getId());
+        List<PlaylistVideoDto> videoDtos = playlistVideos.stream()
+                .map(PlaylistVideoDto::fromEntity)
+                .collect(Collectors.toList());
+
+        dto.setVideos(videoDtos);
+        dto.setVideoCount(videoDtos.size());
+
+        return dto;
+    }
 
     /**
      * 生成唯一的分享码

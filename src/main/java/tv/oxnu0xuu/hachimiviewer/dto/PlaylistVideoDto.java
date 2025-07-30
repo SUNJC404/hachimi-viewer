@@ -1,4 +1,3 @@
-// src/main/java/tv/oxnu0xuu/hachimiviewer/dto/PlaylistVideoDto.java
 package tv.oxnu0xuu.hachimiviewer.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -15,6 +14,7 @@ public class PlaylistVideoDto {
     private String title;
     private String coverUrl;
     private Integer views;
+    private Double rating;
     private OwnerDto owner;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -35,6 +35,7 @@ public class PlaylistVideoDto {
             dto.setCoverUrl(playlistVideo.getVideo().getCoverUrl());
             dto.setViews(playlistVideo.getVideo().getViews());
             dto.setPubDate(playlistVideo.getVideo().getPubDate());
+            dto.setRating(playlistVideo.getVideo().getRating());
 
             if (playlistVideo.getVideo().getOwner() != null) {
                 dto.setOwner(new OwnerDto(

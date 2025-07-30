@@ -11,7 +11,7 @@ public interface PlaylistVideoMapper extends BaseMapper<PlaylistVideo> {
 
     String VIDEO_WITH_OWNER_COLUMNS =
             "pv.id, pv.playlist_id, pv.bvid, pv.position, pv.added_at, " +
-                    "v.title, v.cover_url, v.views, v.pub_date, v.owner_mid, " +
+                    "v.title, v.cover_url, v.views, v.pub_date, v.owner_mid, v.rating, " +
                     "u.name as user_name, u.avatar_url as user_avatar_url";
 
     @Select("SELECT " + VIDEO_WITH_OWNER_COLUMNS + " " +
@@ -26,11 +26,14 @@ public interface PlaylistVideoMapper extends BaseMapper<PlaylistVideo> {
             @Result(property = "bvid", column = "bvid"),
             @Result(property = "position", column = "position"),
             @Result(property = "addedAt", column = "added_at"),
+            // 关联的 Video 对象的映射
             @Result(property = "video.bvid", column = "bvid"),
             @Result(property = "video.title", column = "title"),
             @Result(property = "video.coverUrl", column = "cover_url"),
             @Result(property = "video.views", column = "views"),
             @Result(property = "video.pubDate", column = "pub_date"),
+            @Result(property = "video.rating", column = "rating"), // **修复：为 rating 字段添加映射**
+            // 关联的 Owner (User) 对象的映射
             @Result(property = "video.owner.mid", column = "owner_mid"),
             @Result(property = "video.owner.name", column = "user_name"),
             @Result(property = "video.owner.avatarUrl", column = "user_avatar_url")
