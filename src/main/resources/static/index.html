@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>哈基米FM</title>
     <style>
-        /* CSS 样式部分保持不变 */
+        /* 重置样式 */
         * {
             margin: 0;
             padding: 0;
@@ -13,544 +13,611 @@
         }
 
         :root {
+            /* Bilibili风格配色 */
             --primary-color: #00a1d6;
             --primary-dark: #0087c0;
             --secondary-color: #fb7299;
             --accent-color: #ff6b6b;
             --success-color: #52c41a;
             --warning-color: #faad14;
-
             --bg-primary: #ffffff;
-            --bg-secondary: #f5f7fa;
-            --bg-tertiary: #e9ecef;
+            --bg-secondary: #f4f4f4;
+            --bg-tertiary: #e7e7e7;
             --bg-card: #ffffff;
-            --bg-card-hover: #f8f9fa;
-
-            --text-primary: #1a1a1a;
-            --text-secondary: #6c757d;
-            --text-tertiary: #adb5bd;
-
-            --border-color: #e9ecef;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --bg-card-hover: #fafafa;
+            --text-primary: #212121;
+            --text-secondary: #505050;
+            --text-tertiary: #999999;
+            --border-color: #e7e7e7;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
             --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-            --shadow-xl: 0 12px 48px rgba(0,0,0,0.16);
-
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-
-            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --transition-fast: 0.2s ease;
+            --transition-medium: 0.3s ease;
         }
 
-        /* Dark mode */
+        /* 暗色模式 */
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-primary: #0a0a0a;
-                --bg-secondary: #1a1a1a;
+                --bg-primary: #181818;
+                --bg-secondary: #212121;
                 --bg-tertiary: #2a2a2a;
-                --bg-card: #1f1f1f;
+                --bg-card: #242424;
                 --bg-card-hover: #2a2a2a;
-
-                --text-primary: #ffffff;
-                --text-secondary: #b0b0b0;
-                --text-tertiary: #808080;
-
-                --border-color: #333333;
-                --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
-                --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
-                --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
-                --shadow-xl: 0 12px 48px rgba(0,0,0,0.5);
+                --text-primary: #e5e5e5;
+                --text-secondary: #a0a0a0;
+                --text-tertiary: #707070;
+                --border-color: #3a3a3a;
+                --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
+                --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+                --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
             }
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background-color: var(--bg-secondary);
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
-            position: relative;
         }
 
-        /* Background decoration */
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 20% 80%, rgba(0, 161, 214, 0.05) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(251, 114, 153, 0.05) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(255, 107, 107, 0.03) 0%, transparent 50%);
-            animation: float 20s ease-in-out infinite;
-            pointer-events: none;
-            z-index: -1;
+        /* 导航栏样式 */
+        .nav-header {
+            background-color: var(--bg-primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(-30px, -30px) rotate(120deg); }
-            66% { transform: translate(30px, -30px) rotate(240deg); }
-        }
-
-        /* Container */
-        .container {
-            max-width: 1400px;
+        .nav-container {
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            height: 64px;
         }
 
-        /* Header */
-        .header {
-            text-align: center;
-            padding: 60px 0 40px;
-            position: relative;
+        .logo {
+            display: flex;
+            align-items: center;
         }
 
-        .header h1 {
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 800;
+        .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: bold;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 16px;
-            animation: slideInDown 0.8s ease-out;
         }
 
-        .header-subtitle {
-            font-size: 1.125rem;
-            color: var(--text-secondary);
-            animation: slideInUp 0.8s ease-out 0.2s both;
-        }
-
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Search Section */
-        .search-wrapper {
-            background: var(--bg-primary);
-            border-radius: var(--radius-xl);
-            padding: 40px;
-            margin-bottom: 60px;
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            overflow: hidden;
-            animation: fadeIn 0.8s ease-out 0.4s both;
-        }
-
-        .search-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
-            background-size: 200% 100%;
-            animation: gradient 3s ease infinite;
-        }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .search-container {
+        .nav-menu {
             display: flex;
-            gap: 12px;
-            max-width: 800px;
-            margin: 0 auto;
+            gap: 24px;
         }
 
-        #search-input {
-            flex: 1;
-            padding: 16px 24px;
+        .nav-menu a {
+            color: var(--text-primary);
+            text-decoration: none;
             font-size: 16px;
-            border: 2px solid transparent;
-            border-radius: var(--radius-lg);
-            background: var(--bg-secondary);
-            transition: var(--transition-fast);
-            outline: none;
-        }
-
-        #search-input:focus {
-            border-color: var(--primary-color);
-            background: var(--bg-primary);
-            box-shadow: 0 0 0 4px rgba(0, 161, 214, 0.1);
-        }
-
-        #search-button {
-            padding: 16px 32px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: var(--radius-lg);
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: white;
-            cursor: pointer;
-            transition: var(--transition-fast);
+            font-weight: 500;
             position: relative;
-            overflow: hidden;
+            transition: color 0.2s;
         }
 
-        #search-button::before {
+        .nav-menu a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-menu a.active {
+            color: var(--primary-color);
+        }
+
+        .nav-menu a.active::after {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
+            bottom: -20px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
         }
 
-        #search-button:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        #search-button:active::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        /* Section */
-        .videos-section {
-            margin-bottom: 80px;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* 新增：排序下拉菜单样式 */
-        .sort-options {
+        .search-box {
             display: flex;
             align-items: center;
-            gap: 10px;
+            background-color: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 0 12px;
+            width: 300px;
+            height: 36px;
         }
 
-        .sort-options label {
+        .search-box input {
+            flex: 1;
+            border: none;
+            background: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .search-box button {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .upload-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* 主容器 */
+        .main-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 180px;
+            flex-shrink: 0;
+            background-color: var(--bg-primary);
+            border-radius: var(--radius-md);
+            padding: 16px 0;
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+            position: sticky;
+            top: 80px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .sidebar-menu li:hover {
+            background-color: var(--bg-secondary);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu li.active {
+            background-color: rgba(0, 161, 214, 0.1);
+            color: var(--primary-color);
             font-weight: 500;
         }
 
-        .sort-options select {
-            padding: 8px 12px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border-color);
-            background: var(--bg-primary);
-            color: var(--text-primary);
+        .sidebar-menu li i {
+            font-size: 18px;
+        }
+
+        /* 主内容区 */
+        .content {
+            flex: 1;
+        }
+
+        /* Banner区域 - 轮播样式 */
+        .banner {
+            background-color: var(--bg-primary);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+            height: 400px;
+            position: relative;
+        }
+
+        .banner-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .banner-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .banner-slide.active {
+            opacity: 1;
+        }
+
+        .banner-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            color: white;
+        }
+
+        .banner-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .banner-desc {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Banner进度条 */
+        .banner-progress {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 100px;
+            height: 3px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .banner-progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0;
+            transition: width 0.1s linear;
+        }
+
+        /* Banner指示器 */
+        .banner-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .banner-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .banner-indicator.active {
+            background-color: white;
+        }
+
+        /* 视频区域 */
+        .section {
+            margin-bottom: 32px;
         }
 
         .section-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 32px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--border-color);
-            position: relative;
+            margin-bottom: 16px;
         }
 
-        .section-header::after {
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
             content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100px;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            width: 4px;
+            height: 20px;
+            background-color: var(--primary-color);
             border-radius: 2px;
         }
 
-        .section-header h2 {
-            font-size: 1.875rem;
-            font-weight: 700;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .section-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        .refresh-button {
-            width: 40px;
-            height: 40px;
-            border: 2px solid var(--border-color);
-            background: var(--bg-primary);
-            border-radius: var(--radius-md);
+        .section-more {
+            color: var(--text-secondary);
+            font-size: 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: var(--transition-fast);
-            position: relative;
-            overflow: hidden;
+            gap: 4px;
+            transition: color 0.2s;
         }
 
-        .refresh-button:hover {
-            border-color: var(--primary-color);
-            background: var(--bg-card-hover);
+        .section-more:hover {
+            color: var(--primary-color);
         }
 
-        .refresh-button:hover svg {
-            transform: rotate(180deg);
-        }
-
-        .refresh-button svg {
-            width: 20px;
-            height: 20px;
-            transition: transform 0.5s ease;
-            color: var(--text-secondary);
-        }
-
-        /* Video Grid */
-        .videos-grid {
+        /* 视频网格 - 桌面端 */
+        .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
         }
 
-        @media (max-width: 768px) {
-            .videos-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-        }
-
-        /* Video Card */
+        /* 视频卡片 */
         .video-card {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
+            background-color: var(--bg-primary);
+            border-radius: var(--radius-md);
             overflow: hidden;
-            transition: var(--transition-medium);
-            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
             box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
         }
 
         .video-card:hover {
             transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-            border-color: transparent;
+            box-shadow: var(--shadow-md);
         }
 
-        .video-card a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .video-thumbnail-container {
+        .video-cover {
             position: relative;
             width: 100%;
-            padding-top: 56.25%;
+            padding-top: 56.25%; /* 16:9 比例 */
             overflow: hidden;
-            background: var(--bg-tertiary);
+            background-color: var(--bg-tertiary);
         }
 
-        .video-thumbnail {
+        .video-cover img {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s ease;
+            transition: transform 0.3s;
         }
 
-        .video-card:hover .video-thumbnail {
-            transform: scale(1.1);
-        }
-
-        .video-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.8));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .video-card:hover .video-overlay {
-            opacity: 1;
+        .video-card:hover .video-cover img {
+            transform: scale(1.05);
         }
 
         .video-duration {
             position: absolute;
-            bottom: 12px;
-            right: 12px;
-            background: rgba(0,0,0,0.8);
+            bottom: 8px;
+            right: 8px;
+            background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 4px 8px;
-            border-radius: var(--radius-sm);
+            padding: 2px 6px;
+            border-radius: 4px;
             font-size: 12px;
-            font-weight: 600;
-            backdrop-filter: blur(4px);
+            font-weight: 500;
         }
 
-        .video-play-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            width: 60px;
-            height: 60px;
-            background: rgba(255,255,255,0.9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-            box-shadow: var(--shadow-lg);
+        .video-info {
+            padding: 12px;
         }
 
-        .video-card:hover .video-play-icon {
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .video-play-icon::after {
-            content: '';
-            width: 0;
-            height: 0;
-            border-left: 16px solid var(--primary-color);
-            border-top: 10px solid transparent;
-            border-bottom: 10px solid transparent;
-            margin-left: 4px;
-        }
-
-        .video-card-content {
-            padding: 20px;
-        }
-
-        .video-card-title {
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 1.4;
-            margin-bottom: 12px;
+        .video-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            transition: color 0.2s ease;
-        }
-
-        .video-card:hover .video-card-title {
-            color: var(--primary-color);
-        }
-
-        .video-card-meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 14px;
-            color: var(--text-secondary);
+            line-height: 1.4;
+            height: 2.8em;
         }
 
         .video-stats {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 16px;
+            font-size: 12px;
+            color: var(--text-tertiary);
         }
 
-        .stat-item {
+        .video-views {
             display: flex;
             align-items: center;
             gap: 4px;
         }
 
-        .stat-icon {
-            width: 16px;
-            height: 16px;
-            opacity: 0.7;
-        }
-
-        .video-card-owner {
+        .video-uploader {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border-color);
+            gap: 6px;
+            margin-top: 8px;
         }
 
-        .owner-avatar {
-            width: 32px;
-            height: 32px;
+        .uploader-avatar {
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
+            background-color: var(--bg-tertiary);
+            overflow: hidden;
+        }
+
+        .uploader-avatar img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border: 2px solid var(--border-color);
-            transition: var(--transition-fast);
         }
 
-        .video-card:hover .owner-avatar {
-            border-color: var(--primary-color);
-            transform: scale(1.1);
-        }
-
-        .owner-name {
-            font-size: 14px;
+        .uploader-name {
+            font-size: 12px;
             color: var(--text-secondary);
-            font-weight: 500;
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 150px;
+            max-width: 120px;
         }
 
-        /* Loading States */
-        .loading-spinner {
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+            /* 导航栏移动端适配 */
+            .nav-container {
+                height: 48px;
+                padding: 0 12px;
+            }
+
+            .logo-text {
+                font-size: 18px;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .search-box {
+                width: 120px;
+                height: 32px;
+            }
+
+            .upload-btn {
+                display: none;
+            }
+
+            /* 主容器移动端适配 */
+            .main-container {
+                padding: 12px;
+                flex-direction: column;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            /* Banner移动端适配 */
+            .banner {
+                height: 140px;
+                margin-bottom: 16px;
+            }
+
+            .banner-title {
+                font-size: 18px;
+            }
+
+            .banner-progress {
+                width: 60px;
+                height: 2px;
+            }
+
+            .banner-indicator {
+                width: 6px;
+                height: 6px;
+            }
+
+            /* 视频网格移动端适配 - 两列瀑布流 */
+            .video-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .section-header {
+                margin-bottom: 12px;
+            }
+
+            .section-title {
+                font-size: 18px;
+            }
+
+            /* 视频卡片移动端适配 */
+            .video-card {
+                border-radius: var(--radius-sm);
+            }
+
+            .video-info {
+                padding: 8px;
+            }
+
+            .video-title {
+                font-size: 13px;
+                margin-bottom: 6px;
+            }
+
+            .video-stats {
+                font-size: 11px;
+            }
+
+            .video-uploader {
+                margin-top: 6px;
+            }
+
+            .uploader-name {
+                max-width: 100px;
+            }
+        }
+
+        /* 加载状态 */
+        .loading {
             text-align: center;
-            padding: 60px;
-            color: var(--text-secondary);
+            padding: 40px;
+            color: var(--text-tertiary);
         }
 
-        .loading-spinner::before {
-            content: '';
+        .loading-spinner {
             display: inline-block;
             width: 40px;
             height: 40px;
@@ -558,429 +625,308 @@
             border-top-color: var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 16px;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* Empty & Error States */
-        .empty-message,
-        .error-message {
+        /* 空状态 */
+        .empty-state {
             text-align: center;
-            padding: 80px 20px;
-            color: var(--text-secondary);
-            font-size: 18px;
+            padding: 40px 20px;
+            color: var(--text-tertiary);
         }
 
-        .error-message {
-            color: var(--accent-color);
-        }
-
-        /* Pagination */
-        .pagination-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-top: 48px;
-            flex-wrap: wrap;
-        }
-
-        .pagination-container button {
-            padding: 12px 24px;
-            border: 2px solid var(--border-color);
-            background: var(--bg-card);
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition-fast);
-            color: var(--text-primary);
-        }
-
-        .pagination-container button:hover:not(:disabled) {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .pagination-container button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .pagination-info {
-            padding: 8px 16px;
-            background: var(--bg-tertiary);
-            border-radius: var(--radius-md);
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-
-        /* Footer */
+        /* 页脚 */
         .footer {
-            margin-top: 120px;
-            padding: 40px 0;
-            background: var(--bg-primary);
+            background-color: var(--bg-primary);
+            padding: 24px 0;
+            margin-top: 40px;
             border-top: 1px solid var(--border-color);
         }
 
-        .footer-content {
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 16px;
             text-align: center;
         }
 
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 32px;
-            margin-bottom: 24px;
+            gap: 24px;
+            margin-bottom: 16px;
             flex-wrap: wrap;
         }
 
         .footer-links a {
             color: var(--text-secondary);
             text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition-fast);
-            position: relative;
-        }
-
-        .footer-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary-color);
-            transition: width 0.3s ease;
+            font-size: 14px;
+            transition: color 0.2s;
         }
 
         .footer-links a:hover {
             color: var(--primary-color);
         }
 
-        .footer-links a:hover::after {
-            width: 100%;
-        }
-
         .footer-copyright {
+            font-size: 12px;
             color: var(--text-tertiary);
-            font-size: 14px;
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .header {
-                padding: 40px 0 30px;
-            }
-
-            .search-wrapper {
-                padding: 24px 16px;
-                margin-bottom: 40px;
-            }
-
-            .search-container {
-                flex-direction: column;
-            }
-
-            #search-input,
-            #search-button {
-                width: 100%;
-            }
-
-            .section-header h2 {
-                font-size: 1.5rem;
-            }
-
-            .videos-section {
-                margin-bottom: 60px;
-            }
-
-            .video-card-content {
-                padding: 16px;
-            }
-
-            .sort-options {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .footer {
-                margin-top: 80px;
-            }
-        }
-
-        /* Animations for cards on scroll */
-        .video-card {
-            opacity: 0;
-            animation: cardFadeIn 0.6s ease-out forwards;
-        }
-
-        .video-card:nth-child(1) { animation-delay: 0.1s; }
-        .video-card:nth-child(2) { animation-delay: 0.2s; }
-        .video-card:nth-child(3) { animation-delay: 0.3s; }
-        .video-card:nth-child(4) { animation-delay: 0.4s; }
-        .video-card:nth-child(5) { animation-delay: 0.5s; }
-
-        @keyframes cardFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Skeleton Loading */
-        .skeleton {
-            background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* Video Options Modal */
-        .modal-overlay {
+        /* 模态框 */
+        .modal {
+            display: none;
             position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .modal-overlay.visible {
-            opacity: 1;
-            visibility: visible;
+            justify-content: center;
+            align-items: center;
         }
 
         .modal-content {
-            background: var(--bg-card);
+            background-color: var(--bg-primary);
             border-radius: var(--radius-lg);
-            padding: 32px;
             width: 90%;
             max-width: 500px;
-            box-shadow: var(--shadow-xl);
-            transform: scale(0.95);
-            transition: transform 0.3s ease;
-        }
-
-        .modal-overlay.visible .modal-content {
-            transform: scale(1);
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
             padding-bottom: 16px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: bold;
             color: var(--text-primary);
         }
 
-        .close-modal-btn {
+        .modal-close {
             background: none;
             border: none;
-            cursor: pointer;
-            color: var(--text-tertiary);
             font-size: 24px;
+            color: var(--text-tertiary);
+            cursor: pointer;
             line-height: 1;
-            padding: 4px;
-            transition: color 0.2s ease;
         }
 
-        .close-modal-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .modal-body p {
-            margin-bottom: 12px;
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .modal-body p strong {
-            color: var(--text-primary);
-            font-weight: 500;
+        .modal-body {
+            margin-bottom: 24px;
         }
 
         .modal-footer {
-            margin-top: 32px;
             display: flex;
             justify-content: flex-end;
             gap: 12px;
         }
 
-        .modal-button {
-            padding: 12px 24px;
-            border-radius: var(--radius-md);
-            font-weight: 600;
+        .btn {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: var(--transition-fast);
             border: none;
+            transition: background-color 0.2s;
         }
 
-        .report-btn {
-            background-color: var(--warning-color);
-            color: #fff;
-        }
-
-        .report-btn:hover {
-            opacity: 0.85;
-        }
-
-        .cancel-btn {
-            background-color: var(--bg-tertiary);
-            color: var(--text-secondary);
-        }
-        .cancel-btn:hover {
-            background-color: var(--border-color);
-        }
-
-        /* More Options Button on Video Card */
-        .video-options-btn {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.5);
-            border: none;
+        .btn-primary {
+            background-color: var(--primary-color);
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            z-index: 10;
-            opacity: 0;
         }
 
-        .video-card:hover .video-options-btn {
-            opacity: 1;
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
         }
 
-        .video-options-btn:hover {
-            background: rgba(0, 0, 0, 0.7);
+        .btn-secondary {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
         }
 
-        .video-options-btn svg {
-            width: 20px;
-            height: 20px;
+        .btn-secondary:hover {
+            background-color: var(--border-color);
         }
     </style>
 </head>
 <body>
+<!-- 导航栏 -->
+<header class="nav-header">
+    <div class="nav-container">
+        <div class="logo">
+<!--            <img src="https://i0.hdslb.com/bfs/archive/4e3a3b51f2a6e7a6e1e3e3c3f3d3e3a3b3c3d3e3f.png" alt="Logo">-->
+            <div class="logo-text">哈基米FM</div>
+        </div>
 
-<div class="container">
-    <header class="header">
-        <link rel="apple-touch-icon" sizes="180x180" th:href="@{/apple-touch-icon.png}">
-        <link rel="icon" type="image/png" sizes="32x32" th:href="@{/favicon-32x32.png}">
-        <link rel="icon" type="image/png" sizes="16x16" th:href="@{/favicon-16x16.png}">
-        <link rel="manifest" th:href="@{/site.webmanifest}">
-        <h1>哈基米FM</h1>
-        <p class="header-subtitle">最新最酷的哈基米内容</p>
-    </header>
+        <nav class="nav-menu">
+            <a href="#" class="active">首页</a>
+            <a href="/playlist.html">播放列表</a>
+        </nav>
 
-    <div class="search-container">
-        <input type="text" id="search-input" placeholder="搜索一个基米？">
-        <button id="search-button">
-            搜索
-        </button>
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="搜索视频、用户">
+            <button id="search-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+        </div>
+
+<!--        <div class="user-menu">-->
+<!--            <div class="avatar">-->
+<!--                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">-->
+<!--                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>-->
+<!--                    <circle cx="12" cy="7" r="4"></circle>-->
+<!--                </svg>-->
+<!--            </div>-->
+<!--            <button class="upload-btn">投稿</button>-->
+<!--        </div>-->
     </div>
+</header>
 
-    <div id="search-results" class="videos-section" style="display: none;">
-        <div class="section-header">
-            <h2>
-                搜索结果
-            </h2>
-            <div class="sort-options">
-                <label for="search-sort">排序:</label>
-                <select id="search-sort">
-                    <option value="pubDate:desc">最新发布</option>
-                    <option value="views:desc">最多播放</option>
-                </select>
+<!-- 主容器 -->
+<div class="main-container">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li class="active">
+                <span>首页</span>
+            </li>
+            <li>
+                <span>热门</span>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="content">
+        <!-- Banner轮播区域 -->
+        <div class="banner">
+            <div class="banner-container">
+                <div class="banner-slide active">
+                    <img src="http://i2.hdslb.com/bfs/archive/ea7354ea7451e71d21e3cc7e94a6f32d55f9e3c8.jpg" alt="Banner 1"  loading="lazy" referrerpolicy="no-referrer">
+                    <div class="banner-overlay">
+                        <h2 class="banner-title">FM 83.0 无止境基米电台</h2>
+                        <p class="banner-desc">Non Stop Hachimi Radio FM 83.0 —— 8月3日～9日</p>
+                    </div>
+                </div>
+                <div class="banner-slide">
+                    <img src="http://i1.hdslb.com/bfs/archive/af599e86f36e4edb5f6223581f5856166b090dd8.jpg" alt="Banner 2"  loading="lazy" referrerpolicy="no-referrer">
+                    <div class="banner-overlay">
+                        <h2 class="banner-title">哈基杯·橘狸合战</h2>
+                        <p class="banner-desc">第二节哈基杯！准备开哈！—— 8月15日～31日</p>
+                    </div>
+                </div>
+<!--                <div class="banner-slide">-->
+<!--                    <img src="https://i0.hdslb.com/bfs/archive/4e3a3b51f2a6e7a6e1e3e3c3f3d3e3a3b3c3d3e3f.png" alt="Banner 3">-->
+<!--                    <div class="banner-overlay">-->
+<!--                        <h2 class="banner-title">哈基米新年会</h2>-->
+<!--                        <p class="banner-desc">新年新气象，哈基米陪你过新年</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+            </div>
+
+            <!-- Banner进度条 -->
+            <div class="banner-progress">
+                <div class="banner-progress-bar"></div>
+            </div>
+
+            <!-- Banner指示器 -->
+            <div class="banner-indicators">
+                <div class="banner-indicator active" data-slide="0"></div>
+                <div class="banner-indicator" data-slide="1"></div>
+<!--                <div class="banner-indicator" data-slide="2"></div>-->
             </div>
         </div>
-        <div id="search-results-grid" class="videos-grid"></div>
-        <div id="search-pagination" class="pagination-container"></div>
-    </div>
 
-    <div class="videos-section">
-        <div class="section-header">
-            <h2>
-                最新哈气
-            </h2>
-            <button id="refresh-latest" class="refresh-button" title="换一批">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="23 4 23 10 17 10"></polyline>
-                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                </svg>
-            </button>
+        <!-- 搜索结果区域 -->
+        <div id="search-results" class="section" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title">搜索结果</h2>
+                <div class="sort-options">
+                    <label for="search-sort">排序:</label>
+                    <select id="search-sort">
+                        <option value="pubDate:desc">最新发布</option>
+                        <option value="views:desc">最多播放</option>
+                    </select>
+                </div>
+            </div>
+            <div id="search-results-grid" class="video-grid"></div>
+            <div id="search-pagination" class="pagination-container"></div>
         </div>
-        <div id="latest-videos-grid" class="videos-grid"></div>
-    </div>
 
-    <div class="videos-section">
-        <div class="section-header">
-            <h2>
-                随机哈气
-            </h2>
-            <button id="refresh-random" class="refresh-button" title="刷新随机视频">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="23 4 23 10 17 10"></polyline>
-                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                </svg>
-            </button>
+        <!-- 最新视频区域 -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">最新哈气</h2>
+                <div class="section-more" id="refresh-latest">
+                    换一批
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                </div>
+            </div>
+            <div id="latest-videos-grid" class="video-grid">
+                <!-- 视频卡片将通过JS动态加载 -->
+            </div>
         </div>
-        <div id="random-videos-grid" class="videos-grid"></div>
-    </div>
+
+        <!-- 随机视频区域 -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">随机哈气</h2>
+                <div class="section-more" id="refresh-random">
+                    刷新
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                </div>
+            </div>
+            <div id="random-videos-grid" class="video-grid">
+                <!-- 视频卡片将通过JS动态加载 -->
+            </div>
+        </div>
+    </main>
 </div>
 
+<!-- 页脚 -->
 <footer class="footer">
-    <div class="container">
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="/reviewer.html">审核页面</a>
-                <a href="/admin.html">管理员页面</a>
-                <a href="/playlist.html">播放列表</a>
-                <a href="https://space.bilibili.com/20002123" target="_blank" rel="noopener">@鼻血黄豆</a>
-            </div>
-            <div class="footer-copyright">
-                Made with 哈气 by 和猫做
-            </div>
+    <div class="footer-container">
+        <div class="footer-links">
+            <a href="/reviewer.html">审核页面</a>
+            <a href="/admin.html">管理员页面</a>
+            <a href="/playlist.html">播放列表</a>
+            <a href="https://space.bilibili.com/20002123" target="_blank" rel="noopener">@鼻血黄豆</a>
+        </div>
+        <div class="footer-copyright">
+            Made with 哈气 by 和猫做
         </div>
     </div>
 </footer>
 
-<!-- Video Options Modal -->
-<div id="video-options-modal" class="modal-overlay">
+<!-- 视频选项模态框 -->
+<div id="video-options-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">视频选项</h3>
-            <button class="close-modal-btn" onclick="closeModal()">&times;</button>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
             <p><strong>标题:</strong> <span id="modal-video-title"></span></p>
@@ -995,28 +941,27 @@
             <p style="margin-top: 20px; color: var(--text-tertiary); font-size: 12px;">如果视频内容不当、无法播放或不属于哈基米音乐，请帮助我们改进！</p>
         </div>
         <div class="modal-footer">
-            <button class="modal-button cancel-btn" onclick="closeModal()">取消</button>
-            <button id="report-video-btn" class="modal-button report-btn">报告此视频</button>
+            <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+            <button id="report-video-btn" class="btn btn-primary">报告此视频</button>
         </div>
     </div>
 </div>
-
 
 <script>
     // --- 全局状态变量 ---
     let latestVideosPage = 0;
     let currentSearchQuery = '';
     let currentSearchPage = 1;
-    let currentSearchSort = 'pubDate:desc'; // 新增：当前搜索排序
+    let currentSearchSort = 'pubDate:desc';
     const SEARCH_HITS_PER_PAGE = 20;
-    let activeModalVideo = null; // To store the video data for the currently open modal
+    let activeModalVideo = null;
 
     // 响应式布局配置
     const responsiveConfig = {
-        mobile: { maxWidth: 768, columns: 1, itemsPerPage: 6 },
-        tablet: { maxWidth: 1200, columns: 3, itemsPerPage: 12 },
-        desktop: { maxWidth: 1600, columns: 4, itemsPerPage: 16 },
-        large: { maxWidth: Infinity, columns: 5, itemsPerPage: 20 }
+        mobile: { maxWidth: 768, columns: 2, itemsPerPage: 10 },
+        tablet: { maxWidth: 1200, columns: 3, itemsPerPage: 15 },
+        desktop: { maxWidth: 1600, columns: 4, itemsPerPage: 18 },
+        large: { maxWidth: Infinity, columns: 5, itemsPerPage: 24 }
     };
 
     let currentLayout = 'desktop';
@@ -1026,18 +971,22 @@
         const searchInput = document.getElementById('search-input');
         const refreshLatestBtn = document.getElementById('refresh-latest');
         const refreshRandomBtn = document.getElementById('refresh-random');
-        const searchSortSelect = document.getElementById('search-sort'); // 新增
+        const searchSortSelect = document.getElementById('search-sort');
         const modalOverlay = document.getElementById('video-options-modal');
         const reportVideoBtn = document.getElementById('report-video-btn');
-
 
         // 初始化响应式布局
         updateResponsiveLayout();
         window.addEventListener('resize', debounce(updateResponsiveLayout, 250));
 
+        // 初始加载视频
         fetchLatestVideos();
         fetchRandomVideos();
 
+        // 初始化Banner轮播
+        initBannerCarousel();
+
+        // 事件监听
         searchButton.addEventListener('click', () => {
             const query = searchInput.value.trim();
             if (query) {
@@ -1050,7 +999,6 @@
             if (event.key === 'Enter') searchButton.click();
         });
 
-        // 新增：监听排序变化
         searchSortSelect.addEventListener('change', (event) => {
             currentSearchSort = event.target.value;
             if (currentSearchQuery) {
@@ -1064,8 +1012,8 @@
         });
 
         refreshRandomBtn.addEventListener('click', fetchRandomVideos);
-        
-        // Modal listeners
+
+        // 模态框监听
         modalOverlay.addEventListener('click', (event) => {
             if (event.target === modalOverlay) {
                 closeModal();
@@ -1075,7 +1023,91 @@
         reportVideoBtn.addEventListener('click', handleReportVideo);
     });
 
-    // --- Modal Functions ---
+    // --- Banner轮播功能 ---
+    function initBannerCarousel() {
+        const slides = document.querySelectorAll('.banner-slide');
+        const indicators = document.querySelectorAll('.banner-indicator');
+        const progressBar = document.querySelector('.banner-progress-bar');
+        let currentIndex = 0;
+        const slideCount = slides.length;
+        const intervalTime = 5000; // 每张图片显示5秒
+        let progressInterval;
+        let carouselInterval;
+
+        // 显示指定索引的幻灯片
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            indicators.forEach(indicator => indicator.classList.remove('active'));
+
+            slides[index].classList.add('active');
+            indicators[index].classList.add('active');
+
+            // 重置进度条
+            progressBar.style.width = '0';
+
+            // 开始进度条动画
+            let progress = 0;
+            clearInterval(progressInterval);
+            progressInterval = setInterval(() => {
+                progress += 100 / (intervalTime / 100);
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressInterval);
+                }
+                progressBar.style.width = progress + '%';
+            }, 100);
+        }
+
+        // 下一张幻灯片
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % slideCount;
+            showSlide(currentIndex);
+        }
+
+        // 上一张幻灯片
+        function prevSlide() {
+            currentIndex = (currentIndex - 1 + slideCount) % slideCount;
+            showSlide(currentIndex);
+        }
+
+        // 开始轮播
+        function startCarousel() {
+            showSlide(currentIndex);
+            carouselInterval = setInterval(nextSlide, intervalTime);
+        }
+
+        // 停止轮播
+        function stopCarousel() {
+            clearInterval(carouselInterval);
+            clearInterval(progressInterval);
+        }
+
+        // 指示器点击事件
+        indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                currentIndex = index;
+                stopCarousel();
+                showSlide(currentIndex);
+                startCarousel();
+            });
+        });
+
+        // 鼠标悬停时暂停轮播
+        const banner = document.querySelector('.banner');
+        banner.addEventListener('mouseenter', () => {
+            stopCarousel();
+        });
+
+        // 鼠标离开时恢复轮播
+        banner.addEventListener('mouseleave', () => {
+            startCarousel();
+        });
+
+        // 开始轮播
+        startCarousel();
+    }
+
+    // --- 模态框函数 ---
     function openModal(video) {
         activeModalVideo = video;
         document.getElementById('modal-video-title').textContent = video.title;
@@ -1099,17 +1131,16 @@
             artistContainer.style.display = 'none';
         }
 
-        document.getElementById('video-options-modal').classList.add('visible');
+        document.getElementById('video-options-modal').style.display = 'flex';
     }
 
     function closeModal() {
-        document.getElementById('video-options-modal').classList.remove('visible');
+        document.getElementById('video-options-modal').style.display = 'none';
         activeModalVideo = null;
     }
 
     async function handleReportVideo() {
         if (!activeModalVideo) return;
-
         const bvid = activeModalVideo.bvid;
         const reportBtn = document.getElementById('report-video-btn');
         reportBtn.disabled = true;
@@ -1123,24 +1154,22 @@
             if (!response.ok) {
                 throw new Error('报告失败，请稍后重试。');
             }
-            
+
             reportBtn.textContent = '感谢反馈！';
             setTimeout(() => {
                 closeModal();
                 reportBtn.disabled = false;
                 reportBtn.textContent = '报告此视频';
             }, 1500);
-
         } catch (error) {
             console.error('Report error:', error);
             reportBtn.textContent = error.message;
-             setTimeout(() => {
+            setTimeout(() => {
                 reportBtn.disabled = false;
                 reportBtn.textContent = '报告此视频';
             }, 2000);
         }
     }
-
 
     // --- 响应式布局工具函数 ---
     function getCurrentLayout() {
@@ -1178,7 +1207,7 @@
     // --- API 调用与渲染 ---
     async function fetchApi(url, gridElement, successCallback = null) {
         try {
-            gridElement.innerHTML = '<div class="loading-spinner">加载中...</div>';
+            gridElement.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
@@ -1186,7 +1215,7 @@
             if (successCallback) successCallback(data);
         } catch (error) {
             console.error('Fetch error:', error);
-            gridElement.innerHTML = `<p class="error-message">加载失败: ${error.message}</p>`;
+            gridElement.innerHTML = `<div class="empty-state">加载失败: ${error.message}</div>`;
         }
     }
 
@@ -1218,7 +1247,7 @@
     async function fetchSearchResults() {
         const grid = document.getElementById('search-results-grid');
         const paginationContainer = document.getElementById('search-pagination');
-        grid.innerHTML = '<div class="loading-spinner">搜索中...</div>';
+        grid.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
         paginationContainer.innerHTML = '';
 
         try {
@@ -1226,13 +1255,12 @@
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const results = await response.json();
-
             renderVideos(results, grid, '搜索结果为空');
             renderPagination(results);
             document.getElementById('search-results').scrollIntoView({ behavior: 'smooth' });
         } catch (error) {
             console.error('Search error:', error);
-            grid.innerHTML = `<p class="error-message">搜索失败: ${error.message}</p>`;
+            grid.innerHTML = `<div class="empty-state">搜索失败: ${error.message}</div>`;
         }
     }
 
@@ -1247,10 +1275,12 @@
         }
 
         let paginationHtml = `
-      <button onclick="goToSearchPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&laquo; 上一页</button>
-      <span class="pagination-info">第 ${currentPage} / ${totalPages} 页</span>
-      <button onclick="goToSearchPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>下一页 &raquo;</button>
-    `;
+                <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px;">
+                    <button class="btn btn-secondary" onclick="goToSearchPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一页</button>
+                    <span style="color: var(--text-secondary);">第 ${currentPage} / ${totalPages} 页</span>
+                    <button class="btn btn-secondary" onclick="goToSearchPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>下一页</button>
+                </div>
+            `;
 
         paginationContainer.innerHTML = paginationHtml;
     }
@@ -1263,8 +1293,9 @@
 
     function renderVideos(videos, gridElement, emptyMessage = '没有可显示的视频。') {
         const dataToRender = videos.hits ? videos.hits : videos;
+
         if (!dataToRender || dataToRender.length === 0) {
-            gridElement.innerHTML = `<p class="empty-message">${emptyMessage}</p>`;
+            gridElement.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
             return;
         }
 
@@ -1274,49 +1305,51 @@
         for (const video of dataToRender) {
             const ownerName = video.owner ? video.owner.name : '未知UP主';
             const ownerAvatar = video.owner && video.owner.face ? video.owner.face : '';
-
             const finalCoverUrl = `${video.coverUrl}@672w_378h_1c_!web-home-common-cover.webp`;
             const finalAvatarUrl = ownerAvatar ? `${ownerAvatar}@128w_128h_1c_1s.webp` : '';
 
             const videoCard = document.createElement('div');
             videoCard.className = 'video-card';
+
             videoCard.innerHTML = `
-        <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
-          <div class="video-thumbnail-container">
-            <img class="video-thumbnail" src="${finalCoverUrl}" alt="${video.title}" loading="lazy" referrerpolicy="no-referrer">
-            <div class="video-overlay"></div>
-            <div class="video-duration">${formatDuration(video.duration || 0)}</div>
-            <div class="video-play-icon"></div>
-          </div>
-        </a>
-        <button class="video-options-btn" title="更多选项">
-            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
-        </button>
-        <div class="video-card-content">
-          <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" rel="noopener noreferrer">
-            <h3 class="video-card-title" title="${video.title}">${video.title}</h3>
-          </a>
-          <div class="video-card-meta">
-            <div class="video-stats">
-              <div class="stat-item">
-                <span class="views">▶ ${formatViews(video.views)}</span>
-              </div>
-              <div class="stat-item">
-                <span class="date">${formatDate(video.pubDate)}</span>
-              </div>
-            </div>
-          </div>
-          <div class="video-card-owner">
-            <img class="owner-avatar" src="${finalAvatarUrl}" alt="${ownerName}" referrerpolicy="no-referrer">
-            <span class="owner-name">${ownerName}</span>
-          </div>
-        </div>
-      `;
-            
-            videoCard.querySelector('.video-options-btn').addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openModal(video);
+                    <div class="video-cover">
+                        <img src="${finalCoverUrl}" alt="${video.title}" loading="lazy" referrerpolicy="no-referrer">
+                        <div class="video-duration">${formatDuration(video.duration || 0)}</div>
+                    </div>
+                    <div class="video-info">
+                        <h3 class="video-title" title="${video.title}">${video.title}</h3>
+                        <div class="video-stats">
+                            <div class="video-views">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                                ${formatViews(video.views)}
+                            </div>
+                            <div class="video-date">${formatDate(video.pubDate)}</div>
+                        </div>
+                        <div class="video-uploader">
+                            <div class="uploader-avatar">
+                                <img src="${finalAvatarUrl}" alt="${ownerName}" referrerpolicy="no-referrer">
+                            </div>
+                            <div class="uploader-name">${ownerName}</div>
+                        </div>
+                    </div>
+                `;
+
+            videoCard.addEventListener('click', () => {
+                window.open(`https://www.bilibili.com/video/${video.bvid}`, '_blank');
+            });
+
+            // 添加长按事件以打开模态框
+            let pressTimer;
+            videoCard.addEventListener('touchstart', () => {
+                pressTimer = setTimeout(() => {
+                    openModal(video);
+                }, 800);
+            });
+
+            videoCard.addEventListener('touchend', () => {
+                clearTimeout(pressTimer);
             });
 
             fragment.appendChild(videoCard);
@@ -1344,6 +1377,7 @@
         if (diffDays < 7) return `${diffDays}天前`;
         if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
         if (diffDays < 365) return `${Math.floor(diffDays / 30)}个月前`;
+
         return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
@@ -1351,37 +1385,6 @@
         if (num >= 10000) return (num / 10000).toFixed(1) + '万';
         return num.toLocaleString();
     }
-
-    // 添加平滑滚动效果
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-    });
-
-    // 添加滚动显示动画
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.animationPlayState = 'running';
-            }
-        });
-    }, observerOptions);
-
-    // 监听所有视频卡片
-    document.addEventListener('DOMNodeInserted', (e) => {
-        if (e.target.classList && e.target.classList.contains('video-card')) {
-            observer.observe(e.target);
-        }
-    });
 </script>
 </body>
 </html>

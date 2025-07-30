@@ -5,598 +5,237 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理一个基米？</title>
     <style>
-        /* CSS 样式部分保持不变 */
         :root {
-            --primary-color: #1890ff;
+            --primary-color: #00a1d6;
+            --primary-dark: #0087c0;
+            --secondary-color: #fb7299;
+            --accent-color: #ff6b6b;
             --success-color: #52c41a;
             --danger-color: #ff4d4f;
             --warning-color: #faad14;
-            --text-color: #333;
-            --text-secondary: #666;
-            --bg-color: #f0f2f5;
-            --card-bg: #fff;
-            --border-color: #e8e8e8;
-            --hover-bg: #f5f5f5;
-            --shadow: 0 2px 8px rgba(0,0,0,0.1);
-            --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+            --bg-primary: #ffffff;
+            --bg-secondary: #f4f4f4;
+            --bg-tertiary: #e7e7e7;
+            --bg-card: #ffffff;
+            --text-primary: #212121;
+            --text-secondary: #505050;
+            --text-tertiary: #999999;
+            --border-color: #e7e7e7;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --transition-fast: 0.2s ease;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #181818;
+                --bg-secondary: #212121;
+                --bg-tertiary: #2a2a2a;
+                --bg-card: #242424;
+                --text-primary: #e5e5e5;
+                --text-secondary: #a0a0a0;
+                --text-tertiary: #707070;
+                --border-color: #3a3a3a;
+            }
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
             line-height: 1.6;
         }
 
-        /* 头部导航 */
-        .header {
-            background: var(--card-bg);
-            box-shadow: var(--shadow);
-            padding: 0 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        /* Header */
+        .nav-header {
+            background-color: var(--bg-primary);
+            box-shadow: var(--shadow-sm);
+            position: sticky; top: 0; z-index: 100;
         }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 60px;
+        .nav-container {
+            max-width: 1400px; margin: 0 auto; display: flex;
+            align-items: center; justify-content: space-between;
+            padding: 0 20px; height: 64px;
         }
-
-        .header h1 {
-            font-size: 24px;
-            color: var(--primary-color);
+        .logo-text {
+            font-size: 20px; font-weight: bold;
+            color: var(--text-primary);
         }
+        .header-actions { display: flex; gap: 15px; align-items: center; }
 
-        .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
+        /* Main Container */
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px; border: none; border-radius: var(--radius-sm);
+            font-size: 14px; font-weight: 500; cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+        .btn:disabled { cursor: not-allowed; opacity: 0.6; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+        .btn-secondary:hover:not(:disabled) { background: var(--border-color); }
+        .btn-danger { background: var(--danger-color); color: white; }
+        .btn-danger:hover:not(:disabled) { background: #e83a3d; }
 
-        .logout-btn {
-            padding: 8px 16px;
-            background: var(--danger-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: #ff7875;
-            transform: translateY(-1px);
-        }
-
-        /* 主容器 */
-        .container {
-            max-width: 1400px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-
-        /* 搜索和过滤栏 */
+        /* Search & Filter Bar */
         .search-bar {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
+            background: var(--bg-card); padding: 20px; border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm); margin-bottom: 20px; display: flex;
+            gap: 15px; flex-wrap: wrap; align-items: center;
         }
-
-        .search-input {
-            flex: 1;
-            min-width: 300px;
-            padding: 10px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            transition: border-color 0.3s;
+        .form-input, .form-select {
+            padding: 8px 12px; border: 1px solid var(--border-color);
+            background-color: var(--bg-secondary); color: var(--text-primary);
+            border-radius: var(--radius-sm); font-size: 14px;
+            transition: border-color 0.3s ease;
         }
+        .form-input { flex: 1; min-width: 300px; }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary-color); }
+        .form-select { cursor: pointer; }
 
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .filter-select {
-            padding: 10px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .search-btn {
-            padding: 10px 20px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .search-btn:hover {
-            background: #40a9ff;
-            transform: translateY(-1px);
-        }
-
-        /* 统计卡片样式 */
+        /* Stats Cards */
         .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px; margin-bottom: 30px;
         }
-
         .stat-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: var(--bg-card); border-radius: var(--radius-md); padding: 20px;
+            box-shadow: var(--shadow-sm); transition: transform 0.2s, box-shadow 0.2s;
         }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .stat-card-title { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+        .stat-card-value { font-size: 28px; font-weight: 600; color: var(--text-primary); }
 
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .stat-card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            font-size: 24px;
-        }
-
-        .stat-card-icon.primary { background: #e6f7ff; color: #1890ff; }
-        .stat-card-icon.success { background: #f6ffed; color: #52c41a; }
-        .stat-card-icon.warning { background: #fffbe6; color: #faad14; }
-        .stat-card-icon.info { background: #f0f5ff; color: #2f54eb; }
-
-        .stat-card-title {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .stat-card-value {
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--text-color);
-        }
-
-        .stat-card-extra {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-        }
-
-        /* 表格容器 */
+        /* Table */
         .table-container {
-            background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
+            background: var(--bg-card); border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm); overflow: hidden;
         }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
+        .table { width: 100%; border-collapse: collapse; }
         .table th {
-            background: #fafafa;
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-secondary);
-            border-bottom: 2px solid var(--border-color);
-            white-space: nowrap;
+            background: var(--bg-secondary); padding: 15px; text-align: left;
+            font-weight: 500; color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color); white-space: nowrap;
         }
-
-        .table td {
-            padding: 15px;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
-        }
-
-        .table tr:hover {
-            background: var(--hover-bg);
-        }
-
-        .table tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* 表格内容样式 */
-        .bvid-link {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .bvid-link:hover {
-            text-decoration: underline;
-        }
-
-        .title-cell {
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .description-preview {
-            color: var(--text-secondary);
-            cursor: pointer;
-            text-decoration: underline;
-            font-size: 13px;
-        }
-
-        .pub-date {
-            color: var(--text-secondary);
-            font-size: 13px;
-            white-space: nowrap;
-        }
-
+        .table td { padding: 15px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .table tr:hover { background: var(--bg-secondary); }
+        .table tr:last-child td { border-bottom: none; }
+        .bvid-link { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+        .bvid-link:hover { text-decoration: underline; }
+        .title-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .description-preview { color: var(--text-tertiary); cursor: pointer; text-decoration: underline dotted; font-size: 13px; }
+        .description-preview:hover { color: var(--primary-color); }
+        .pub-date { font-size: 13px; color: var(--text-tertiary); white-space: nowrap; }
         .views-badge {
-            background: #e6f7ff;
-            color: #1890ff;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            white-space: nowrap;
+            background: rgba(0, 161, 214, 0.1); color: var(--primary-color);
+            padding: 4px 8px; border-radius: var(--radius-sm);
+            font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap;
         }
-
         .hachimi-toggle {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.3s;
-            user-select: none;
+            display: inline-flex; align-items: center; padding: 6px 12px;
+            border-radius: var(--radius-sm); cursor: pointer; font-size: 13px;
+            font-weight: 500; transition: all 0.2s; user-select: none;
+            border: 1px solid transparent;
         }
+        .hachimi-toggle.yes { background: rgba(82, 196, 26, 0.1); color: var(--success-color); border-color: rgba(82, 196, 26, 0.3); }
+        .hachimi-toggle.no { background: rgba(255, 77, 79, 0.1); color: var(--danger-color); border-color: rgba(255, 77, 79, 0.3); }
+        .hachimi-toggle:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 
-        .hachimi-toggle.yes {
-            background: #f6ffed;
-            color: var(--success-color);
-            border: 1px solid #b7eb8f;
-        }
+        .action-btn { padding: 6px 12px; font-size: 13px; }
+        .action-btn.resolve { background: var(--success-color); color: white; }
+        .action-btn.resolve:hover { background-color: #5fcf25; }
 
-        .hachimi-toggle.no {
-            background: #fff1f0;
-            color: var(--danger-color);
-            border: 1px solid #ffccc7;
-        }
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; }
+        .pagination .page-info { color: var(--text-secondary); font-size: 14px; }
 
-        .hachimi-toggle:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .action-btn {
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.3s;
-            border: 1px solid var(--border-color);
-        }
-
-        .action-btn.resolve {
-            background: #f6ffed;
-            color: var(--success-color);
-            border-color: #b7eb8f;
-        }
-
-        .action-btn.resolve:hover {
-            opacity: 0.8;
-        }
-
-        /* 分页 */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 30px;
-        }
-
-        .pagination button {
-            padding: 8px 16px;
-            border: 1px solid var(--border-color);
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .pagination button:hover:not(:disabled) {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
-
-        .pagination button:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .pagination .page-info {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        /* 模态框 */
+        /* Modal */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            animation: fadeIn 0.3s;
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+            z-index: 1000; justify-content: center; align-items: center;
         }
-
         .modal-content {
-            position: relative;
-            background: white;
-            max-width: 600px;
-            margin: 50px auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            animation: slideIn 0.3s;
-            max-height: 80vh;
-            overflow-y: auto;
+            background: var(--bg-card); max-width: 600px;
+            width: 90%; margin: 50px auto; border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg); max-height: 80vh; overflow-y: auto;
         }
-
         .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 20px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .modal-header h3 { font-size: 18px; margin: 0; }
+        .modal-close { font-size: 24px; cursor: pointer; color: var(--text-tertiary); background: none; border: none; }
+        .modal-body { padding: 20px; }
+        .modal-body p { margin-bottom: 15px; line-height: 1.8; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
+        .stat-item { background: var(--bg-secondary); padding: 12px; border-radius: var(--radius-md); text-align: center; }
+        .stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; }
+        .stat-value { font-size: 16px; font-weight: 600; }
 
-        .modal-header h3 {
-            font-size: 18px;
-            margin: 0;
-        }
-
-        .modal-close {
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            background: none;
-            border: none;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-
-        .modal-close:hover {
-            background: var(--hover-bg);
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-body p {
-            margin-bottom: 15px;
-            line-height: 1.8;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .stat-item {
-            background: #f5f5f5;
-            padding: 12px;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-color);
-        }
-
-        /* 登录页面 */
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-color);
-        }
-
+        /* Login Page */
+        .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); }
         .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 400px;
+            background: var(--bg-card); padding: 40px; border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md); width: 100%; max-width: 400px; text-align: center;
         }
-
         .login-box h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--primary-color);
+            font-size: 24px; font-weight: bold; margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-
         .login-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            transition: border-color 0.3s;
+            width: 100%; padding: 12px 15px; font-size: 14px; margin-bottom: 20px;
+            height: 44px; text-align: left;
         }
+        .login-btn { width: 100%; height: 44px; }
+        .error-message { color: var(--danger-color); margin-top: 15px; font-size: 14px; height: 1em; }
 
-        .login-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 12px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .login-btn:hover {
-            background: #40a9ff;
-        }
-
-        .login-btn:disabled {
-            background: #d9d9d9;
-            cursor: not-allowed;
-        }
-
-        .error-message {
-            color: var(--danger-color);
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-
-        /* 加载动画 */
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: var(--text-secondary);
-        }
-
+        /* Loading */
+        .loading { text-align: center; padding: 50px; color: var(--text-tertiary); }
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--primary-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            border: 3px solid var(--border-color); border-top: 3px solid var(--primary-color);
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 0 auto 20px;
         }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* 响应式设计 */
         @media (max-width: 768px) {
-            .table-container {
-                overflow-x: auto;
-            }
-
-            .table {
-                min-width: 800px;
-            }
-
-            .search-bar {
-                flex-direction: column;
-            }
-
-            .search-input {
-                width: 100%;
-                min-width: auto;
-            }
+            .table-container { overflow-x: auto; }
+            .table { min-width: 800px; }
+            .search-bar { flex-direction: column; }
+            .form-input { width: 100%; min-width: auto; }
         }
     </style>
 </head>
 <body>
 <div id="login-page" class="login-container">
     <div class="login-box">
-        <h2>管理员登录</h2>
-        <input type="password" id="password-input" class="login-input" placeholder="请输入管理员密码" autocomplete="off">
-        <button id="login-btn" class="login-btn">登录</button>
-        <div id="error-message" class="error-message" style="display: none;"></div>
+        <h2>管理员后台</h2>
+        <input type="password" id="password-input" class="form-input login-input" placeholder="请输入管理员密码" autocomplete="off">
+        <button id="login-btn" class="btn btn-primary login-btn">登录</button>
+        <div id="error-message" class="error-message"></div>
     </div>
 </div>
 
 <div id="admin-page" style="display: none;">
-    <header class="header">
-        <div class="header-content">
-            <h1>哈基米视频管理系统</h1>
+    <header class="nav-header">
+        <div class="nav-container">
+            <h1 class="logo-text">哈基米视频管理系统</h1>
             <div class="header-actions">
-                <span id="admin-info">电警喵大人</span>
-                <button class="logout-btn" onclick="logout()">退出登录</button>
+                <span id="admin-info" style="color: var(--text-secondary); font-weight: 500;">电警喵大人</span>
+                <button class="btn btn-danger" onclick="logout()">退出登录</button>
             </div>
         </div>
     </header>
@@ -604,41 +243,38 @@
     <div class="container">
         <div class="stats-container" id="stats-container">
             <div class="stat-card">
-                <div class="stat-card-icon primary">📹</div>
                 <div class="stat-card-title">哈基米视频总数</div>
                 <div class="stat-card-value" id="stat-total-hachimi">-</div>
             </div>
-            <div class="stat-card" id="stat-card-total-authors"> <div class="stat-card-icon success">👤</div>
+            <div class="stat-card" id="stat-card-total-authors" style="cursor: pointer;">
                 <div class="stat-card-title">作者总数</div>
                 <div class="stat-card-value" id="stat-total-authors">-</div>
             </div>
             <div class="stat-card">
-                <div class="stat-card-icon warning">✅</div>
                 <div class="stat-card-title">今日审核数</div>
                 <div class="stat-card-value" id="stat-today-reviewed">-</div>
             </div>
             <div class="stat-card">
-                <div class="stat-card-icon info">🎉</div>
                 <div class="stat-card-title">今日哈基米</div>
                 <div class="stat-card-value" id="stat-today-hachimi">-</div>
             </div>
         </div>
 
         <div class="search-bar">
-            <input type="text" id="search-input" class="search-input" placeholder="搜索 BV号、标题或简介...">
-            <select id="filter-select" class="filter-select">
+            <input type="text" id="search-input" class="form-input" placeholder="搜索 BV号、标题或简介...">
+            <select id="filter-select" class="form-select">
                 <option value="">全部视频</option>
                 <option value="true">哈基米视频</option>
                 <option value="false">非哈基米视频</option>
                 <option value="reported">已报告的视频</option>
             </select>
-            <select id="sort-select" class="filter-select">
+            <select id="sort-select" class="form-select">
                 <option value="pubDate:desc">最新发布</option>
                 <option value="pubDate:asc">最早发布</option>
                 <option value="views:desc">最多播放</option>
                 <option value="views:asc">最少播放</option>
             </select>
-            <button class="search-btn" onclick="searchVideos()">搜索</button>
+            <button class="btn btn-primary" onclick="searchVideos()">搜索</button>
         </div>
 
         <div class="table-container">
@@ -656,12 +292,6 @@
                 </tr>
                 </thead>
                 <tbody id="video-tbody">
-                <tr>
-                    <td colspan="7" class="loading">
-                        <div class="spinner"></div>
-                        <div>加载中...</div>
-                    </td>
-                </tr>
                 </tbody>
             </table>
         </div>
@@ -681,36 +311,31 @@
 </div>
 
 <script>
-    // 全局变量
+    // JavaScript 逻辑保持不变
     let currentPage = 0;
     let totalPages = 0;
     let currentSearch = '';
     let currentFilter = '';
-    let currentSort = 'pubDate:desc'; // 新增
+    let currentSort = 'pubDate:desc';
 
-    // 页面初始化
     document.addEventListener('DOMContentLoaded', async () => {
-        // 检查是否已登录
         const isAuthenticated = await checkAuth();
         if (isAuthenticated) {
             showAdminPage();
-            loadVideos();
         } else {
             showLoginPage();
         }
 
-        // Add event listener for the "Total Authors" card
         const statCardTotalAuthors = document.getElementById('stat-card-total-authors');
         if (statCardTotalAuthors) {
-            statCardTotalAuthors.style.cursor = 'pointer'; // Make it look clickable
             statCardTotalAuthors.addEventListener('click', showHachimiAuthorsModal);
         }
     });
 
-    // 检查认证状态
     async function checkAuth() {
         try {
             const response = await fetch('/api/auth/admin/check');
+            if (!response.ok) return false;
             const data = await response.json();
             return data.authenticated;
         } catch (error) {
@@ -719,46 +344,35 @@
         }
     }
 
-    // 显示登录页面
     function showLoginPage() {
         document.getElementById('login-page').style.display = 'flex';
         document.getElementById('admin-page').style.display = 'none';
     }
 
-    // 显示管理页面
     function showAdminPage() {
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('admin-page').style.display = 'block';
-        loadStatistics(); // 加载统计数据
+        loadStatistics();
+        loadVideos();
     }
 
-    // 加载统计数据
     async function loadStatistics() {
         try {
             const response = await fetch('/api/admin/statistics');
-            if (!response.ok) {
-                throw new Error('Failed to load statistics');
-            }
-
+            if (!response.ok) throw new Error('Failed to load statistics');
             const stats = await response.json();
-
-            // 更新统计卡片
             document.getElementById('stat-total-hachimi').textContent = formatNumber(stats.totalHachimiVideos || 0);
             document.getElementById('stat-total-authors').textContent = formatNumber(stats.totalAuthors || 0);
             document.getElementById('stat-today-reviewed').textContent = formatNumber(stats.todayReviewedVideos || 0);
             document.getElementById('stat-today-hachimi').textContent = formatNumber(stats.todayHachimiVideos || 0);
-
         } catch (error) {
             console.error('Load statistics failed:', error);
-            // 出错时显示 0
-            document.getElementById('stat-total-hachimi').textContent = '0';
-            document.getElementById('stat-total-authors').textContent = '0';
-            document.getElementById('stat-today-reviewed').textContent = '0';
-            document.getElementById('stat-today-hachimi').textContent = '0';
+            ['stat-total-hachimi', 'stat-total-authors', 'stat-today-reviewed', 'stat-today-hachimi'].forEach(id => {
+                document.getElementById(id).textContent = '0';
+            });
         }
     }
 
-    // 登录功能
     document.getElementById('login-btn').addEventListener('click', login);
     document.getElementById('password-input').addEventListener('keyup', (e) => {
         if (e.key === 'Enter') login();
@@ -767,33 +381,18 @@
     async function login() {
         const password = document.getElementById('password-input').value;
         const loginBtn = document.getElementById('login-btn');
-        const errorMsg = document.getElementById('error-message');
-
-        console.log('Login attempt with password:', password ? '***' : 'empty');
-
-        if (!password) {
-            showError('请输入密码');
-            return;
-        }
-
+        if (!password) { showError('请输入密码'); return; }
         loginBtn.disabled = true;
         loginBtn.textContent = '登录中...';
-
         try {
             const response = await fetch('/api/auth/admin/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password })
             });
-
-            console.log('Login response status:', response.status);
             const data = await response.json();
-            console.log('Login response data:', data);
-
             if (data.success) {
-                console.log('Login successful, loading admin page');
                 showAdminPage();
-                loadVideos(); // 默认加载最新数据
             } else {
                 showError(data.message || '密码错误');
             }
@@ -809,366 +408,189 @@
     function showError(message) {
         const errorMsg = document.getElementById('error-message');
         errorMsg.textContent = message;
-        errorMsg.style.display = 'block';
-        setTimeout(() => {
-            errorMsg.style.display = 'none';
-        }, 3000);
+        setTimeout(() => { errorMsg.textContent = ''; }, 3000);
     }
 
-    // 退出登录
     async function logout() {
         try {
             await fetch('/api/auth/logout', { method: 'POST' });
             showLoginPage();
             document.getElementById('password-input').value = '';
-        } catch (error) {
-            console.error('Logout failed:', error);
-        }
+        } catch (error) { console.error('Logout failed:', error); }
     }
 
-    // 加载视频列表
     async function loadVideos(page = 0) {
         const tbody = document.getElementById('video-tbody');
-        tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="loading">
-                        <div class="spinner"></div>
-                        <div>加载中...</div>
-                    </td>
-                </tr>
-            `;
-
+        tbody.innerHTML = `<tr><td colspan="8" class="loading"><div class="spinner"></div><div>加载中...</div></td></tr>`;
         try {
-            let url = `/api/admin/videos?page=${page}&size=20`;
-            if (currentSearch) {
-                url += `&search=${encodeURIComponent(currentSearch)}`;
-            }
+            let url = `/api/admin/videos?page=${page}&size=20&sort=${currentSort}`;
+            if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
             if (currentFilter === 'true' || currentFilter === 'false') {
                 url += `&isHachimi=${currentFilter}`;
             } else if (currentFilter === 'reported') {
                 url += `&is_reported=true`;
             }
-            if (currentSort) {
-                url += `&sort=${currentSort}`;
-            }
 
             const response = await fetch(url);
             if (!response.ok) {
-                if (response.status === 401) {
-                    showLoginPage();
-                    return;
-                }
+                if (response.status === 401) { showLoginPage(); return; }
                 throw new Error('加载失败');
             }
-
             const data = await response.json();
             currentPage = data.currentPage;
             totalPages = data.totalPages;
-
             renderVideos(data.content);
             renderPagination();
         } catch (error) {
             console.error('Load videos failed:', error);
-            tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" style="text-align: center; color: var(--danger-color);">
-                            加载失败，请重试
-                        </td>
-                    </tr>
-                `;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--danger-color);">加载失败，请重试</td></tr>`;
         }
     }
 
-    // 渲染视频列表
     function renderVideos(videos) {
         const tbody = document.getElementById('video-tbody');
-
         if (!videos || videos.length === 0) {
-            tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" style="text-align: center; color: var(--text-secondary);">
-                            暂无数据
-                        </td>
-                    </tr>
-                `;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-secondary);">暂无数据</td></tr>`;
             return;
         }
-
         tbody.innerHTML = videos.map(video => `
-                <tr>
-                    <td>
-                        <a href="https://www.bilibili.com/video/${video.bvid}"
-                           target="_blank"
-                           class="bvid-link">${video.bvid}</a>
-                    </td>
-                    <td class="title-cell" title="${escapeHtml(video.title)}">
-                        ${escapeHtml(video.title)}
-                    </td>
-                    <td>${escapeHtml(video.ownerName || '未知')}</td>
-                    <td>
-                        <span class="description-preview"
-                              onclick="showDescription('${escapeHtml(video.title)}', '${escapeHtml(video.description || '暂无简介')}')">
-                            ${video.description ? video.description.substring(0, 20) + '...' : '暂无'}
-                        </span>
-                    </td>
-                    <td class="pub-date">${formatDate(video.pubDate)}</td>
-                    <td>
-                        <span class="views-badge" onclick="showStats('${video.bvid}')">
-                            播放: ${formatNumber(video.views)}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="hachimi-toggle ${video.is_hachimi ? 'yes' : 'no'}"
-                              onclick="toggleHachimi('${video.bvid}', ${video.is_hachimi})">
-                            ${video.is_hachimi ? '是' : '否'}
-                        </span>
-                    </td>
-                    <td>
-                        ${video.is_reported ? `<button class="action-btn resolve" onclick="resolveReport('${video.bvid}')">解决报告</button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td><a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" class="bvid-link">${video.bvid}</a></td>
+                <td class="title-cell" title="${escapeHtml(video.title)}">${escapeHtml(video.title)}</td>
+                <td>${escapeHtml(video.ownerName || '未知')}</td>
+                <td><span class="description-preview" onclick="showDescriptionModal(this)" data-title="${escapeHtml(video.title)}" data-description="${escapeHtml(video.description || '暂无简介')}">${video.description ? video.description.substring(0, 20) + '...' : '暂无'}</span></td>
+                <td class="pub-date">${formatDate(video.pubDate)}</td>
+                <td><span class="views-badge" onclick="showStatsModal('${video.bvid}')">播放: ${formatNumber(video.views)}</span></td>
+                <td><span class="hachimi-toggle ${video.is_hachimi ? 'yes' : 'no'}" onclick="toggleHachimi('${video.bvid}', ${video.is_hachimi})">${video.is_hachimi ? '是' : '否'}</span></td>
+                <td>${video.is_reported ? `<button class="btn btn-sm action-btn resolve" onclick="resolveReport('${video.bvid}')">解决报告</button>` : ''}</td>
+            </tr>
+        `).join('');
     }
 
-    // 渲染分页
     function renderPagination() {
         const pagination = document.getElementById('pagination');
-
-        if (totalPages <= 1) {
-            pagination.innerHTML = '';
-            return;
-        }
-
+        if (totalPages <= 1) { pagination.innerHTML = ''; return; }
         pagination.innerHTML = `
-                <button onclick="loadVideos(0)" ${currentPage === 0 ? 'disabled' : ''}>首页</button>
-                <button onclick="loadVideos(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}>上一页</button>
-                <span class="page-info">第 ${currentPage + 1} / ${totalPages} 页</span>
-                <button onclick="loadVideos(${currentPage + 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>下一页</button>
-                <button onclick="loadVideos(${totalPages - 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>末页</button>
-            `;
+            <button class="btn btn-secondary" onclick="loadVideos(0)" ${currentPage === 0 ? 'disabled' : ''}>首页</button>
+            <button class="btn btn-secondary" onclick="loadVideos(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}>上一页</button>
+            <span class="page-info">第 ${currentPage + 1} / ${totalPages} 页</span>
+            <button class="btn btn-secondary" onclick="loadVideos(${currentPage + 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>下一页</button>
+            <button class="btn btn-secondary" onclick="loadVideos(${totalPages - 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>末页</button>
+        `;
     }
 
-    // 搜索功能
     function searchVideos() {
         currentSearch = document.getElementById('search-input').value.trim();
         currentFilter = document.getElementById('filter-select').value;
-        currentSort = document.getElementById('sort-select').value; // 新增
+        currentSort = document.getElementById('sort-select').value;
         loadVideos(0);
     }
 
-    // 切换哈基米状态
     async function toggleHachimi(bvid, currentStatus) {
-        if (!confirm(`确定要将此视频的哈基米状态从 "${currentStatus ? '是' : '否'}" 改为 "${!currentStatus ? '是' : '否'}" 吗？`)) {
-            return;
-        }
-
+        if (!confirm(`确定要将此视频的哈基米状态从 "${currentStatus ? '是' : '否'}" 改为 "${!currentStatus ? '是' : '否'}" 吗？`)) return;
         try {
-            const response = await fetch(`/api/admin/videos/${bvid}/hachimi`, {
-                method: 'PUT'
-            });
-
-            if (!response.ok) {
-                throw new Error('操作失败');
-            }
-
-            // 重新加载当前页
+            const response = await fetch(`/api/admin/videos/${bvid}/hachimi`, { method: 'PUT' });
+            if (!response.ok) throw new Error('操作失败');
             loadVideos(currentPage);
-        } catch (error) {
-            console.error('Toggle hachimi failed:', error);
-            alert('操作失败，请重试');
-        }
+        } catch (error) { alert('操作失败，请重试'); }
     }
 
     async function resolveReport(bvid) {
-        if (!confirm(`确定要将此视频的报告状态标记为已解决吗？`)) {
-            return;
-        }
-
+        if (!confirm(`确定要将此视频的报告状态标记为已解决吗？`)) return;
         try {
-            const response = await fetch(`/api/admin/videos/${bvid}/resolve-report`, {
-                method: 'PUT'
-            });
-
-            if (!response.ok) {
-                throw new Error('操作失败');
-            }
-
-            // 重新加载当前页
+            const response = await fetch(`/api/admin/videos/${bvid}/resolve-report`, { method: 'PUT' });
+            if (!response.ok) throw new Error('操作失败');
             loadVideos(currentPage);
-        } catch (error) {
-            console.error('Resolve report failed:', error);
-            alert('操作失败，请重试');
-        }
+        } catch (error) { alert('操作失败，请重试'); }
     }
 
-    // 显示简介
-    function showDescription(element) {
-        const title = element.dataset.title;
-        const description = element.dataset.description;
-
-        document.getElementById('modal-title').textContent = '视频简介';
-        document.getElementById('modal-body').innerHTML = `
-            <h4>${title}</h4>
-            <p style="white-space: pre-wrap;">${description}</p>
-        `;
-        document.getElementById('modal').style.display = 'block';
+    function showDescriptionModal(element) {
+        openModal('视频简介', `<h4>${element.dataset.title}</h4><p style="white-space: pre-wrap;">${element.dataset.description}</p>`);
     }
 
-    // 显示视频统计数据
-    async function showStats(bvid) {
+    async function showStatsModal(bvid) {
+        openModal('视频数据详情', `<div class="loading"><div class="spinner"></div></div>`);
         try {
             const response = await fetch(`/api/admin/videos/${bvid}`);
             if (!response.ok) throw new Error('加载失败');
-
             const video = await response.json();
-
-            document.getElementById('modal-title').textContent = '视频数据详情';
-            document.getElementById('modal-body').innerHTML = `
-                    <h4>${escapeHtml(video.title)}</h4>
-                    <div class="stats-grid">
+            const bodyHtml = `
+                <h4>${escapeHtml(video.title)}</h4>
+                <div class="stats-grid">
+                    ${Object.entries({播放量:'views',弹幕:'danmaku',评论:'replies',收藏:'favorites',硬币:'coins',分享:'shares',点赞:'likes'}).map(([label, key]) => `
                         <div class="stat-item">
-                            <div class="stat-label">播放量</div>
-                            <div class="stat-value">${formatNumber(video.views)}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">弹幕</div>
-                            <div class="stat-value">${formatNumber(video.danmaku)}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">评论</div>
-                            <div class="stat-value">${formatNumber(video.replies)}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">收藏</div>
-                            <div class="stat-value">${formatNumber(video.favorites)}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">硬币</div>
-                            <div class="stat-value">${formatNumber(video.coins)}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">分享</div>
-                            <div class="stat-value">${formatNumber(video.shares)}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">点赞</div>
-                            <div class="stat-value">${formatNumber(video.likes)}</div>
-                        </div>
-                    </div>
-                    <p style="margin-top: 20px; color: var(--text-secondary);">
-                        审核时间: ${video.reviewedAt ? formatDate(video.reviewedAt) : '未审核'}<br>
-                        更新时间: ${video.updatedAt ? formatDate(video.updatedAt) : '-'}
-                    </p>
-                `;
-            document.getElementById('modal').style.display = 'block';
-        } catch (error) {
-            console.error('Show stats failed:', error);
-            alert('加载数据失败');
-        }
+                            <div class="stat-label">${label}</div>
+                            <div class="stat-value">${formatNumber(video[key])}</div>
+                        </div>`).join('')}
+                </div>
+                <p style="margin-top: 20px; font-size: 13px; color: var(--text-tertiary);">
+                    审核时间: ${video.reviewedAt ? formatDate(video.reviewedAt) : '未审核'}<br>
+                    更新时间: ${video.updatedAt ? formatDate(video.updatedAt) : '-'}
+                </p>`;
+            document.getElementById('modal-body').innerHTML = bodyHtml;
+        } catch (error) { document.getElementById('modal-body').innerHTML = `<p style="color: var(--danger-color)">加载数据失败</p>`; }
     }
 
-    // New function to show Hachimi Authors in a modal
     async function showHachimiAuthorsModal() {
-        document.getElementById('modal-title').textContent = '哈基米视频作者列表';
-        document.getElementById('modal-body').innerHTML = `
-            <div class="spinner" style="margin: 20px auto;"></div>
-            <div>加载作者中...</div>
-        `;
-        document.getElementById('modal').style.display = 'block';
-
+        openModal('哈基米视频作者列表', `<div class="loading"><div class="spinner"></div></div>`);
         try {
             const response = await fetch('/api/admin/statistics/authors');
             if (!response.ok) {
-                if (response.status === 401) {
-                    showLoginPage(); // Redirect to login if unauthorized
-                    return;
-                }
+                if (response.status === 401) { showLoginPage(); return; }
                 throw new Error('Failed to load authors');
             }
             const authors = await response.json();
-
             if (!authors || authors.length === 0) {
                 document.getElementById('modal-body').innerHTML = '<p style="text-align: center;">暂无作者数据。</p>';
                 return;
             }
-
-            let tableHtml = `
-                <div class="table-container" style="box-shadow: none;">
+            const tableHtml = `
+                <div class="table-container" style="box-shadow: none; max-height: 50vh; overflow-y: auto;">
                     <table class="table">
-                        <thead>
-                            <tr>
-                                <th>头像</th>
-                                <th>作者名称</th>
-                                <th>B站主页</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>头像</th><th>作者名称</th><th>B站主页</th></tr></thead>
                         <tbody>
-            `;
-            authors.forEach(author => {
-                // Construct Bilibili user space URL: https://space.bilibili.com/{mid}
-                const bilibiliSpaceUrl = `https://space.bilibili.com/${author.mid}`;
-                // Use a proxy for Bilibili avatars to avoid CORS/mixed content issues
-                const proxiedAvatarUrl = author.face ? `https://images.weserv.nl/?url=${encodeURIComponent(author.face)}&w=64&h=64&fit=cover&output=webp` : '';
-
-                tableHtml += `
-                    <tr>
-                        <td><img src="${proxiedAvatarUrl}" alt="头像" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"></td>
-                        <td>${escapeHtml(author.name || '未知作者')}</td>
-                        <td><a href="${bilibiliSpaceUrl}" target="_blank" class="bvid-link">进入主页</a></td>
-                    </tr>
-                `;
-            });
-            tableHtml += `
+                            ${authors.map(author => `
+                                <tr>
+                                    <td><img src="https://images.weserv.nl/?url=${encodeURIComponent(author.face)}&w=64&h=64&fit=cover&output=webp" alt="头像" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"></td>
+                                    <td>${escapeHtml(author.name || '未知作者')}</td>
+                                    <td><a href="https://space.bilibili.com/${author.mid}" target="_blank" class="bvid-link">进入主页</a></td>
+                                </tr>`).join('')}
                         </tbody>
                     </table>
-                </div>
-            `;
+                </div>`;
             document.getElementById('modal-body').innerHTML = tableHtml;
-
         } catch (error) {
-            console.error('Error fetching authors:', error);
-            document.getElementById('modal-body').innerHTML = '<p style="color: var(--danger-color); text-align: center;">加载作者失败，请重试。</p>';
+            document.getElementById('modal-body').innerHTML = '<p style="color: var(--danger-color); text-align: center;">加载作者失败。</p>';
         }
     }
 
+    function openModal(title, bodyHtml) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-body').innerHTML = bodyHtml;
+        document.getElementById('modal').style.display = 'flex';
+    }
 
-    // 关闭模态框
     function closeModal() {
         document.getElementById('modal').style.display = 'none';
     }
 
-    // 点击模态框外部关闭
     window.onclick = function(event) {
-        const modal = document.getElementById('modal');
-        if (event.target === modal) {
-            closeModal();
-        }
+        if (event.target === document.getElementById('modal')) closeModal();
     }
 
-    // 工具函数
     function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        if (text === null || text === undefined) return '';
+        return text.toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]);
     }
 
     function formatDate(dateString) {
         if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        return new Date(dateString).toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-');
     }
 
     function formatNumber(num) {
-        if (num >= 10000) {
-            return (num / 10000).toFixed(1) + '万';
-        }
+        if (num === null || num === undefined) return 0;
+        if (num >= 10000) return (num / 10000).toFixed(1) + '万';
         return num.toLocaleString();
     }
 </script>

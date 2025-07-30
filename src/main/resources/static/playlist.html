@@ -13,487 +13,223 @@
       --success-color: #52c41a;
       --danger-color: #ff4d4f;
       --warning-color: #faad14;
-
       --bg-primary: #ffffff;
-      --bg-secondary: #f5f7fa;
-      --bg-tertiary: #e9ecef;
-      --text-primary: #1a1a1a;
-      --text-secondary: #6c757d;
-      --border-color: #e9ecef;
-
-      --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --bg-secondary: #f4f4f4;
+      --bg-tertiary: #e7e7e7;
+      --bg-card: #ffffff;
+      --text-primary: #212121;
+      --text-secondary: #505050;
+      --text-tertiary: #999999;
+      --border-color: #e7e7e7;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
       --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --transition-fast: 0.2s ease;
     }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #181818;
+        --bg-secondary: #212121;
+        --bg-tertiary: #2a2a2a;
+        --bg-card: #242424;
+        --text-primary: #e5e5e5;
+        --text-secondary: #a0a0a0;
+        --text-tertiary: #707070;
+        --border-color: #3a3a3a;
+      }
     }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
       background-color: var(--bg-secondary);
       color: var(--text-primary);
       line-height: 1.6;
     }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+    .container { max-width: 1280px; margin: 0 auto; padding: 20px; }
 
     /* Header */
-    .header {
-      background: var(--bg-primary);
+    .nav-header {
+      background-color: var(--bg-primary);
       box-shadow: var(--shadow-sm);
-      padding: 20px 0;
-      margin-bottom: 30px;
+      position: sticky; top: 0; z-index: 100;
     }
-
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .nav-container {
+      max-width: 1280px; margin: 0 auto; display: flex;
+      align-items: center; justify-content: space-between;
+      padding: 0 16px; height: 64px;
     }
-
-    .header h1 {
-      font-size: 24px;
-      color: var(--primary-color);
+    .logo-text {
+      font-size: 20px; font-weight: bold;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-
-    .header-actions {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-
+    .header-actions { display: flex; gap: 10px; align-items: center; }
     .back-link {
-      color: var(--primary-color);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-weight: 500;
-      transition: opacity 0.3s;
+      color: var(--text-primary); text-decoration: none;
+      font-size: 16px; font-weight: 500;
+      transition: color var(--transition-fast);
     }
-
-    .back-link:hover {
-      opacity: 0.8;
-    }
+    .back-link:hover { color: var(--primary-color); }
 
     /* Buttons */
     .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      padding: 8px 16px; border: none; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: all var(--transition-fast);
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      white-space: nowrap; /* Fix for button text wrapping */
     }
-
-    .btn-primary {
-      background: var(--primary-color);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-secondary {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-    }
-
-    .btn-secondary:hover {
-      background: var(--border-color);
-    }
-
-    .btn-danger {
-      background: var(--danger-color);
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background: #ff7875;
-    }
-
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 12px;
-    }
+    .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+    .btn:disabled { transform: none; box-shadow: none; background-color: var(--bg-tertiary) !important; color: var(--text-tertiary) !important; cursor: not-allowed; opacity: 0.7; }
+    .btn-primary { background: var(--primary-color); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+    .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+    .btn-secondary:hover:not(:disabled) { background: var(--border-color); }
+    .btn-danger { background: var(--danger-color); color: white; }
+    .btn-danger:hover:not(:disabled) { background: #e83a3d; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
 
     /* Forms */
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-      color: var(--text-primary);
-    }
-
-    .form-input,
-    .form-textarea {
-      width: 100%;
-      padding: 10px 15px;
+    .form-group { margin-bottom: 15px; }
+    .form-label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary); }
+    .form-input, .form-textarea {
+      width: 100%; padding: 10px 15px;
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm); font-size: 14px;
       transition: border-color 0.3s ease;
     }
+    .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--primary-color); }
+    #playlistDescription.form-textarea, #editPlaylistDescription { min-height: 120px; }
+    .form-textarea { resize: vertical; min-height: 100px; }
+    /* Larger font for title input */
+    #editPlaylistTitle { font-size: 20px; font-weight: bold; }
 
-    .form-input:focus,
-    .form-textarea:focus {
-      outline: none;
-      border-color: var(--primary-color);
-    }
 
-    .form-textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    /* Cards */
+    /* Cards & Headers */
     .card {
-      background: var(--bg-primary);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-sm);
-      padding: 24px;
-      margin-bottom: 20px;
+      background: var(--bg-card); border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm); padding: 24px; margin-bottom: 20px;
     }
-
     .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+      margin-bottom: 20px; padding-bottom: 15px;
       border-bottom: 1px solid var(--border-color);
     }
+    .card-title { font-size: 20px; font-weight: bold; flex-grow: 1; }
+    .card-header-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .playlist-details { flex-grow: 1; }
 
-    .card-title {
-      font-size: 20px;
-      font-weight: 600;
+    /* Edit Mode Specifics */
+    .playlist-edit-footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      text-align: right;
     }
+
 
     /* Modal */
     .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;
+      justify-content: center; align-items: center;
     }
-
     .modal-content {
-      position: relative;
-      background: white;
-      max-width: 600px;
-      margin: 50px auto;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      max-height: 90vh;
-      overflow-y: auto;
+      position: relative; background: var(--bg-card);
+      width: 90%;
+      max-width: 650px;
+      margin: 50px auto; border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
+      max-height: calc(100vh - 80px);
     }
-
-    .modal-header {
-      padding: 24px;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-body {
-      padding: 24px;
-    }
-
-    .modal-footer {
-      padding: 16px 24px;
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    .modal-close {
-      font-size: 24px;
-      cursor: pointer;
-      color: var(--text-secondary);
-      background: none;
-      border: none;
-    }
+    .modal-header { padding: 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h2 { font-size: 18px; font-weight: bold; }
+    .modal-body { padding: 24px; overflow-y: auto; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; }
+    .modal-close { font-size: 24px; cursor: pointer; color: var(--text-tertiary); background: none; border: none; }
 
     /* Video list */
-    .video-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
+    .video-list { display: flex; flex-direction: column; gap: 12px; }
     .video-item {
-      display: flex;
-      gap: 15px;
-      padding: 15px;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-sm);
-      transition: all 0.3s ease;
-      position: relative;
+      display: flex; gap: 15px; padding: 12px; background: var(--bg-secondary);
+      border-radius: var(--radius-sm); transition: all 0.2s ease; position: relative;
     }
+    .video-item:hover { background: var(--bg-tertiary); transform: translateX(5px); }
+    .video-item.dragging { opacity: 0.5; }
+    .video-thumbnail { width: 120px; height: 68px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; }
+    .video-info { flex: 1; min-width: 0; }
+    .video-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .video-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 15px; align-items: center; }
+    .video-actions { display: flex; gap: 8px; align-items: center; }
+    .drag-handle { cursor: move; color: var(--text-tertiary); padding: 5px; }
 
-    .video-item:hover {
-      background: var(--bg-tertiary);
-      transform: translateX(5px);
-    }
+    /* Search Section & Modal */
+    .search-section { margin-bottom: 30px; }
+    .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+    .search-input { flex: 1; }
+    #searchModal .modal-content { max-width: 800px; }
+    #search-modal-results { display: flex; flex-direction: column; gap: 12px; }
+    .search-result-item { display: flex; gap: 12px; padding: 8px; border-radius: var(--radius-sm); align-items: center; }
+    .search-result-item:hover { background: var(--bg-secondary); }
+    .search-result-thumbnail { width: 120px; height: 68px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; }
+    .search-result-info { flex: 1; min-width: 0;}
+    .search-result-title { font-weight: 500; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px;}
+    .search-result-meta { font-size: 12px; color: var(--text-secondary); }
+    #search-modal-pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; }
 
-    .video-item.dragging {
-      opacity: 0.5;
-    }
-
-    .video-thumbnail {
-      width: 120px;
-      height: 68px;
-      border-radius: var(--radius-sm);
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-
-    .video-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .video-title {
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 4px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .video-meta {
-      font-size: 12px;
-      color: var(--text-secondary);
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-
-    .video-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .drag-handle {
-      cursor: move;
-      color: var(--text-secondary);
-      padding: 5px;
-    }
-
-    /* Search section */
-    .search-section {
-      margin-bottom: 30px;
-    }
-
-    .search-box {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .search-input {
-      flex: 1;
-    }
-
-    .search-results {
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      padding: 10px;
-      background: var(--bg-primary);
-    }
-
-    .search-result-item {
-      display: flex;
-      gap: 12px;
-      padding: 10px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .search-result-item:hover {
-      background: var(--bg-secondary);
-    }
-
-    .search-result-thumbnail {
-      width: 80px;
-      height: 45px;
-      border-radius: var(--radius-sm);
-      object-fit: cover;
-    }
-
-    /* Random Playlists */
-    #random-playlists-section {
-      margin-bottom: 30px;
-    }
-
+    /* Random Playlists & Share Code */
     .playlist-card {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow-sm);
+      background: var(--bg-card); border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px;
+      box-shadow: var(--shadow-sm); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
     }
-
-    .playlist-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
+    .playlist-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .playlist-card-meta-right { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
+    .share-code-display {
+      display: flex; align-items: center; background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color); padding: 4px 8px; border-radius: var(--radius-sm);
+      font-family: monospace; font-size: 13px; color: var(--text-secondary);
     }
-
-    .playlist-card-title {
-      font-size: 18px;
-      font-weight: 600;
+    .share-code-display .copy-btn {
+      background: none; border: none; cursor: pointer; padding: 0; margin-left: 8px;
+      display: inline-flex; align-items: center; color: var(--text-tertiary);
     }
+    .share-code-display .copy-btn:hover { color: var(--primary-color); }
+    .share-code-display .copy-btn svg { width: 16px; height: 16px; }
+    .playlist-card-views { font-size: 14px; color: var(--text-secondary); text-align: right; margin-top: 8px; }
+    .playlist-card-videos { display: flex; flex-wrap: wrap; gap: 10px; }
+    .playlist-card-video-cover { width: 120px; height: 68px; border-radius: var(--radius-sm); object-fit: cover; }
+    .playlist-card-more-videos { width: 68px; height: 68px; border-radius: var(--radius-sm); background-color: var(--bg-secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
 
-    .playlist-card-views {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
-    .playlist-card-videos {
-      display: flex;
-      gap: 10px;
-    }
-
-    .playlist-card-video-cover {
-      width: 120px;
-      height: 68px;
-      border-radius: var(--radius-sm);
-      object-fit: cover;
-    }
-
-    .playlist-card-more-videos {
-      width: 68px;
-      height: 68px;
-      border-radius: var(--radius-sm);
-      background-color: var(--bg-tertiary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-secondary);
-    }
-
-    .empty-state-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-
-    /* Success message */
-    .success-message {
-      background: #f6ffed;
-      border: 1px solid #b7eb8f;
-      color: var(--success-color);
-      padding: 15px 20px;
-      border-radius: var(--radius-sm);
-      margin-bottom: 20px;
-    }
-
-    .code-display {
-      font-family: monospace;
-      font-size: 18px;
-      background: var(--bg-tertiary);
-      padding: 10px 15px;
-      border-radius: var(--radius-sm);
-      display: inline-block;
-      margin: 5px 0;
-    }
-
-    /* Loading spinner */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-secondary);
-    }
-
-    .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid var(--primary-color);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Responsive */
+    /* Utility Styles */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+    .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+    .success-message { background: rgba(82, 196, 26, 0.1); border: 1px solid rgba(82, 196, 26, 0.3); color: #389e0d; padding: 15px 20px; border-radius: var(--radius-sm); margin-bottom: 20px; }
+    .code-display { font-family: monospace; font-size: 16px; background: var(--bg-secondary); padding: 8px 12px; border-radius: var(--radius-sm); display: inline-block; margin: 5px 0; border: 1px solid var(--border-color); }
+    .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
+    .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @media (max-width: 768px) {
-      .video-item {
-        flex-direction: column;
-      }
-
-      .video-thumbnail {
-        width: 100%;
-        height: 180px;
-      }
-
-      .modal-content {
-        margin: 20px;
-        max-height: calc(100vh - 40px);
-      }
+      .video-item { flex-direction: column; }
+      .video-thumbnail { width: 100%; height: auto; }
+      .modal-content { margin: 20px; max-height: calc(100vh - 40px); }
+      .header-actions .btn-primary { display: none; }
     }
   </style>
 </head>
 <body>
-<header class="header">
-  <div class="header-content">
-    <h1>🎵 哈基米播放列表</h1>
+<header class="nav-header">
+  <div class="nav-container">
+    <a href="/" style="text-decoration: none;"><div class="logo-text">哈基米FM</div></a>
     <div class="header-actions">
-      <a href="/" class="back-link">← 返回主页</a>
-      <input type="text" id="shareCodeInput" class="form-input" style="width: 150px;" placeholder="输入分享码">
-      <button class="btn btn-secondary" onclick="loadPlaylist()">查看播放列表</button>
-      <button class="btn btn-primary" onclick="showCreateModal()">+ 创建播放列表</button>
+      <a href="/playlist.html" class="back-link">播放列表首页</a>
+      <input type="text" id="shareCodeInput" class="form-input" style="width: 150px; height: 38px;" placeholder="输入分享码">
+      <button class="btn btn-secondary" onclick="loadPlaylist()">查看</button>
+      <button class="btn btn-primary" onclick="showCreateModal()">+ 创建</button>
     </div>
   </div>
 </header>
@@ -501,7 +237,7 @@
 <div class="container">
   <div id="mainContent">
     <div id="random-playlists-section">
-      <h2 style="margin-bottom: 20px;">随机播放列表</h2>
+      <h2 style="margin-bottom: 20px; font-weight: bold;">发现播放列表</h2>
       <div id="random-playlists-container"></div>
     </div>
   </div>
@@ -511,7 +247,7 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2>创建新的播放列表</h2>
-      <button class="modal-close" onclick="closeCreateModal()">&times;</button>
+      <button class="modal-close" onclick="closeModal('createModal')">&times;</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -524,7 +260,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeCreateModal()">取消</button>
+      <button class="btn btn-secondary" onclick="closeModal('createModal')">取消</button>
       <button class="btn btn-primary" onclick="createPlaylist()">创建</button>
     </div>
   </div>
@@ -534,26 +270,43 @@
   <div class="modal-content" style="max-width: 400px;">
     <div class="modal-header">
       <h2>输入编辑码</h2>
-      <button class="modal-close" onclick="closeEditCodeModal()">&times;</button>
+      <button class="modal-close" onclick="closeModal('editCodeModal')">&times;</button>
     </div>
     <div class="modal-body">
-      <p style="margin-bottom: 15px;">请输入编辑码以编辑此播放列表：</p>
+      <p style="margin-bottom: 15px; color: var(--text-secondary);">请输入编辑码以编辑此播放列表：</p>
       <input type="text" id="editCodeInput" class="form-input" placeholder="编辑码">
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeEditCodeModal()">取消</button>
+      <button class="btn btn-secondary" onclick="closeModal('editCodeModal')">取消</button>
       <button class="btn btn-primary" onclick="validateEditCode()">确认</button>
     </div>
   </div>
 </div>
 
+<div id="searchModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>搜索视频</h2>
+      <button class="modal-close" onclick="closeSearchModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="search-modal-results" class="loading"><div class="spinner"></div></div>
+      <div id="search-modal-pagination"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeSearchModal()">完成</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
-  // 全局变量
   let currentPlaylist = null;
   let currentEditCode = null;
   let isEditMode = false;
+  let currentSearchQuery = '';
+  let currentSearchPage = 1;
 
-  // 页面加载时检查URL参数
   document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const shareCode = urlParams.get('code');
@@ -565,247 +318,472 @@
     }
   });
 
-  // 加载随机播放列表
   async function loadRandomPlaylists() {
     const container = document.getElementById('random-playlists-container');
     container.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载中...</div></div>';
     try {
       const response = await fetch('/api/playlists/random?limit=5');
-      if (!response.ok) {
-        throw new Error('加载失败');
-      }
+      if (!response.ok) throw new Error('加载失败');
       const playlists = await response.json();
       displayRandomPlaylists(playlists);
     } catch (error) {
-      container.innerHTML = `<p class="error-message">${error.message}</p>`;
+      container.innerHTML = `<div class="card"><p class="empty-state">${error.message}</p></div>`;
     }
   }
 
-  // 显示随机播放列表
   function displayRandomPlaylists(playlists) {
     const container = document.getElementById('random-playlists-container');
     if (!playlists || playlists.length === 0) {
-      container.innerHTML = '<p class="empty-message">暂无随机播放列表</p>';
+      container.innerHTML = '<div class="card"><p class="empty-state">暂无随机播放列表</p></div>';
       return;
     }
-    container.innerHTML = playlists.map(playlist => {
-      const videosHtml = playlist.videos.map(video => `
-              <img class="playlist-card-video-cover" src="https://images.weserv.nl/?url=${encodeURIComponent(video.coverUrl)}&w=240&h=136&fit=cover&output=webp" alt="${video.title}" referrerpolicy="no-referrer">
-          `).join('');
 
-      const moreVideosSvg = playlist.videoCount > 5 ? `
-              <div class="playlist-card-more-videos">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="1"></circle>
-                      <circle cx="19" cy="12" r="1"></circle>
-                      <circle cx="5" cy="12" r="1"></circle>
-                  </svg>
-              </div>
-          ` : '';
+    const numVideosToShow = 9;
+    const copyIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+
+    container.innerHTML = playlists.map(playlist => {
+      const videosHtml = playlist.videos.slice(0, numVideosToShow).map(video => `
+          <img class="playlist-card-video-cover" src="https://images.weserv.nl/?url=${encodeURIComponent(video.coverUrl)}&w=240&h=136&fit=cover&output=webp" alt="${video.title}" referrerpolicy="no-referrer">
+      `).join('');
+
+      const moreVideosSvg = playlist.videoCount > numVideosToShow ? `
+          <div class="playlist-card-more-videos">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-tertiary);">
+                  <circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle>
+              </svg>
+          </div>
+      ` : '';
 
       return `
-              <div class="playlist-card" onclick="loadPlaylistByCode('${playlist.shareCode}')" style="cursor: pointer;">
-                  <div class="playlist-card-header">
-                      <div class="playlist-card-title">${playlist.title}</div>
-                      <div class="playlist-card-views">查看次数: ${playlist.viewCount}</div>
-                  </div>
-                  <div class="playlist-card-videos">
-                      ${videosHtml}
-                      ${moreVideosSvg}
+          <div class="playlist-card" onclick="loadPlaylistByCode('${playlist.shareCode}')">
+              <div class="card-header">
+                  <div class="card-title">${playlist.title}</div>
+                  <div class="playlist-card-meta-right">
+                      <div class="share-code-display">
+                          <span>${playlist.shareCode}</span>
+                          <button class="copy-btn" title="复制分享码" onclick="copyShareCodeOnCard(event, '${playlist.shareCode}', this)">
+                              ${copyIconSvg}
+                          </button>
+                      </div>
+                      <div class="playlist-card-views">查看: ${formatViews(playlist.viewCount)}</div>
                   </div>
               </div>
-          `;
+              <div class="playlist-card-videos">
+                  ${videosHtml}
+                  ${moreVideosSvg}
+              </div>
+          </div>
+      `;
     }).join('');
   }
 
-
-  // 创建播放列表
   async function createPlaylist() {
     const title = document.getElementById('playlistTitle').value.trim();
     const description = document.getElementById('playlistDescription').value.trim();
-
-    if (!title) {
-      alert('请输入播放列表标题');
-      return;
-    }
+    if (!title) { alert('请输入播放列表标题'); return; }
 
     try {
       const response = await fetch('/api/playlists', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description })
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || '创建失败');
-      }
-
+      if (!response.ok) { const error = await response.json(); throw new Error(error.error || '创建失败'); }
       const data = await response.json();
-      closeCreateModal();
+      closeModal('createModal');
       showCreateSuccess(data);
-    } catch (error) {
-      alert('创建失败: ' + error.message);
-    }
+    } catch (error) { alert('创建失败: ' + error.message); }
   }
 
-  // 显示创建成功信息
   function showCreateSuccess(data) {
-    const mainContent = document.getElementById('mainContent');
-    mainContent.innerHTML = `
-                <div class="card">
-                    <div class="success-message">
-                        <h2>🎉 播放列表创建成功！</h2>
-                        <p style="margin-top: 10px;">请妥善保存以下信息：</p>
-                        <div style="margin-top: 20px;">
-                            <p><strong>分享码：</strong><span class="code-display">${data.shareCode}</span></p>
-                            <p style="margin-top: 10px;">任何人都可以通过分享码查看你的播放列表</p>
-                        </div>
-                        <div style="margin-top: 20px;">
-                            <p><strong>编辑码：</strong><span class="code-display">${data.editCode}</span></p>
-                            <p style="margin-top: 10px; color: var(--danger-color);">⚠️ 请务必保存编辑码，丢失后无法找回！</p>
-                        </div>
-                        <div style="margin-top: 30px;">
-                            <button class="btn btn-primary" onclick="loadPlaylistByCode('${data.shareCode}')">立即查看</button>
-                            <button class="btn btn-secondary" onclick="copyToClipboard('${data.shareCode}')">复制分享码</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+    document.getElementById('mainContent').innerHTML = `
+        <div class="card">
+            <div class="success-message">
+                <h2 style="font-weight: bold; font-size: 1.2em;">🎉 播放列表创建成功！</h2>
+                <p style="margin-top: 10px; color: var(--text-secondary);">请妥善保存以下信息：</p>
+            </div>
+            <div style="margin-top: 20px;">
+                <p><strong>分享码 (Share Code):</strong></p>
+                <p><span class="code-display">${data.shareCode}</span></p>
+                <p style="margin-top: 5px; font-size: 13px; color: var(--text-secondary);">任何人都可以通过分享码查看你的播放列表</p>
+            </div>
+            <div style="margin-top: 20px;">
+                <p><strong>编辑码 (Edit Code):</strong></p>
+                <p><span class="code-display">${data.editCode}</span></p>
+                <p style="margin-top: 5px; font-size: 13px; color: var(--danger-color);">⚠️ 请务必保存编辑码，丢失后无法找回！</p>
+            </div>
+            <div style="margin-top: 30px; display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="loadPlaylistByCode('${data.shareCode}')">立即查看</button>
+                <button class="btn btn-secondary" onclick="copyToClipboard('${data.shareCode}')">复制分享码</button>
+            </div>
+        </div>`;
   }
 
-  // 加载播放列表
   async function loadPlaylist() {
     const shareCode = document.getElementById('shareCodeInput').value.trim();
-    if (!shareCode) {
-      alert('请输入分享码');
-      return;
-    }
+    if (!shareCode) { alert('请输入分享码'); return; }
     loadPlaylistByCode(shareCode);
+  }
+
+  function goBackToDiscovery() {
+    const mainContent = document.getElementById('mainContent');
+    mainContent.innerHTML = `
+      <div id="random-playlists-section">
+        <h2 style="margin-bottom: 20px; font-weight: bold;">发现播放列表</h2>
+        <div id="random-playlists-container"></div>
+      </div>
+    `;
+    const url = new URL(window.location);
+    url.searchParams.delete('code');
+    window.history.pushState({}, '', url);
+    loadRandomPlaylists();
   }
 
   async function loadPlaylistByCode(shareCode) {
     const mainContent = document.getElementById('mainContent');
     mainContent.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载中...</div></div>';
-
     try {
       const response = await fetch(`/api/playlists/${shareCode}`);
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('播放列表不存在');
-        }
+        if (response.status === 404) throw new Error('播放列表不存在 (404)');
         throw new Error('加载失败');
       }
-
       const playlist = await response.json();
       currentPlaylist = playlist;
       displayPlaylist(playlist);
-
-      // 更新URL
       const url = new URL(window.location);
       url.searchParams.set('code', shareCode);
       window.history.pushState({}, '', url);
     } catch (error) {
-      mainContent.innerHTML = `
-                    <div class="card">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">😢</div>
-                            <h2>加载失败</h2>
-                            <p>${error.message}</p>
-                        </div>
-                    </div>
-                `;
+      mainContent.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-state-icon">😢</div><h2>加载失败</h2><p>${error.message}</p></div></div>`;
     }
   }
 
-  // 显示播放列表
   function displayPlaylist(playlist) {
     const mainContent = document.getElementById('mainContent');
-    const videoList = playlist.videos && playlist.videos.length > 0
+    const copyIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+    const videoListHtml = playlist.videos && playlist.videos.length > 0
             ? playlist.videos.map(video => `
-                    <div class="video-item" data-id="${video.id}" data-position="${video.position}">
-                        ${isEditMode ? '<span class="drag-handle">≡</span>' : ''}
-                        <img class="video-thumbnail" src="https://images.weserv.nl/?url=${encodeURIComponent(video.coverUrl)}&w=480&h=270&fit=cover&output=webp" alt="${video.title}" referrerpolicy="no-referrer">
-                        <div class="video-info">
-                            <div class="video-title">${video.title}</div>
-                            <div class="video-meta">
-                                <span>UP主: ${video.owner ? video.owner.name : '未知'}</span>
-                                <span>播放: ${formatViews(video.views)}</span>
-                                <span>发布: ${formatDate(video.pubDate)}</span>
-                            </div>
-                        </div>
-                        <div class="video-actions">
-                            <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" class="btn btn-sm btn-secondary">播放</a>
-                            ${isEditMode ? `<button class="btn btn-sm btn-danger" onclick="removeVideo(${video.id})">删除</button>` : ''}
-                        </div>
-                    </div>
-                `).join('')
-            : '<div class="empty-state"><div class="empty-state-icon">📭</div><p>播放列表还没有视频</p></div>';
-
-    mainContent.innerHTML = `
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2 class="card-title">${playlist.title}</h2>
-                            ${playlist.description ? `<p style="margin-top: 8px; color: var(--text-secondary);">${playlist.description}</p>` : ''}
-                            <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary);">
-                                ${playlist.videoCount || 0} 个视频 · ${playlist.viewCount || 0} 次浏览 ·
-                                创建于 ${formatDate(playlist.createdAt)}
-                            </p>
-                        </div>
-                        <div>
-                            ${!isEditMode ? `<button class="btn btn-primary" onclick="enterEditMode()">编辑</button>` :
-            `<button class="btn btn-secondary" onclick="exitEditMode()">完成编辑</button>`}
-                        </div>
-                    </div>
-
-                    ${isEditMode ? `
-                        <div class="search-section">
-                            <h3 style="margin-bottom: 15px;">添加视频</h3>
-                            <div class="search-box">
-                                <input type="text" id="videoSearchInput" class="form-input search-input" placeholder="搜索哈基米视频...">
-                                <button class="btn btn-primary" onclick="searchVideos()">搜索</button>
-                            </div>
-                            <div id="searchResults"></div>
-                        </div>
-                    ` : ''}
-
-                    <div class="video-list" id="videoList">
-                        ${videoList}
+            <div class="video-item" draggable="${isEditMode}" data-id="${video.id}" data-position="${video.position}">
+                ${isEditMode ? '<span class="drag-handle">≡</span>' : ''}
+                <img class="video-thumbnail" src="https://images.weserv.nl/?url=${encodeURIComponent(video.coverUrl)}&w=480&h=270&fit=cover&output=webp" alt="${video.title}" referrerpolicy="no-referrer">
+                <div class="video-info">
+                    <div class="video-title" title="${video.title}">${video.title}</div>
+                    <div class="video-meta">
+                        <span>UP: ${video.owner ? video.owner.name : '未知'}</span>
+                        <span>▶ ${formatViews(video.views)}</span>
+                        <span>${formatDate(video.pubDate)}</span>
                     </div>
                 </div>
-            `;
+                <div class="video-actions">
+                    <a href="https://www.bilibili.com/video/${video.bvid}" target="_blank" class="btn btn-sm btn-secondary">播放</a>
+                    ${isEditMode ? `<button class="btn btn-sm btn-danger" onclick="removeVideo(${video.id})">删除</button>` : ''}
+                </div>
+            </div>`).join('')
+            : '<div class="empty-state"><div class="empty-state-icon">📭</div><p>播放列表还没有视频，快去添加吧！</p></div>';
 
+    let headerActionsHtml = '';
     if (isEditMode) {
-      setupDragAndDrop();
+      headerActionsHtml = `
+            <button class="btn btn-secondary" onclick="exitEditMode()">取消</button>
+            <button class="btn btn-primary" onclick="updatePlaylistDetails()">保存更改</button>
+        `;
+    } else {
+      headerActionsHtml = `
+            <div class="share-code-display">
+                <span>${playlist.shareCode}</span>
+                <button class="copy-btn" title="复制分享码" onclick="copyShareCodeOnCard(event, '${playlist.shareCode}', this)">
+                    ${copyIconSvg}
+                </button>
+            </div>
+            <button class="btn btn-secondary" onclick="goBackToDiscovery()">返回</button>
+            <button class="btn btn-primary" onclick="enterEditMode()">编辑</button>
+        `;
+    }
+
+    let playlistDetailsHtml = `
+        <h2 class="card-title">${playlist.title}</h2>
+        ${playlist.description ? `<p style="margin-top: 8px; color: var(--text-secondary);">${playlist.description}</p>` : ''}
+    `;
+    if (isEditMode) {
+      playlistDetailsHtml = `
+            <div class="form-group">
+                <label for="editPlaylistTitle" class="form-label">标题</label>
+                <input type="text" id="editPlaylistTitle" class="form-input" style="width: 80%" value="${playlist.title}">
+            </div>
+            <div class="form-group">
+                <label for="editPlaylistDescription" class="form-label">简介</label>
+                <textarea id="editPlaylistDescription" class="form-textarea" style="width: 80%">${playlist.description || ''}</textarea>
+            </div>
+        `;
+    }
+
+    let editFooterHtml = '';
+    if (isEditMode) {
+      editFooterHtml = `
+            <div class="playlist-edit-footer">
+                <button class="btn btn-danger" onclick="deletePlaylist()">删除此播放列表</button>
+            </div>
+        `;
+    }
+
+    mainContent.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <div class="playlist-details">
+                    ${playlistDetailsHtml}
+                    ${!isEditMode ? `<p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary);">
+                        ${playlist.videoCount || 0} 个视频 · ${formatViews(playlist.viewCount || 0)} 次浏览 · 创建于 ${formatDate(playlist.createdAt)}
+                    </p>` : ''}
+                </div>
+                <div class="card-header-actions">
+                    ${headerActionsHtml}
+                </div>
+            </div>
+            ${isEditMode ? `
+                <div class="search-section">
+                    <h3 style="margin-bottom: 15px; font-weight: bold;">添加视频</h3>
+                    <div class="search-box">
+                        <input type="text" id="videoSearchInput" class="form-input search-input" placeholder="通过关键词或BVID搜索哈基米视频...">
+                        <button class="btn btn-primary" onclick="startSearch()">搜索</button>
+                    </div>
+                </div>` : ''}
+            <div class="video-list" id="videoList">${videoListHtml}</div>
+            ${editFooterHtml}
+        </div>`;
+
+    if (isEditMode) setupDragAndDrop();
+  }
+
+  function startSearch() {
+    const query = document.getElementById('videoSearchInput').value.trim();
+    if (!query) {
+      alert('请输入搜索关键词');
+      return;
+    }
+    currentSearchQuery = query;
+    currentSearchPage = 1;
+    document.getElementById('searchModal').style.display = 'flex';
+    fetchPaginatedSearchResults();
+  }
+
+  async function fetchPaginatedSearchResults() {
+    const resultsContainer = document.getElementById('search-modal-results');
+    const paginationContainer = document.getElementById('search-modal-pagination');
+    resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    paginationContainer.innerHTML = '';
+
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(currentSearchQuery)}&page=${currentSearchPage}&hitsPerPage=12`);
+      if (!response.ok) throw new Error('搜索失败');
+      const results = await response.json();
+      renderPaginatedSearchResults(results.hits || []);
+      renderSearchPagination(results);
+    } catch (error) {
+      resultsContainer.innerHTML = `<p style="color: var(--danger-color); text-align: center;">${error.message}</p>`;
     }
   }
 
-  // 进入编辑模式
-  function enterEditMode() {
-    document.getElementById('editCodeModal').style.display = 'block';
+  function renderPaginatedSearchResults(videos) {
+    const resultsContainer = document.getElementById('search-modal-results');
+    if (videos.length === 0 && currentSearchPage === 1) {
+      resultsContainer.innerHTML = '<p class="empty-state">没有找到相关视频</p>';
+      return;
+    }
+
+    const existingBvids = new Set(currentPlaylist.videos.map(v => v.bvid));
+
+    resultsContainer.innerHTML = videos.map(video => {
+      const isAlreadyInPlaylist = existingBvids.has(video.bvid);
+      const buttonHtml = isAlreadyInPlaylist
+              ? `<button class="btn btn-sm" disabled>已在列表中</button>`
+              : `<button class="btn btn-sm btn-primary" onclick="addVideoToPlaylist('${video.bvid}', this)">添加</button>`;
+
+      return `
+            <div class="search-result-item" id="search-item-${video.bvid}">
+                <img class="search-result-thumbnail" src="https://images.weserv.nl/?url=${encodeURIComponent(video.coverUrl)}&w=320&h=180&fit=cover&output=webp" alt="${video.title}" referrerpolicy="no-referrer">
+                <div class="search-result-info">
+                    <div class="search-result-title" title="${video.title}">${video.title}</div>
+                    <div class="search-result-meta">
+                        UP: ${video.owner ? video.owner.name : '未知'} · ▶ ${formatViews(video.views)}
+                    </div>
+                </div>
+                ${buttonHtml}
+            </div>
+        `;
+    }).join('');
   }
 
-  // 验证编辑码
+  function renderSearchPagination(results) {
+    const paginationContainer = document.getElementById('search-modal-pagination');
+    const totalPages = results.totalPages;
+    if (totalPages <= 1) {
+      paginationContainer.innerHTML = '';
+      return;
+    }
+    paginationContainer.innerHTML = `
+          <button class="btn btn-secondary" onclick="goToSearchPage(${currentSearchPage - 1})" ${currentSearchPage === 1 ? 'disabled' : ''}>上一页</button>
+          <span>第 ${currentSearchPage} / ${totalPages} 页</span>
+          <button class="btn btn-secondary" onclick="goToSearchPage(${currentSearchPage + 1})" ${currentSearchPage >= totalPages ? 'disabled' : ''}>下一页</button>
+      `;
+  }
+
+  function goToSearchPage(page) {
+    currentSearchPage = page;
+    fetchPaginatedSearchResults();
+  }
+
+  function closeSearchModal() {
+    document.getElementById('searchModal').style.display = 'none';
+    if (currentPlaylist) {
+      loadPlaylistByCode(currentPlaylist.shareCode);
+    }
+  }
+
+  async function addVideoToPlaylist(bvid, buttonElement) {
+    if (!currentEditCode) { alert('请先验证编辑码'); return; }
+    buttonElement.disabled = true;
+    buttonElement.textContent = '添加中...';
+    try {
+      const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}/videos`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ editCode: currentEditCode, bvid })
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || '添加失败');
+      }
+      buttonElement.textContent = '已添加';
+      buttonElement.classList.remove('btn-primary');
+    } catch (error) {
+      alert('添加失败: ' + error.message);
+      buttonElement.disabled = false;
+      buttonElement.textContent = '添加';
+    }
+  }
+
+  async function updatePlaylistDetails() {
+    const newTitle = document.getElementById('editPlaylistTitle').value.trim();
+    const newDescription = document.getElementById('editPlaylistDescription').value.trim();
+
+    if (!newTitle) {
+      alert('标题不能为空');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newTitle,
+          description: newDescription,
+          editCode: currentEditCode
+        })
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || '保存失败');
+      }
+      alert('保存成功！');
+      exitEditMode(); // Exit edit mode on success
+    } catch (error) {
+      alert('保存失败: ' + error.message);
+    }
+  }
+
+  async function deletePlaylist() {
+    if (!confirm('您确定要永久删除这个播放列表吗？此操作无法撤销。')) {
+      return;
+    }
+    try {
+      const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}?editCode=${currentEditCode}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || '删除失败');
+      }
+      alert('播放列表已成功删除。');
+      goBackToDiscovery(); // Go back to the main page
+    } catch (error) {
+      alert('删除失败: ' + error.message);
+    }
+  }
+
+  async function removeVideo(videoId) {
+    if (!confirm('确定要删除这个视频吗？')) return;
+    try {
+      const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}/videos/${videoId}?editCode=${currentEditCode}`, { method: 'DELETE' });
+      if (!response.ok) { const error = await response.json(); throw new Error(error.error || '删除失败'); }
+      loadPlaylistByCode(currentPlaylist.shareCode);
+    } catch (error) { alert('删除失败: ' + error.message); }
+  }
+
+  function setupDragAndDrop() {
+    const videoList = document.getElementById('videoList');
+    if(!videoList) return;
+    let draggedElement = null;
+    videoList.addEventListener('dragstart', e => { if (e.target.classList.contains('video-item')) { draggedElement = e.target; setTimeout(() => e.target.classList.add('dragging'), 0); } });
+    videoList.addEventListener('dragend', e => { if(draggedElement) { draggedElement.classList.remove('dragging'); draggedElement = null; } });
+    videoList.addEventListener('dragover', e => { e.preventDefault(); const afterElement = getDragAfterElement(videoList, e.clientY); if (draggedElement) { if (afterElement == null) { videoList.appendChild(draggedElement); } else { videoList.insertBefore(draggedElement, afterElement); } } });
+    videoList.addEventListener('drop', async e => {
+      e.preventDefault(); if (!draggedElement) return;
+      const items = Array.from(videoList.querySelectorAll('.video-item'));
+      const draggedId = parseInt(draggedElement.dataset.id);
+      const newPosition = items.indexOf(draggedElement) + 1;
+      try { await updateVideoPosition(draggedId, newPosition); items.forEach((item, index) => item.dataset.position = index + 1); } catch (error) { alert('更新位置失败，将重新加载列表。'); loadPlaylistByCode(currentPlaylist.shareCode); }
+    });
+  }
+
+  function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.video-item:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => { const box = child.getBoundingClientRect(); const offset = y - box.top - box.height / 2; if (offset < 0 && offset > closest.offset) { return { offset: offset, element: child }; } else { return closest; } }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+
+  async function updateVideoPosition(videoId, newPosition) {
+    try {
+      const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}/videos/${videoId}/position`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ editCode: currentEditCode, position: newPosition })
+      });
+      if (!response.ok) throw new Error('更新失败');
+    } catch (error) { throw error; }
+  }
+
+  function copyShareCodeOnCard(event, text, buttonElement) {
+    event.stopPropagation();
+    navigator.clipboard.writeText(text).then(() => {
+      const originalIcon = buttonElement.innerHTML;
+      const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success-color)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+      buttonElement.innerHTML = checkIcon;
+      buttonElement.disabled = true;
+      setTimeout(() => {
+        buttonElement.innerHTML = originalIcon;
+        buttonElement.disabled = false;
+      }, 2000);
+    }).catch(err => {
+      console.error('Copy failed', err);
+      alert('复制失败');
+    });
+  }
+
   async function validateEditCode() {
     const editCode = document.getElementById('editCodeInput').value.trim();
     if (!editCode) {
       alert('请输入编辑码');
       return;
     }
-
     try {
       const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ editCode })
       });
-
       const data = await response.json();
       if (data.valid) {
         currentEditCode = editCode;
         isEditMode = true;
-        closeEditCodeModal();
+        closeModal('editCodeModal');
         displayPlaylist(currentPlaylist);
       } else {
         alert('编辑码错误');
@@ -815,266 +793,35 @@
     }
   }
 
-  // 退出编辑模式
-  function exitEditMode() {
-    isEditMode = false;
-    currentEditCode = null;
-    loadPlaylistByCode(currentPlaylist.shareCode);
-  }
+  function formatViews(num) { if (num >= 10000) return (num / 10000).toFixed(1) + '万'; return num ? num.toLocaleString() : '0'; }
+  function formatDate(dateString) { if (!dateString) return ''; try { return new Date(dateString).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }); } catch (e) { return ''; } }
+  function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => alert('已复制到剪贴板')).catch(() => alert('复制失败')); }
+  function showCreateModal() { document.getElementById('createModal').style.display = 'flex'; }
+  function enterEditMode() { document.getElementById('editCodeModal').style.display = 'flex'; }
+  function exitEditMode() { isEditMode = false; currentEditCode = null; loadPlaylistByCode(currentPlaylist.shareCode); }
 
-  // 搜索视频
-  async function searchVideos() {
-    const query = document.getElementById('videoSearchInput').value.trim();
-    if (!query) {
-      alert('请输入搜索关键词');
-      return;
-    }
-
-    const searchResults = document.getElementById('searchResults');
-    searchResults.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-
-    try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&hitsPerPage=10`);
-      if (!response.ok) throw new Error('搜索失败');
-
-      const results = await response.json();
-      displaySearchResults(results.hits || []);
-    } catch (error) {
-      searchResults.innerHTML = '<p style="color: var(--danger-color);">搜索失败</p>';
-    }
-  }
-
-  // 显示搜索结果
-  function displaySearchResults(videos) {
-    const searchResults = document.getElementById('searchResults');
-
-    if (videos.length === 0) {
-      searchResults.innerHTML = '<p style="text-align: center; padding: 20px;">没有找到相关视频</p>';
-      return;
-    }
-
-    searchResults.innerHTML = `
-                <div class="search-results">
-                    ${videos.map(video => `
-                        <div class="search-result-item" onclick="addVideoToPlaylist('${video.bvid}')">
-                            <img class="search-result-thumbnail" src="https://images.weserv.nl/?url=${encodeURIComponent(video.coverUrl)}&w=320&h=180&fit=cover&output=webp" alt="${video.title}" referrerpolicy="no-referrer">
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 500; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${video.title}</div>
-                                <div style="font-size: 12px; color: var(--text-secondary);">
-                                    UP主: ${video.owner ? video.owner.name : '未知'} · 播放: ${formatViews(video.views)}
-                                </div>
-                            </div>
-                            <button class="btn btn-sm btn-primary">添加</button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-  }
-
-  // 添加视频到播放列表
-  async function addVideoToPlaylist(bvid) {
-    if (!currentEditCode) {
-      alert('请先验证编辑码');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}/videos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ editCode: currentEditCode, bvid })
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || '添加失败');
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.style.display = 'none';
+      if (modalId === 'editCodeModal') {
+        modal.querySelector('#editCodeInput').value = '';
       }
-
-      // 刷新播放列表
-      loadPlaylistByCode(currentPlaylist.shareCode);
-    } catch (error) {
-      alert('添加失败: ' + error.message);
-    }
-  }
-
-  // 从播放列表移除视频
-  async function removeVideo(videoId) {
-    if (!confirm('确定要删除这个视频吗？')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}/videos/${videoId}?editCode=${currentEditCode}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || '删除失败');
+      if (modalId === 'createModal') {
+        modal.querySelector('#playlistTitle').value = '';
+        modal.querySelector('#playlistDescription').value = '';
       }
-
-      // 刷新播放列表
-      loadPlaylistByCode(currentPlaylist.shareCode);
-    } catch (error) {
-      alert('删除失败: ' + error.message);
     }
   }
 
-  // 设置拖拽排序
-  function setupDragAndDrop() {
-    const videoList = document.getElementById('videoList');
-    let draggedElement = null;
-
-    videoList.addEventListener('dragstart', (e) => {
-      if (e.target.classList.contains('video-item')) {
-        draggedElement = e.target;
-        setTimeout(() => e.target.classList.add('dragging'), 0);
-      }
-    });
-
-    videoList.addEventListener('dragend', (e) => {
-      if(draggedElement) {
-        draggedElement.classList.remove('dragging');
-        draggedElement = null;
-      }
-    });
-
-    videoList.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      const afterElement = getDragAfterElement(videoList, e.clientY);
-      if (draggedElement) {
-        if (afterElement == null) {
-          videoList.appendChild(draggedElement);
-        } else {
-          videoList.insertBefore(draggedElement, afterElement);
-        }
-      }
-    });
-
-    videoList.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      if (!draggedElement) return;
-
-      const items = Array.from(videoList.querySelectorAll('.video-item'));
-      const draggedId = parseInt(draggedElement.dataset.id);
-      const newPosition = items.indexOf(draggedElement) + 1;
-
-      try {
-        await updateVideoPosition(draggedId, newPosition);
-        // 刷新以确认后台更新
-        loadPlaylistByCode(currentPlaylist.shareCode);
-      } catch (error) {
-        alert('更新位置失败');
-        loadPlaylistByCode(currentPlaylist.shareCode);
-      }
-    });
-
-    document.querySelectorAll('.video-item').forEach(item => {
-      item.draggable = true;
-    });
-  }
-
-  function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.video-item:not(.dragging)')];
-
-    return draggableElements.reduce((closest, child) => {
-      const box = child.getBoundingClientRect();
-      const offset = y - box.top - box.height / 2;
-      if (offset < 0 && offset > closest.offset) {
-        return { offset: offset, element: child };
-      } else {
-        return closest;
-      }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
-  }
-
-  // 更新视频位置
-  async function updateVideoPosition(videoId, newPosition) {
-    try {
-      const response = await fetch(`/api/playlists/${currentPlaylist.shareCode}/videos/${videoId}/position`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ editCode: currentEditCode, position: newPosition })
-      });
-
-      if (!response.ok) {
-        throw new Error('更新失败');
-      }
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // 工具函数
-  function formatViews(num) {
-    if (num >= 10000) {
-      return (num / 10000).toFixed(1) + '万';
-    }
-    return num ? num.toLocaleString() : 0;
-  }
-
-  function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return '今天';
-    if (diffDays === 1) return '昨天';
-    if (diffDays < 7) return `${diffDays}天前`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)}个月前`;
-
-    return date.toLocaleDateString('zh-CN');
-  }
-
-  function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-      alert('已复制到剪贴板');
-    }).catch(() => {
-      alert('复制失败，请手动复制');
-    });
-  }
-
-  // 模态框控制
-  function showCreateModal() {
-    document.getElementById('createModal').style.display = 'block';
-    document.getElementById('playlistTitle').value = '';
-    document.getElementById('playlistDescription').value = '';
-  }
-
-  function closeCreateModal() {
-    document.getElementById('createModal').style.display = 'none';
-  }
-
-  function closeEditCodeModal() {
-    document.getElementById('editCodeModal').style.display = 'none';
-    document.getElementById('editCodeInput').value = '';
-  }
-
-  // 点击模态框外部关闭
-  window.onclick = function(event) {
-    if (event.target.classList.contains('modal')) {
-      event.target.style.display = 'none';
-    }
-  }
-
-  // 键盘快捷键
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeCreateModal();
-      closeEditCodeModal();
-    }
-  });
-
-  // Enter 键搜索
-  document.addEventListener('keyup', (e) => {
-    if(e.target.id === 'shareCodeInput' && e.key === 'Enter') {
-      loadPlaylist();
-    }
-    if(e.target.id === 'videoSearchInput' && e.key === 'Enter') {
-      searchVideos();
+  window.onclick = function(event) { if (event.target.classList.contains('modal')) { event.target.style.display = 'none'; } }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('createModal'); closeModal('editCodeModal'); closeModal('searchModal'); } });
+  document.addEventListener('keyup', e => {
+    const targetId = e.target.id;
+    if (e.key === 'Enter') {
+      if (targetId === 'shareCodeInput') loadPlaylist();
+      if (targetId === 'videoSearchInput') startSearch();
+      if (targetId === 'editCodeInput') validateEditCode();
     }
   });
 </script>

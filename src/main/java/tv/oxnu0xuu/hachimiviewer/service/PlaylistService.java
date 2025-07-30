@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class PlaylistService {
 
     private static final Logger log = LoggerFactory.getLogger(PlaylistService.class);
-    private static final int MAX_VIDEOS_PER_PLAYLIST = 30;
+    private static final int MAX_VIDEOS_PER_PLAYLIST = 100;
     private static final String SHARE_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final String EDIT_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final SecureRandom random = new SecureRandom();
