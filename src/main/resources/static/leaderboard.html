@@ -43,11 +43,27 @@
     /* Header Styles */
     .nav-header { background-color: var(--bg-primary); box-shadow: var(--shadow-sm); position: sticky; top: 0!important; z-index: 100; }
     .nav-container { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 64px; }
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
     .logo { display: flex; align-items: center; }
     .logo-text { font-size: 20px; font-weight: bold; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .nav-menu { display: flex; gap: 24px; }
     .nav-menu a { color: var(--text-primary); text-decoration: none; font-size: 16px; font-weight: 500; position: relative; transition: color 0.2s; }
     .nav-menu a:hover { color: var(--primary-color); }
+    .nav-menu a.active { color: var(--primary-color); }
+    .nav-menu a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -20px; /* Adjust to align with the bottom of the nav container */
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: var(--primary-color);
+      border-radius: 3px 3px 0 0;
+    }
 
     /* Other page-specific styles */
     .card { background: var(--bg-card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); padding: 24px; margin-bottom: 20px; }
@@ -85,6 +101,7 @@
       .nav-container {
         height: 48px;
       }
+      .nav-left { gap: 16px; }
     }
 
     /* Modal Styles with Animation */
@@ -119,33 +136,27 @@
   </style>
 </head>
 <body>
-<!--<header class="nav-header">-->
-<!--  <div class="nav-container">-->
-<!--    <a href="/" style="text-decoration: none;"><div class="logo-text">哈基米FM</div></a>-->
-<!--    <div class="header-actions">-->
-<!--      <a href="/" class="back-link">首页</a>-->
-<!--      <a href="/playlist.html" class="back-link">播放列表</a>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</header>-->
 <header class="nav-header">
   <div class="nav-container">
-    <div class="logo">
-      <a href="/" style="text-decoration: none;"><div class="logo-text">哈基米FM</div></a>
+    <div class="nav-left">
+      <div class="logo">
+        <a href="/" style="text-decoration: none;"><div class="logo-text">哈基米FM</div></a>
+      </div>
+      <nav class="nav-menu">
+        <a href="/index.html">首页</a>
+        <a href="/playlist.html">播放列表</a>
+        <a href="#" class="active">排行榜</a>
+      </nav>
     </div>
-    <nav class="nav-menu">
-      <a href="/index.html">首页</a>
-      <a href="/playlist.html">播放列表</a>
-    </nav>
   </div>
 </header>
 <div class="main-container">
-  <aside class="sidebar">
-    <ul class="sidebar-menu">
-      <li><a href="/index.html"><span>首页</span></a></li>
-      <li class="active"><a href="/leaderboard.html"><span>排行榜</span></a></li>
-    </ul>
-  </aside>
+<!--  <aside class="sidebar">-->
+<!--    <ul class="sidebar-menu">-->
+<!--      <li><a href="/index.html"><span>首页</span></a></li>-->
+<!--      <li class="active"><a href="/leaderboard.html"><span>排行榜</span></a></li>-->
+<!--    </ul>-->
+<!--  </aside>-->
   <main class="content">
     <div id="leaderboardContent">
       <div class="card">

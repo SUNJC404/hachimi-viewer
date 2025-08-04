@@ -85,6 +85,12 @@
             height: 64px;
         }
 
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
         .logo {
             display: flex;
             align-items: center;
@@ -519,6 +525,9 @@
                 height: 48px;
                 padding: 0 12px;
             }
+            .nav-left {
+                gap: 16px;
+            }
 
             .logo-text {
                 font-size: 18px;
@@ -762,18 +771,18 @@
     </style>
 </head>
 <body>
-<!-- 导航栏 -->
 <header class="nav-header">
     <div class="nav-container">
-        <div class="logo">
-<!--            <img src="https://i0.hdslb.com/bfs/archive/4e3a3b51f2a6e7a6e1e3e3c3f3d3e3a3b3c3d3e3f.png" alt="Logo">-->
-            <div class="logo-text">哈基米FM</div>
+        <div class="nav-left">
+            <div class="logo">
+                <div class="logo-text">哈基米FM</div>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="active">首页</a>
+                <a href="/playlist.html">播放列表</a>
+                <a href="/leaderboard.html">排行榜</a>
+            </nav>
         </div>
-
-        <nav class="nav-menu">
-            <a href="#" class="active">首页</a>
-            <a href="/playlist.html">播放列表</a>
-        </nav>
 
         <div class="search-box">
             <input type="text" id="search-input" placeholder="搜索视频、用户">
@@ -784,32 +793,18 @@
                 </svg>
             </button>
         </div>
-
-<!--        <div class="user-menu">-->
-<!--            <div class="avatar">-->
-<!--                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">-->
-<!--                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>-->
-<!--                    <circle cx="12" cy="7" r="4"></circle>-->
-<!--                </svg>-->
-<!--            </div>-->
-<!--            <button class="upload-btn">投稿</button>-->
-<!--        </div>-->
     </div>
 </header>
 
-<!-- 主容器 -->
 <div class="main-container">
-    <!-- 侧边栏 -->
-    <aside class="sidebar">
-        <ul class="sidebar-menu">
-            <li class="active"><a href="/index.html"><span>首页</span></a></li>
-            <li><a href="/leaderboard.html"><span>排行榜</span></a></li>
-        </ul>
-    </aside>
+<!--    <aside class="sidebar">-->
+<!--        <ul class="sidebar-menu">-->
+<!--            <li class="active"><a href="/index.html"><span>首页</span></a></li>-->
+<!--            <li><a href="/leaderboard.html"><span>排行榜</span></a></li>-->
+<!--        </ul>-->
+<!--    </aside>-->
 
-    <!-- 主内容区 -->
     <main class="content">
-        <!-- Banner轮播区域 -->
         <div class="banner">
             <div class="banner-container">
                 <div class="banner-slide active">
@@ -826,29 +821,18 @@
                         <p class="banner-desc">第二节哈基杯！准备开哈！—— 8月15日～31日</p>
                     </div>
                 </div>
-<!--                <div class="banner-slide">-->
-<!--                    <img src="https://i0.hdslb.com/bfs/archive/4e3a3b51f2a6e7a6e1e3e3c3f3d3e3a3b3c3d3e3f.png" alt="Banner 3">-->
-<!--                    <div class="banner-overlay">-->
-<!--                        <h2 class="banner-title">哈基米新年会</h2>-->
-<!--                        <p class="banner-desc">新年新气象，哈基米陪你过新年</p>-->
-<!--                    </div>-->
-<!--                </div>-->
             </div>
 
-            <!-- Banner进度条 -->
             <div class="banner-progress">
                 <div class="banner-progress-bar"></div>
             </div>
 
-            <!-- Banner指示器 -->
             <div class="banner-indicators">
                 <div class="banner-indicator active" data-slide="0"></div>
                 <div class="banner-indicator" data-slide="1"></div>
-<!--                <div class="banner-indicator" data-slide="2"></div>-->
             </div>
         </div>
 
-        <!-- 搜索结果区域 -->
         <div id="search-results" class="section" style="display: none;">
             <div class="section-header">
                 <h2 class="section-title">搜索结果</h2>
@@ -864,7 +848,6 @@
             <div id="search-pagination" class="pagination-container"></div>
         </div>
 
-        <!-- 最新视频区域 -->
         <div class="section">
             <div class="section-header">
                 <h2 class="section-title">最新哈气</h2>
@@ -877,11 +860,9 @@
                 </div>
             </div>
             <div id="latest-videos-grid" class="video-grid">
-                <!-- 视频卡片将通过JS动态加载 -->
             </div>
         </div>
 
-        <!-- 随机视频区域 -->
         <div class="section">
             <div class="section-header">
                 <h2 class="section-title">随机哈气</h2>
@@ -894,13 +875,11 @@
                 </div>
             </div>
             <div id="random-videos-grid" class="video-grid">
-                <!-- 视频卡片将通过JS动态加载 -->
             </div>
         </div>
     </main>
 </div>
 
-<!-- 页脚 -->
 <footer class="footer">
     <div class="footer-container">
         <div class="footer-links">
@@ -915,7 +894,6 @@
     </div>
 </footer>
 
-<!-- 视频选项模态框 -->
 <div id="video-options-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
