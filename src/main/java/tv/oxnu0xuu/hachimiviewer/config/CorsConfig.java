@@ -12,7 +12,11 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowedOrigins("http://hachimifm.com", "http://www.hachimifm.com")
+                .allowedOriginPatterns(
+                        "https://hachimifm.com",
+                        "https://*.hachimifm.com",
+                        "http://localhost:[*]" // 匹配本地开发的所有端口
+                )
                 .allowCredentials(true)
                 .maxAge(3600);
     }
